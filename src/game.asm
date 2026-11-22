@@ -75,6 +75,7 @@ moon_colors:
     jsr start_game
     jsr init_view
     jsr detect_video
+    jsr init_music
 idle:
     lda $d012
     cmp #250
@@ -92,6 +93,7 @@ frame_present:
     sbc refresh_rate
     sta logic_clock
     inc game_ticks
+    jsr sid_tick
     jsr read_controls
 controls_ready:
     jsr step_game
@@ -112,6 +114,7 @@ leave_raster:
 .include "patrols.asm"
 .include "checkpoints.asm"
 .include "objective.asm"
+.include "music.asm"
 
 * = $3000
     .binary "../build/tiles.bin"
