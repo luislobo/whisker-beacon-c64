@@ -74,11 +74,37 @@ show_title:
     bpl show_title
     jsr init_cat_sprite
     jsr init_view
+    jsr detect_video
 idle:
+    lda $d012
+    cmp #250
+    bne idle
+frame_present:
+    jsr present_view
+    inc video_ticks
+    lda logic_clock
+    clc
+    adc #50
+    cmp refresh_rate
+    bcc wait_next_video
+    sbc refresh_rate
+    sta logic_clock
+    inc game_ticks
+    jsr read_controls
+controls_ready:
+    jmp leave_raster
+wait_next_video:
+    sta logic_clock
+leave_raster:
+    lda $d012
+    cmp #250
+    beq leave_raster
     jmp idle
 
 .include "sprites.asm"
 .include "view.asm"
+.include "clock.asm"
+.include "controls.asm"
 
 title:
     .text "WHISKER BEACON"
