@@ -72,6 +72,12 @@ show_title:
     sta $2804,x
     dex
     bpl show_title
+    ldx #39
+moon_colors:
+    lda #15
+    sta $d800+5*40,x
+    dex
+    bpl moon_colors
     jsr reset_player
     jsr init_cat_sprite
     jsr init_view

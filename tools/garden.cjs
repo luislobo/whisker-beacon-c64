@@ -3,13 +3,14 @@ const HEIGHT = 25;
 const TILE = {
   sky: 0, star: 1, cloud: 2, leaf: 3, trunk: 4, flower: 5, roots: 6,
   moon: 7, grassShadow: 8, firefly: 9, post: 10, lamp: 11, litLamp: 12,
+  pineLeft: 13, pineRight: 14, mist: 15,
   grass: 16, soil: 17, stone: 18
 };
 
 const tiles = {
   star:        ['....','....','.1..','....','....','....','....','....'],
-  cloud:       ['....','....','...1','..11','.111','1111','1111','1111'],
-  leaf:        ['.1..','111.','1131','1111','3131','1311','1111','.11.'],
+  cloud:       ['....','....','...1','....','.1.1','..1.','.1.1','1.1.'],
+  leaf:        ['.11.','.11.','1111','1111','1111','1111','1111','1111'],
   trunk:       ['.22.','.22.','.222','.22.','.22.','222.','.22.','.22.'],
   flower:      ['....','....','.3..','333.','.3..','.3.3','.33.','.3..'],
   roots:       ['....','....','....','...1','1.11','1111','2112','2222'],
@@ -19,6 +20,9 @@ const tiles = {
   post:        ['.22.','.22.','.22.','.22.','.22.','.22.','2222','2222'],
   lamp:        ['.22.','2222','2..2','2.12','2.12','2222','.22.','.22.'],
   litLamp:     ['.22.','2222','2332','2332','2332','2222','.22.','.22.'],
+  pineLeft:    ['....','....','...1','...1','..11','..11','.111','.111'],
+  pineRight:   ['....','....','1...','1...','11..','11..','111.','111.'],
+  mist:        ['.1.1','1.1.','....','....','1.1.','.1.1','....','....'],
   grass:       ['3333','3333','3232','2322','2222','2122','2221','2222'],
   soil:        ['2222','2212','2222','1222','2222','2221','2222','2122'],
   stone:       ['1111','1331','1131','1111','2222','2112','2212','2222']
@@ -50,7 +54,8 @@ function glyphs() {
     }
   }
   for (const [letter, rows] of Object.entries(font)) {
-    for (const [y, row] of rows.entries()) output[8 * letter.charCodeAt(0) + y] = row << 2;
+    const code = letter.charCodeAt(0) + (/[A-Z]/.test(letter) ? 128 : 0);
+    for (const [y, row] of rows.entries()) output[8 * code + y] = row << 2;
   }
   return output;
 }
@@ -60,14 +65,25 @@ function garden() {
   const put = (column, row, tile) => { map[row * WIDTH + column] = TILE[tile]; };
   for (let x = 0; x < WIDTH; x++) {
     if (x % 13 === 3 || x % 19 === 1) put(x, 4 + (x * 23 % 9), 'star');
-    const ridge = 16 + ((x * 3 >> 5) % 3);
+    const ridge = 18 + Math.round(2 * Math.sin(x / 7) + Math.sin(x / 3));
     put(x, ridge, 'cloud');
-    for (let row = ridge + 1; row <= 21; row++) put(x, row, 'leaf');
-    if (x % 11 === 6) {
-      for (let row = 20; row < 23; row++) put(x, row, 'trunk');
-    }
+    for (let row = ridge + 1; row <= 21; row++) put(x, row, 'mist');
   }
   for (const x of [20, 62, 107]) put(x, 5, 'moon');
+  for (const x of [1, 8, 13, 25, 29, 37, 46, 50, 61, 73, 82, 91, 96, 108, 122]) {
+    const crown = 11 + x % 5;
+    for (let row = crown; row < 21; row++) {
+      put(x, row, 'leaf');
+      const wide = row - crown > 3 ? 2 : 1;
+      put(x-wide, row, 'pineLeft');
+      put(x+wide, row, 'pineRight');
+      if (wide === 2) {
+        put(x-1, row, 'leaf');
+        put(x+1, row, 'leaf');
+      }
+    }
+    for (let row = 21; row <= 22; row++) put(x, row, 'trunk');
+  }
   const banks = [[0,24],[28,48],[52,70],[75,91],[95,111],[115,128]];
   for (const [first,last] of banks) {
     for (let x=first; x<last; x++) {
