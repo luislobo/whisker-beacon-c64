@@ -2,6 +2,8 @@ GOAL = 6
 LEVEL_MAP = $5000
 BEACON_X = 984
 BEACON_TILE = 20*WORLD_WIDTH+126
+BLUE_FLY_TILE = 8
+BLUE_BADGE_COLUMN = 37
 
 start_game:
     ldx #0
@@ -21,6 +23,9 @@ copy_last_row:
     sta fireflies
     sta beacon_lit
     sta restart_armed
+    sta blue_found
+    sta SCREEN_A+BLUE_BADGE_COLUMN
+    sta SCREEN_B+BLUE_BADGE_COLUMN
     jsr reset_run
     jsr init_checkpoints
     jsr reset_player
@@ -97,6 +102,8 @@ write_win:
 
 catch_firefly:
     jsr read_tile
+    cmp #BLUE_FLY_TILE
+    beq catch_blue_firefly
     cmp #9
     bne no_firefly
     lda #0
@@ -117,6 +124,17 @@ write_score:
     sta SCREEN_A+5+header_count-header
     sta SCREEN_B+5+header_count-header
 no_firefly:
+    rts
+catch_blue_firefly:
+    lda #0
+    sta (cell_ptr),y
+    lda #$ff
+    sta drawn_column
+    lda #1
+    sta blue_found
+    lda #42
+    sta SCREEN_A+BLUE_BADGE_COLUMN
+    sta SCREEN_B+BLUE_BADGE_COLUMN
     rts
 
 header:

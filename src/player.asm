@@ -3,6 +3,8 @@ SPAWN_Y = 171
 CAT_LEFT = 4
 CAT_RIGHT = 16
 CAT_FOOT = 13
+MUSHROOM_TILE = 19
+SPRING_DURATION = 20
 
 recover_player:
     lda recoveries
@@ -24,6 +26,7 @@ reset_player:
     sta jump_grace
     sta jump_buffer
     sta jump_cuttable
+    sta spring_ticks
     lda #1
     sta grounded
     rts
@@ -93,6 +96,10 @@ probe_head:
     dec steps
     bne vertical_loop
 landed:
+    lda spring_ticks
+    beq no_spring_tick
+    dec spring_ticks
+no_spring_tick:
     rts
 hit_vertical:
     lda player_y
@@ -105,11 +112,30 @@ hit_vertical:
     lda vertical_step
     and #$80
     bne landed
+    lda #10
+    jsr player_probe_x
+    lda player_y
+    clc
+    adc #CAT_FOOT+1
+    sta probe_y
+    jsr read_tile
+    cmp #MUSHROOM_TILE
+    beq spring_launch
     lda #1
     sta grounded
     rts
 fell:
     jmp recover_player
+spring_launch:
+    lda #0
+    sta grounded
+    sta jump_grace
+    sta jump_cuttable
+    lda #256-126
+    sta y_speed
+    lda #SPRING_DURATION
+    sta spring_ticks
+    rts
 
 step_horizontal:
     lda input_bits
@@ -125,6 +151,10 @@ walking_left:
 start_walking:
     stx facing_left
     lda #2
+    ldx spring_ticks
+    beq regular_stride
+    lda #3
+regular_stride:
     sta steps
 walk_loop:
     lda facing_left

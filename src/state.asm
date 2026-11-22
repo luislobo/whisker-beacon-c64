@@ -41,3 +41,5 @@ color_dst      = $35
 jump_grace     = $37
 jump_buffer    = $38
 jump_cuttable  = $39
+spring_ticks   = $3a
+blue_found     = $3b
