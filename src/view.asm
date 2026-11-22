@@ -3,6 +3,31 @@ SCREEN_B = $2800
 WORLD_WIDTH = 128
 CAMERA_LIMIT = (WORLD_WIDTH - 40) * 8
 
+init_colors:
+    lda #0
+    sta color_dst
+    lda #$d8
+    sta color_dst+1
+    ldx #0
+color_row:
+    lda garden_colors,x
+    ldy #39
+color_cell:
+    sta (color_dst),y
+    dey
+    bpl color_cell
+    lda color_dst
+    clc
+    adc #40
+    sta color_dst
+    bcc next_color_row
+    inc color_dst+1
+next_color_row:
+    inx
+    cpx #25
+    bne color_row
+    rts
+
 init_view:
     lda #$ff
     sta drawn_column

@@ -53,24 +53,9 @@ clear_screen:
         sta $0400 + page * 256,x
         sta $2800 + page * 256,x
     .endfor
-    lda #13
-    .for page := 0, page < 4, page += 1
-        sta $d800 + page * 256,x
-    .endfor
     inx
     bne clear_screen
-    ldx #39
-hud_colors:
-    lda #1
-    sta $d800,x
-    dex
-    bpl hud_colors
-    ldx #39
-moon_colors:
-    lda #15
-    sta $d800+5*40,x
-    dex
-    bpl moon_colors
+    jsr init_colors
     jsr init_cat_sprite
     jsr start_game
     jsr init_view
@@ -127,3 +112,5 @@ leave_raster:
 * = $4000
 garden_source:
     .binary "../build/garden.bin"
+garden_colors:
+    .binary "../build/garden-colors.bin"

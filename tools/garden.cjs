@@ -25,7 +25,7 @@ const tiles = {
   mist:        ['.1.1','1.1.','....','....','1.1.','.1.1','....','....'],
   grass:       ['3333','3333','3232','2322','2222','2122','2221','2222'],
   soil:        ['2222','2212','2222','1222','2222','2221','2222','2122'],
-  stone:       ['1111','1331','1131','1111','2222','2112','2212','2222']
+  stone:       ['3333','3333','2222','2.22','2222','22.2','2222','.22.']
 };
 
 const font = {
@@ -104,4 +104,13 @@ function garden() {
   return map;
 }
 
-module.exports = { glyphs, garden, WIDTH, HEIGHT, TILE };
+function gardenColors(map) {
+  return Buffer.from(Array.from({ length: HEIGHT }, (_, row) => {
+    if (row === 0) return 1; // Hires HUD ink.
+    const tiles = map.subarray(row * WIDTH, (row + 1) * WIDTH);
+    // Multicolor yellow for stone caps and the moon, green everywhere else.
+    return tiles.includes(TILE.stone) || tiles.includes(TILE.moon) ? 15 : 13;
+  }));
+}
+
+module.exports = { glyphs, garden, gardenColors, WIDTH, HEIGHT, TILE };

@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const { playerSprites } = require('./tools/sprites.cjs');
-const { glyphs, garden } = require('./tools/garden.cjs');
+const { glyphs, garden, gardenColors } = require('./tools/garden.cjs');
 const { score } = require('./tools/music.cjs');
 
 const root = __dirname;
@@ -13,7 +13,9 @@ if (args.some(arg => arg !== '--disk')) throw Error('Usage: node build.cjs [--di
 fs.mkdirSync(build, { recursive: true });
 fs.writeFileSync(path.join(build, 'cats.bin'), playerSprites());
 fs.writeFileSync(path.join(build, 'tiles.bin'), glyphs());
-fs.writeFileSync(path.join(build, 'garden.bin'), garden());
+const map = garden();
+fs.writeFileSync(path.join(build, 'garden.bin'), map);
+fs.writeFileSync(path.join(build, 'garden-colors.bin'), gardenColors(map));
 fs.writeFileSync(path.join(build, 'score.inc'), score());
 execFileSync(process.env.TASS64 || '64tass', [
   '--cbm-prg', '-a', '-o', program,
