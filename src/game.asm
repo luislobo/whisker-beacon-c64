@@ -26,6 +26,12 @@ entry:
     sta $d020
     sta $d021
     sta $d01a
+    lda $dd02
+    ora #3
+    sta $dd02
+    lda $dd00
+    ora #3
+    sta $dd00
     lda #$1b
     sta $d011
     lda #$08
@@ -50,9 +56,16 @@ show_title:
     sta $059d,x
     dex
     bpl show_title
+    jsr init_cat_sprite
 idle:
     jmp idle
+
+.include "sprites.asm"
 
 title:
     .byte 23,8,9,19,11,5,18,32,2,5,1,3,15,14
 title_end:
+
+
+* = $3800
+    .binary "../build/cats.bin"
