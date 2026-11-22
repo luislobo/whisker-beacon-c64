@@ -18,28 +18,16 @@ reset_player:
     sta y_fraction
     sta facing_left
     sta jump_held
+    sta jump_grace
+    sta jump_buffer
+    sta jump_cuttable
     lda #1
     sta grounded
     rts
 
 step_player:
     jsr step_horizontal
-    lda input_bits
-    and #JUMP
-    bne try_jump
-    sta jump_held
-    beq apply_gravity
-try_jump:
-    lda jump_held
-    bne apply_gravity
-    inc jump_held
-    lda grounded
-    beq apply_gravity
-    lda #0
-    sta grounded
-    lda #256-91
-    sta y_speed
-apply_gravity:
+    jsr update_jump
     lda y_speed
     bmi accelerate_y
     cmp #88

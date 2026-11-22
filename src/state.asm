@@ -38,3 +38,6 @@ music_bank     = $32
 sid_tick_count = $33
 world_scroll   = $34
 color_dst      = $35
+jump_grace     = $37
+jump_buffer    = $38
+jump_cuttable  = $39

@@ -97,6 +97,7 @@ leave_raster:
 .include "clock.asm"
 .include "controls.asm"
 .include "player.asm"
+.include "jump.asm"
 .include "patrols.asm"
 .include "checkpoints.asm"
 .include "objective.asm"
