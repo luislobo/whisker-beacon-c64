@@ -30,6 +30,11 @@ const rival = [
   '  bb  bb'
 ];
 
+const slide = [
+  '', '', '', '', '', '', '', '      o  o', '   o  oooo',
+  '  boooowowo', ' boooooooo', 'woooooooooo', '  bb   bb'
+];
+
 const ink = { b: 3, o: 1, w: 2, ' ': 0 };
 
 function pack(rows, left = false) {
@@ -45,7 +50,7 @@ function pack(rows, left = false) {
 }
 
 function playerSprites() {
-  return Buffer.concat([pack(pip), pack(pip, true), pack(stride), pack(stride, true), pack(rival)]);
+  return Buffer.concat([pack(pip), pack(pip, true), pack(stride), pack(stride, true), pack(rival), pack(slide), pack(slide, true)]);
 }
 
 module.exports = { playerSprites };

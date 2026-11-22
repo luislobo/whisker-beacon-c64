@@ -1,21 +1,29 @@
+SLIDE = 2
 MOVE_LEFT = 4
 MOVE_RIGHT = 8
 JUMP = 16
 
-; Joystick 2 is active low. A, D and Space are read from three keyboard rows.
+; Joystick 2 is active low. A, S, D and Space are read from three keyboard rows.
 read_controls:
     lda #0
     sta $dc02
     sta $dc03
     lda $dc00
     eor #$ff
-    and #(MOVE_LEFT | MOVE_RIGHT | JUMP)
+    and #(SLIDE | MOVE_LEFT | MOVE_RIGHT | JUMP)
     sta input_bits
     lda #$ff
     sta $dc02
 
     lda #$fd
     sta $dc00
+    lda $dc01
+    and #32
+    bne scan_left_key
+    lda input_bits
+    ora #SLIDE
+    sta input_bits
+scan_left_key:
     lda $dc01
     and #4
     bne check_right_key

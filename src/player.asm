@@ -27,11 +27,17 @@ reset_player:
     sta jump_buffer
     sta jump_cuttable
     sta spring_ticks
+    sta slide_ticks
+    sta slide_cooldown
+    sta down_held
+    sta low_profile
+    sta slide_strike
     lda #1
     sta grounded
     rts
 
 step_player:
+    jsr prepare_slide
     jsr step_horizontal
     jsr update_jump
     lda y_speed
@@ -79,13 +85,11 @@ probe_head:
     sta probe_y
     lda #CAT_LEFT
     jsr player_probe_x
-    jsr read_tile
-    cmp #16
+    jsr read_solid
     bcs hit_vertical
     lda #CAT_RIGHT
     jsr player_probe_x
-    jsr read_tile
-    cmp #16
+    jsr read_solid
     bcs hit_vertical
     lda #0
     sta grounded
@@ -138,6 +142,17 @@ spring_launch:
     rts
 
 step_horizontal:
+    ldx slide_ticks
+    beq walk_input
+    lda slide_stride-1,x
+    sta steps
+    cmp #2
+    bcc slide_step
+    inc slide_strike
+slide_step:
+    dec slide_ticks
+    jmp walk_loop
+walk_input:
     lda input_bits
     and #(MOVE_LEFT | MOVE_RIGHT)
     cmp #MOVE_LEFT
@@ -150,6 +165,9 @@ walking_left:
     ldx #1
 start_walking:
     stx facing_left
+    lda #1
+    ldx low_profile
+    bne regular_stride
     lda #2
     ldx spring_ticks
     beq regular_stride
@@ -173,22 +191,27 @@ check_side:
     lda player_y
     clc
     adc #2
+    ldx low_profile
+    beq check_upper_side
+    adc #6
+check_upper_side:
     sta probe_y
-    jsr read_tile
-    cmp #16
+    jsr read_solid
     bcs blocked
     lda player_y
     clc
     adc #11
     sta probe_y
-    jsr read_tile
-    cmp #16
+    jsr read_solid
     bcs blocked
     dec steps
     bne walk_loop
 moved:
     rts
 blocked:
+    lda #0
+    sta slide_ticks
+    sta slide_strike
     lda facing_left
     bne increment_x
 decrement_x:
@@ -212,6 +235,16 @@ player_probe_x:
     lda player_x+1
     adc #0
     sta probe_x+1
+    rts
+
+read_solid:
+    jsr read_tile
+    cmp #32
+    bcs non_solid
+    cmp #16
+    rts
+non_solid:
+    clc
     rts
 
 read_tile:

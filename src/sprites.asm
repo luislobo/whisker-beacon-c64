@@ -42,6 +42,11 @@ present_cat:
     clc
     adc #51
     sta $d001
+    lda low_profile
+    beq cat_walk_pose
+    lda #5
+    bne cat_pose
+cat_walk_pose:
     lda input_bits
     and #(MOVE_LEFT | MOVE_RIGHT)
     beq cat_still

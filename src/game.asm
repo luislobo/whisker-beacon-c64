@@ -39,7 +39,7 @@ entry:
     sta $d022
     lda #9
     sta $d023
-    ldx #$3f
+    ldx #$40
     lda #0
 clear_state:
     sta $00,x
@@ -98,6 +98,7 @@ leave_raster:
 .include "controls.asm"
 .include "player.asm"
 .include "jump.asm"
+.include "slide.asm"
 .include "patrols.asm"
 .include "checkpoints.asm"
 .include "objective.asm"

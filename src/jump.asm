@@ -39,8 +39,11 @@ jump_pressed:
 consume_jump:
     lda jump_buffer
     beq jump_done
+    lda low_profile
+    bne decay_buffer
     lda jump_grace
     bne buffered_jump
+decay_buffer:
     dec jump_buffer
 jump_done:
     rts
