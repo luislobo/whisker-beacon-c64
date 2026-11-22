@@ -7,7 +7,21 @@ init_view:
     lda #$ff
     sta drawn_column
     jsr render_world
-    jmp present_view
+    jsr present_view
+    lda #<scroll_irq
+    sta $fffe
+    lda #>scroll_irq
+    sta $ffff
+    lda #<scroll_irq_return
+    sta $fffa
+    lda #>scroll_irq_return
+    sta $fffb
+    lda #61                  ; Switch inside the blank row below the HUD.
+    sta $d012
+    lda #1
+    sta $d019
+    sta $d01a
+    rts
 
 present_view:
     ldx screen_index
@@ -17,8 +31,21 @@ present_view:
     eor #7
     and #7
     ora #$10                 ; Multicolor among the inner 38 columns.
+    sta world_scroll
+    lda #$08                 ; Fixed 40-column HUD at the start of every frame.
     sta $d016
     rts
+
+scroll_irq:
+    pha
+    lda world_scroll         ; Match the screen bank already latched this frame.
+    sta $d016
+    lda #1
+    sta $d019
+scroll_applied:
+    pla
+scroll_irq_return:
+    rti
 
 screen_select:
     .byte $1c,$ac            ; Screen $0400/$2800, charset $3000 in bank 0.

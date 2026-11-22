@@ -59,13 +59,24 @@ async function test(mode) {
 
     // Restart the PRG to give the patrols the same starting phase.
     await boot(monitor);
+    const gardenScroll = new Set();
     for (let i = 0; i < 466; i++) {
-      await step(monitor, RIGHT | (jumpAt.has(i) ? FIRE : 0));
+      await monitor.write(INPUT, [RIGHT | (jumpAt.has(i) ? FIRE : 0)]);
+      if (i >= 60 && i < 72) {
+        const hudMode = (await monitor.bytes(0xd016, 1))[0] & 0x1f;
+        assert.equal(hudMode, 0x08, 'the HUD stays in fixed 40-column mode');
+        await monitor.until(symbols.scroll_applied);
+        const gardenMode = (await monitor.bytes(0xd016, 1))[0] & 0x1f;
+        assert.equal(gardenMode & 0x18, 0x10, 'the garden uses multicolor in 38 columns');
+        gardenScroll.add(gardenMode & 7);
+      }
+      await monitor.until(symbols.controls_ready);
       if (mode === 'pal' && process.env.CAPTURE === '1' && i % 5 === 0) {
         const frame = String(i / 5).padStart(3, '0');
         await monitor.command(`screenshot "${path.join(directory, 'frame-' + frame + '.png')}" 2`);
       }
     }
+    assert.equal(gardenScroll.size, 4, 'each moving scroll phase keeps the HUD fixed');
     assert.equal((await monitor.bytes(WON, 1))[0], 1, 'the beacon was lit');
     assert.ok((await monitor.bytes(SCORE, 1))[0] >= 6, 'enough fireflies were collected');
     assert.equal((await monitor.bytes(RECOVERIES, 1))[0], 0, 'the recorded route avoids all hazards');
@@ -86,7 +97,7 @@ async function test(mode) {
     assert.equal((await monitor.bytes(PLAYER_X, 2)).readUInt16LE(), 52, 'a fall returns Pip to the checkpoint');
 
     const results = { mode, videoRefreshes: hz, gameUpdates: 50, sidUpdates: 50, routeSteps: 466,
-      won: true, checkpoints: 2, replay: true, recoveredFromFall: true };
+      fixedHudScrollPhases: gardenScroll.size, won: true, checkpoints: 2, replay: true, recoveredFromFall: true };
     fs.writeFileSync(path.join(directory, 'result.json'), JSON.stringify(results, null, 2) + '\n');
     console.log(results);
   });

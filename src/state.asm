@@ -36,3 +36,4 @@ music_period   = $30
 music_beat     = $31
 music_bank     = $32
 sid_tick_count = $33
+world_scroll   = $34

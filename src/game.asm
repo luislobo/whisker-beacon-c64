@@ -76,6 +76,7 @@ moon_colors:
     jsr init_view
     jsr detect_video
     jsr init_music
+    cli
 idle:
     lda $d012
     cmp #250
