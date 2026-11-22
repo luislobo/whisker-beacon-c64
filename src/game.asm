@@ -1,4 +1,5 @@
 .cpu "6502"
+.include "state.asm"
 
 * = $0801
     .word basic_end
@@ -34,15 +35,23 @@ entry:
     sta $dd00
     lda #$1b
     sta $d011
-    lda #$08
-    sta $d016
-    lda #$17
-    sta $d018
+    lda #6
+    sta $d022
+    lda #9
+    sta $d023
+    ldx #$3f
+    lda #0
+clear_state:
+    sta $00,x
+    dex
+    cpx #1
+    bne clear_state
     ldx #0
 clear_screen:
-    lda #32
+    lda #0
     .for page := 0, page < 4, page += 1
         sta $0400 + page * 256,x
+        sta $2800 + page * 256,x
     .endfor
     lda #13
     .for page := 0, page < 4, page += 1
@@ -50,22 +59,38 @@ clear_screen:
     .endfor
     inx
     bne clear_screen
+    ldx #39
+hud_colors:
+    lda #1
+    sta $d800,x
+    dex
+    bpl hud_colors
     ldx #title_end-title-1
 show_title:
     lda title,x
-    sta $059d,x
+    sta $0404,x
+    sta $2804,x
     dex
     bpl show_title
     jsr init_cat_sprite
+    jsr init_view
 idle:
     jmp idle
 
 .include "sprites.asm"
+.include "view.asm"
 
 title:
-    .byte 23,8,9,19,11,5,18,32,2,5,1,3,15,14
+    .text "WHISKER BEACON"
 title_end:
 
+* = $3000
+    .binary "../build/tiles.bin"
 
 * = $3800
     .binary "../build/cats.bin"
+
+
+* = $4000
+level_map:
+    .binary "../build/garden.bin"

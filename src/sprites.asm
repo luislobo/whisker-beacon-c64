@@ -3,6 +3,7 @@ CAT_SHAPE = $3800 / 64
 init_cat_sprite:
     lda #CAT_SHAPE
     sta $07f8
+    sta $2bf8
     lda #8
     sta $d025
     lda #9
