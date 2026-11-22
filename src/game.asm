@@ -72,6 +72,7 @@ show_title:
     sta $2804,x
     dex
     bpl show_title
+    jsr reset_player
     jsr init_cat_sprite
     jsr init_view
     jsr detect_video
@@ -81,6 +82,7 @@ idle:
     bne idle
 frame_present:
     jsr present_view
+    jsr present_cat
     inc video_ticks
     lda logic_clock
     clc
@@ -92,6 +94,8 @@ frame_present:
     inc game_ticks
     jsr read_controls
 controls_ready:
+    jsr step_player
+    jsr track_cat
     jmp leave_raster
 wait_next_video:
     sta logic_clock
@@ -105,6 +109,7 @@ leave_raster:
 .include "view.asm"
 .include "clock.asm"
 .include "controls.asm"
+.include "player.asm"
 
 title:
     .text "WHISKER BEACON"

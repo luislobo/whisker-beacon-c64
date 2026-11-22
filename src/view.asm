@@ -26,11 +26,17 @@ screen_select:
 render_world:
     ; Convert the 16-bit pixel offset to a tile column.
     lda camera_x+1
-    lsr
+    asl
+    asl
+    asl
+    asl
+    asl
+    sta camera_column
     lda camera_x
-    ror
     lsr
     lsr
+    lsr
+    ora camera_column
     cmp drawn_column
     bne redraw_world
     rts
@@ -64,3 +70,28 @@ render_a:
     #draw_columns SCREEN_A
 render_b:
     #draw_columns SCREEN_B
+
+track_cat:
+    lda player_x
+    sec
+    sbc #144
+    tay
+    lda player_x+1
+    sbc #0
+    bcc camera_left_edge
+    cmp #>CAMERA_LIMIT
+    bcc set_camera
+    bne camera_right_edge
+    cpy #<CAMERA_LIMIT
+    bcc set_camera
+camera_right_edge:
+    lda #>CAMERA_LIMIT
+    ldy #<CAMERA_LIMIT
+    bne set_camera
+camera_left_edge:
+    lda #0
+    tay
+set_camera:
+    sty camera_x
+    sta camera_x+1
+    jmp render_world

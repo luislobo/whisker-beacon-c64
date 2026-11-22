@@ -22,3 +22,39 @@ init_cat_sprite:
     lda #161
     sta $d001
     rts
+
+present_cat:
+    lda player_x
+    sec
+    sbc camera_x
+    sta sprite_x
+    lda player_x+1
+    sbc camera_x+1
+    tax
+    lda sprite_x
+    clc
+    adc #31
+    sta $d000
+    txa
+    adc #0
+    sta $d010
+    lda player_y
+    clc
+    adc #51
+    sta $d001
+    lda input_bits
+    and #(MOVE_LEFT | MOVE_RIGHT)
+    beq cat_still
+    lda game_ticks
+    and #4
+    lsr
+    bne cat_pose
+cat_still:
+    lda #0
+cat_pose:
+    clc
+    adc facing_left
+    adc #CAT_SHAPE
+    sta $07f8
+    sta $2bf8
+    rts
