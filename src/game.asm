@@ -80,6 +80,7 @@ moon_colors:
     bpl moon_colors
     jsr reset_player
     jsr init_cat_sprite
+    jsr init_patrols
     jsr init_view
     jsr detect_video
 idle:
@@ -89,6 +90,7 @@ idle:
 frame_present:
     jsr present_view
     jsr present_cat
+    jsr present_patrols
     inc video_ticks
     lda logic_clock
     clc
@@ -101,6 +103,7 @@ frame_present:
     jsr read_controls
 controls_ready:
     jsr step_player
+    jsr step_patrols
     jsr track_cat
     jmp leave_raster
 wait_next_video:
@@ -116,6 +119,7 @@ leave_raster:
 .include "clock.asm"
 .include "controls.asm"
 .include "player.asm"
+.include "patrols.asm"
 
 title:
     .text "WHISKER BEACON"

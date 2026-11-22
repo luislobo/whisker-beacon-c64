@@ -70,7 +70,7 @@ function garden() {
     for (let row = ridge + 1; row <= 21; row++) put(x, row, 'mist');
   }
   for (const x of [20, 62, 107]) put(x, 5, 'moon');
-  for (const x of [1, 8, 13, 25, 29, 37, 46, 50, 61, 73, 82, 91, 96, 108, 122]) {
+  for (const x of [3, 8, 13, 25, 29, 37, 46, 50, 61, 73, 82, 91, 96, 108, 122]) {
     const crown = 11 + x % 5;
     for (let row = crown; row < 21; row++) {
       put(x, row, 'leaf');
