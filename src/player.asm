@@ -231,9 +231,9 @@ under_world:
 
 row_low:
     .for row := 0, row < 25, row += 1
-        .byte <(level_map + row * WORLD_WIDTH)
+        .byte <(LEVEL_MAP + row * WORLD_WIDTH)
     .endfor
 row_high:
     .for row := 0, row < 25, row += 1
-        .byte >(level_map + row * WORLD_WIDTH)
+        .byte >(LEVEL_MAP + row * WORLD_WIDTH)
     .endfor

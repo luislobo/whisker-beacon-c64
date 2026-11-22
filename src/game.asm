@@ -65,23 +65,14 @@ hud_colors:
     sta $d800,x
     dex
     bpl hud_colors
-    ldx #title_end-title-1
-show_title:
-    lda title,x
-    sta $0404,x
-    sta $2804,x
-    dex
-    bpl show_title
     ldx #39
 moon_colors:
     lda #15
     sta $d800+5*40,x
     dex
     bpl moon_colors
-    jsr init_checkpoints
-    jsr reset_player
     jsr init_cat_sprite
-    jsr init_patrols
+    jsr start_game
     jsr init_view
     jsr detect_video
 idle:
@@ -103,10 +94,7 @@ frame_present:
     inc game_ticks
     jsr read_controls
 controls_ready:
-    jsr step_player
-    jsr step_patrols
-    jsr activate_checkpoint
-    jsr track_cat
+    jsr step_game
     jmp leave_raster
 wait_next_video:
     sta logic_clock
@@ -123,10 +111,7 @@ leave_raster:
 .include "player.asm"
 .include "patrols.asm"
 .include "checkpoints.asm"
-
-title:
-    .text "WHISKER BEACON"
-title_end:
+.include "objective.asm"
 
 * = $3000
     .binary "../build/tiles.bin"
@@ -136,5 +121,5 @@ title_end:
 
 
 * = $4000
-level_map:
+garden_source:
     .binary "../build/garden.bin"

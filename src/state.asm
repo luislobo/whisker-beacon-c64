@@ -29,3 +29,6 @@ patrol_dir     = $26
 checkpoint_x   = $29
 recoveries     = $2b
 checkpoint     = $2c
+fireflies      = $2d
+beacon_lit     = $2e
+restart_armed  = $2f

@@ -54,7 +54,7 @@ draw_columns .macro screen
     ldy #0
 next_column:
     .for row := 1, row < 25, row += 1
-        lda level_map+row*WORLD_WIDTH,x
+        lda LEVEL_MAP+row*WORLD_WIDTH,x
         sta \screen+row*40,y
     .endfor
     inx
