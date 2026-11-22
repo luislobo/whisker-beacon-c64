@@ -4,10 +4,12 @@ CAT_LEFT = 4
 CAT_RIGHT = 16
 CAT_FOOT = 13
 
+recover_player:
+    inc recoveries
 reset_player:
-    lda #<SPAWN_X
+    lda checkpoint_x
     sta player_x
-    lda #>SPAWN_X
+    lda checkpoint_x+1
     sta player_x+1
     lda #SPAWN_Y
     sta player_y
@@ -116,7 +118,7 @@ hit_vertical:
     sta grounded
     rts
 fell:
-    jmp reset_player
+    jmp recover_player
 
 step_horizontal:
     lda input_bits

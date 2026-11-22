@@ -65,7 +65,7 @@ patrol_done:
     bpl next_patrol
     rts
 touched_cat:
-    jmp reset_player
+    jmp recover_player
 
 present_patrols:
     lda #1

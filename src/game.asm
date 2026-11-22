@@ -78,6 +78,7 @@ moon_colors:
     sta $d800+5*40,x
     dex
     bpl moon_colors
+    jsr init_checkpoints
     jsr reset_player
     jsr init_cat_sprite
     jsr init_patrols
@@ -104,6 +105,7 @@ frame_present:
 controls_ready:
     jsr step_player
     jsr step_patrols
+    jsr activate_checkpoint
     jsr track_cat
     jmp leave_raster
 wait_next_video:
@@ -120,6 +122,7 @@ leave_raster:
 .include "controls.asm"
 .include "player.asm"
 .include "patrols.asm"
+.include "checkpoints.asm"
 
 title:
     .text "WHISKER BEACON"

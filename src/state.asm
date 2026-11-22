@@ -26,3 +26,6 @@ sprite_enable  = $21
 sprite_msb     = $22
 patrol_x       = $23
 patrol_dir     = $26
+checkpoint_x   = $29
+recoveries     = $2b
+checkpoint     = $2c
