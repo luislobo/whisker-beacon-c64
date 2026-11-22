@@ -21,6 +21,7 @@ copy_last_row:
     sta fireflies
     sta beacon_lit
     sta restart_armed
+    jsr reset_run
     jsr init_checkpoints
     jsr reset_player
     jsr init_patrols
@@ -38,6 +39,7 @@ write_header:
 step_game:
     lda beacon_lit
     bne wait_for_replay
+    jsr update_run_time
     jsr step_player
     jsr step_patrols
     jsr activate_checkpoint
@@ -91,7 +93,7 @@ write_win:
     sta SCREEN_B+4,x
     dex
     bpl write_win
-    rts
+    jmp show_results
 
 catch_firefly:
     jsr read_tile

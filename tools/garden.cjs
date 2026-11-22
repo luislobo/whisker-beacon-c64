@@ -43,7 +43,7 @@ const font = {
   '0':[14,17,19,21,25,17,14], '1':[4,12,4,4,4,4,14], '2':[14,17,1,2,4,8,31],
   '3':[30,1,1,14,1,1,30], '4':[2,6,10,18,31,2,2], '5':[31,16,16,30,1,1,30],
   '6':[14,16,16,30,17,17,14], '7':[31,1,2,4,8,8,8], '8':[14,17,17,14,17,17,14],
-  '9':[14,17,17,15,1,1,14], '/':[1,1,2,4,8,16,16], '-':[0,0,0,31,0,0,0]
+  '9':[14,17,17,15,1,1,14], ':':[0,0,4,0,4,0,0], '.':[0,0,0,0,0,0,4], '/':[1,1,2,4,8,16,16], '-':[0,0,0,31,0,0,0]
 };
 
 function glyphs() {
@@ -107,6 +107,7 @@ function garden() {
 function gardenColors(map) {
   return Buffer.from(Array.from({ length: HEIGHT }, (_, row) => {
     if (row === 0) return 1; // Hires HUD ink.
+    if (row === 1) return 3;
     const tiles = map.subarray(row * WIDTH, (row + 1) * WIDTH);
     // Multicolor yellow for stone caps and the moon, green everywhere else.
     return tiles.includes(TILE.stone) || tiles.includes(TILE.moon) ? 15 : 13;

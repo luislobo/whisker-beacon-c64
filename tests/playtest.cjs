@@ -81,6 +81,15 @@ async function test(mode) {
     }
     assert.equal(gardenScroll.size, 4, 'each moving scroll phase keeps the HUD fixed');
     assert.equal((await monitor.bytes(WON, 1))[0], 1, 'the beacon was lit');
+    const cleanTime = Buffer.from([0x32, 0x09, 0x00]);
+    assert.deepEqual(await monitor.bytes(symbols.run_cents, 3), cleanTime);
+    assert.deepEqual(await monitor.bytes(symbols.best_cents, 3), cleanTime);
+    for (const screen of [0x0400, 0x2800]) {
+      const result = (await monitor.bytes(screen + 42, 37)).toString('ascii');
+      assert.ok(result.startsWith('00:09.32 '), 'the HUD shows the run time');
+      assert.ok(result.includes('FALLS 00 '), 'the HUD shows the fall count');
+      assert.ok(result.endsWith('00:09.32'), 'the HUD shows the session best');
+    }
     assert.ok((await monitor.bytes(SCORE, 1))[0] >= 6, 'enough fireflies were collected');
     assert.equal((await monitor.bytes(RECOVERIES, 1))[0], 0, 'the recorded route avoids all hazards');
     assert.equal((await monitor.bytes(CHECKPOINT, 1))[0], 2, 'both checkpoints were reached');
@@ -90,6 +99,8 @@ async function test(mode) {
     await step(monitor, FIRE);
     assert.equal((await monitor.bytes(WON, 1))[0], 0, 'fire replays the level');
     assert.equal((await monitor.bytes(SCORE, 1))[0], 0, 'replay resets the score');
+    assert.deepEqual(await monitor.bytes(symbols.run_cents, 3), Buffer.alloc(3));
+    assert.deepEqual(await monitor.bytes(symbols.best_cents, 3), cleanTime, 'best survives replay');
     assert.equal((await monitor.bytes(PLAYER_X, 2)).readUInt16LE(), 52, 'replay returns Pip to spawn');
 
     for (let i = 0; i < 95; i++) {
@@ -100,7 +111,7 @@ async function test(mode) {
     assert.equal((await monitor.bytes(PLAYER_X, 2)).readUInt16LE(), 52, 'a fall returns Pip to the checkpoint');
 
     const results = { mode, videoRefreshes: hz, gameUpdates: 50, sidUpdates: 50, routeSteps: 466,
-      fixedHudScrollPhases: gardenScroll.size, won: true, checkpoints: 2, replay: true, recoveredFromFall: true };
+      fixedHudScrollPhases: gardenScroll.size, bestTime: '00:09.32', won: true, checkpoints: 2, replay: true, recoveredFromFall: true };
     fs.writeFileSync(path.join(directory, 'result.json'), JSON.stringify(results, null, 2) + '\n');
     console.log(results);
   });

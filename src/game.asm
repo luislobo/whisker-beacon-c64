@@ -102,6 +102,7 @@ leave_raster:
 .include "checkpoints.asm"
 .include "objective.asm"
 .include "music.asm"
+.include "results.asm"
 
 * = $3000
     .binary "../build/tiles.bin"

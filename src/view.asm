@@ -2,6 +2,7 @@ SCREEN_A = $0400
 SCREEN_B = $2800
 WORLD_WIDTH = 128
 CAMERA_LIMIT = (WORLD_WIDTH - 40) * 8
+HUD_ROWS = 2
 
 init_colors:
     lda #0
@@ -41,7 +42,7 @@ init_view:
     sta $fffa
     lda #>scroll_irq_return
     sta $fffb
-    lda #61                  ; Switch inside the blank row below the HUD.
+    lda #(53 + HUD_ROWS*8)   ; Switch inside the blank row below the HUD.
     sta $d012
     lda #1
     sta $d019
@@ -105,7 +106,7 @@ draw_columns .macro screen
     ldx camera_column
     ldy #0
 next_column:
-    .for row := 1, row < 25, row += 1
+    .for row := HUD_ROWS, row < 25, row += 1
         lda LEVEL_MAP+row*WORLD_WIDTH,x
         sta \screen+row*40,y
     .endfor

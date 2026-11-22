@@ -5,6 +5,9 @@ CAT_RIGHT = 16
 CAT_FOOT = 13
 
 recover_player:
+    lda recoveries
+    cmp #99
+    beq reset_player
     inc recoveries
 reset_player:
     lda checkpoint_x
