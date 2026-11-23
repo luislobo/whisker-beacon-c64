@@ -72,3 +72,4 @@ blend_index    = $6b
 objective_ink  = $6c
 camera_page    = $6d
 drawn_page     = $6e
+lantern_center = $79

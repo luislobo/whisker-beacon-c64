@@ -8,7 +8,6 @@ BELL_COLUMN = 38
 BOARD_FIRST = 20*MAP_STRIDE+40
 BOARD_LENGTH = 6
 GATE_COLUMN = 30
-LANTERN_OFFSET = 21*MAP_STRIDE+67
 
 init_greenhouse_props:
     lda #0
@@ -66,18 +65,48 @@ light_greenhouse_lantern:
     sta lantern_lit
     lda #LIT_LANTERN_TILE
     sta (cell_ptr),y
+    ; read_tile has already selected this lantern's row and 256-tile page.
+    ; Lanterns are at least two columns from an edge and eight from a page end.
+    sty lantern_center
     lda #LANTERN_GLOW_TILE
-    sta LEVEL_MAP+LANTERN_OFFSET-1
-    sta LEVEL_MAP+LANTERN_OFFSET+1
-    sta LEVEL_MAP+LANTERN_OFFSET-2
-    sta LEVEL_MAP+LANTERN_OFFSET+2
-    sta LEVEL_MAP+LANTERN_OFFSET-MAP_STRIDE
-    sta LEVEL_MAP+LANTERN_OFFSET-MAP_STRIDE-1
-    sta LEVEL_MAP+LANTERN_OFFSET-MAP_STRIDE+1
+    dey
+    sta (cell_ptr),y
+    dey
+    sta (cell_ptr),y
+    iny
+    iny
+    iny
+    sta (cell_ptr),y
+    iny
+    sta (cell_ptr),y
+    lda cell_ptr+1
+    sec
+    sbc #>MAP_STRIDE
+    sta cell_ptr+1
+    ldy lantern_center
+    lda #LANTERN_GLOW_TILE
+    sta (cell_ptr),y
+    dey
+    sta (cell_ptr),y
+    iny
+    iny
+    sta (cell_ptr),y
+    lda cell_ptr+1
+    clc
+    adc #>MAP_STRIDE
+    sta cell_ptr+1
+    lda lantern_center
+    clc
+    adc #4
+    tay
     lda #FIREFLY_TILE
-    sta LEVEL_MAP+21*MAP_STRIDE+71
-    sta LEVEL_MAP+21*MAP_STRIDE+73
-    sta LEVEL_MAP+21*MAP_STRIDE+75
+    sta (cell_ptr),y
+    iny
+    iny
+    sta (cell_ptr),y
+    iny
+    iny
+    sta (cell_ptr),y
     lda #$ff
     sta drawn_page
     ldx #HINT_LANTERN
