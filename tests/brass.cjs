@@ -29,11 +29,11 @@ function test(mode) {
     async function overlayMask() {
       return (await monitor.bytes(0xd015, 1))[0] & 0xe0;
     }
-    async function bell(flash = false) {
+    async function bell(flash = false, offset = -9) {
       assert.equal(await overlayMask(), flash ? 0xe0 : 0x60,
         'the gold and bronze share two sprites, with a third sprite for the pickup glint');
       const [x, y] = await monitor.bytes(0xd000, 2);
-      assert.deepEqual([...await monitor.bytes(0xd00a, 4)], [x, y - 9, x, y - 9],
+      assert.deepEqual([...await monitor.bytes(0xd00a, 4)], [x, y + offset, x, y + offset],
         'both layers stay aligned above the displayed cat');
       const xHigh = (await monitor.bytes(0xd010, 1))[0];
       assert.equal(xHigh & 0xe0, (xHigh & 1) * (flash ? 0xe0 : 0x60));
@@ -78,9 +78,18 @@ function test(mode) {
     await step(left);
     assert.ok(!strides.has(await bell()), 'leftward movement displays the mirrored bell');
     await step(left | down);
-    assert.equal(await overlayMask(), 0, 'the bell tucks away during a slide');
-    for (let tick = 0; tick < 16; tick++) await step();
-    assert.ok(!strides.has(await bell()), 'the bell returns facing left after the slide');
+    const tucked = await bell(false, -7);
+    assert.ok(!strides.has(tucked), 'the slide uses separate folded bell art');
+    for (const offset of [-4, -2, 0]) {
+      await step();
+      assert.equal(await bell(false, offset), tucked, 'the folded bell settles close to the cat');
+    }
+    for (let tick = 0; tick < 8; tick++) await step();
+    assert.equal(await bell(false, 0), tucked, 'the folded bell stays visible during the slide');
+    for (let tick = 0; tick < 8; tick++) await step();
+    const unfolded = await bell();
+    assert.notEqual(unfolded, tucked, 'the bell opens up after the slide');
+    assert.ok(!strides.has(unfolded), 'the bell stays mirrored while facing left');
 
     console.log(mode + ': shaded brass, pickup glint, swing, mirroring, and slide verified');
   });

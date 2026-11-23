@@ -336,6 +336,7 @@ function packFrame(art, colors) {
 function charmArt() {
   const ribbon = ['   .. ..', '   #####', '    ###.', '     ##.', '    #.#.', '   ##.##'];
   const brass = ['...b...', '..ggb..', '..ggb..', '.ggggb.', '.ggggb.', 'bbgggbb', '...b...'];
+  const tucked = ['..bbb..', '.ggggb.', 'gggggbb', '..b.b..'];
   const glint = ['..w..', '.www.', '..w..'];
   const frames = [0, 1].map(left => charmFrame(ribbon, '#', 16, 7, left));
   for (const swing of [-1, 0, 1]) {
@@ -343,6 +344,10 @@ function charmArt() {
       frames.push(charmFrame(brass, 'g', 13, 0, left, swing));
       frames.push(charmFrame(brass, 'b', 13, 0, left, swing));
     }
+  }
+  for (const left of [0, 1]) {
+    frames.push(charmFrame(tucked, 'g', 12, 0, left));
+    frames.push(charmFrame(tucked, 'b', 12, 0, left));
   }
   for (const left of [0, 1]) frames.push(charmFrame(glint, 'w', 18, 0, left));
   return Buffer.concat(frames);

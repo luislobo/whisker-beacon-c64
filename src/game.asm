@@ -121,10 +121,14 @@ leave_raster:
 .include "sfx.asm"
 .include "results.asm"
 
-.cerror * > SCREEN_B, "Game code overlaps the second screen buffer"
+.cerror * > BRASS_GLINT_SPRITES, "Game code overlaps the bell glint sprites"
+
+* = BRASS_GLINT_SPRITES
+    .binary "../build/charms.bin", $400, $80
+.cerror * > SCREEN_B, "Bell glint sprites overlap the second screen buffer"
 
 * = CHARM_SPRITES
-    .binary "../build/charms.bin"
+    .binary "../build/charms.bin", 0, $400
 .cerror * > $3000, "Charms overlap the VIC charset"
 
 * = $3000

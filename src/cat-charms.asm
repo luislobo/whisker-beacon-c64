@@ -6,15 +6,17 @@ BRASS_POINTER = CHARM_POINTER+2
 BRASS_BACK = 0
 BRASS_UPRIGHT = 2
 BRASS_FORWARD = 4
-BRASS_GLINT = BRASS_POINTER+12
+BRASS_TUCK = 6
+BRASS_GLINT_SPRITES = $2700
+BRASS_GLINT = BRASS_GLINT_SPRITES/64
 
 present_cat_charm:
     lda cat_charm
     beq charm_done
-    ldx low_profile
-    bne charm_done
     cmp #2
     beq present_brass
+    ldx low_profile
+    bne charm_done
     lda #3
     sta $d02c
     lda facing_left
@@ -63,9 +65,19 @@ present_brass:
     lda $d000
     sta $d00a
     sta $d00c
+    ldx #0
+    ldy low_profile
+    beq place_brass_y
+    ldx #1
+    lda slide_ticks
+    cmp #SLIDE_DURATION-4
+    bcc place_brass_y
+    sbc #SLIDE_DURATION-5
+    tax
+place_brass_y:
     lda $d001
-    sec
-    sbc #9
+    clc
+    adc brass_y_offsets,x
     sta $d00b
     sta $d00d
     ldy #$60
@@ -84,9 +96,12 @@ present_brass:
     lda #1
     sta $d02e
     ldy #$e0
-    bne enable_charm_sprites
+    jmp enable_charm_sprites
 
 brass_swing:
+    ldx #BRASS_TUCK
+    lda low_profile
+    bne brass_swing_done
     ldx #BRASS_UPRIGHT
     lda beacon_lit
     bne brass_swing_done
@@ -119,6 +134,8 @@ brass_tilt_back:
 brass_run_swing:
     .byte BRASS_UPRIGHT,BRASS_BACK,BRASS_BACK,BRASS_UPRIGHT
     .byte BRASS_FORWARD,BRASS_FORWARD,BRASS_UPRIGHT,BRASS_UPRIGHT
+brass_y_offsets:
+    .char -9,0,-2,-4,-7
 
 award_ribbon:
     lda level_index
