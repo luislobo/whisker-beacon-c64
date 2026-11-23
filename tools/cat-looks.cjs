@@ -368,12 +368,19 @@ function charmFrame(rows, ink, xOrigin, yOrigin, left, swing = 0) {
 
 function catLooks() {
   const frames = [];
+  const titleCats = [];
   const labels = [];
   for (const [index, look] of looks.entries()) {
     labels.push(`cat_look_${index} = cat_look_bits + ${frames.length * height * 3}`);
+    const palette = { ...ink, ...look.ink };
     for (const [pose, frame] of Object.entries(poses)) {
       const art = pose === 'stand' ? look.art : look[pose] ?? actionArt(look, frame, pose);
-      frames.push(packFrame(art, { ...ink, ...look.ink }));
+      const packed = packFrame(art, palette);
+      frames.push(packed);
+      if (pose === 'sit') {
+        const blinking = art.split('\n').map((row, y) => y === 3 ? row.replaceAll('c', 'a') : row).join('\n');
+        titleCats.push({ name: look.name.toUpperCase(), frames: [packed, packFrame(blinking, palette)] });
+      }
     }
   }
   const tables = [
@@ -391,9 +398,7 @@ function catLooks() {
     'cat_names:',
     ...looks.map(look => '    .text "' + look.name.toUpperCase().padEnd(13) + '"')
   ].join('\n') + '\n';
-  const seated = actionArt(looks[0], sit, 'sit');
-  const blinking = seated.split('\n').map((row, y) => y === 3 ? row.replaceAll('c', 'a') : row).join('\n');
-  return { bytes: Buffer.concat(frames), tables, titlePip: [seated, blinking].map(art => packFrame(art, ink)) };
+  return { bytes: Buffer.concat(frames), tables, titleCats };
 }
 
 module.exports = { catLooks, charmArt };

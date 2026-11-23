@@ -60,6 +60,10 @@ clear_screen:
     jsr show_title
     jsr init_cat_sprite
     jsr start_game
+    ; A held C or Up belongs to the title until it is released.
+    lda input_bits
+    and #CHANGE_CAT
+    sta wardrobe_keys
     jsr init_view
     jsr init_music
     cli
@@ -160,8 +164,13 @@ cat_look_bits:
 
 ; Load the intro into the future level map. It is only needed before start_game.
 ; Keep VIC data below the character ROM window at $9000.
+* = TITLE_NAMES
+    .binary "../build/title-names.bin"
+.cerror * != TITLE_NAMES+CAT_LOOKS*TITLE_NAME_BYTES, "Title name art must match the cat roster"
+.cerror * > TITLE_SPRITES, "Title name art overlaps its sprites"
 * = TITLE_SPRITES
     .binary "../build/title-sprites.bin"
+.cerror * != TITLE_SPRITES+(CAT_LOOKS*2+3)*64, "Title sprites must match the cat roster"
 .cerror * > TITLE_SCREEN, "Title sprites overlap the screen"
 * = TITLE_SCREEN
     .binary "../build/title-screen.bin"

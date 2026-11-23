@@ -2,10 +2,29 @@ const { glyphs } = require('./garden.cjs');
 
 const width = 160;
 const height = 200;
-const promptRow = 23;
+const nameRow = 22;
+const nameCells = 20;
+const promptRow = 24;
 const [black, white, , cyan, purple, green, blue, yellow, orange, brown,
   , charcoal, gray, lime, periwinkle, silver] = Array.from({ length: 16 }, (_, ink) => ink);
 const font = glyphs();
+
+function drawText(pixels, label, y, ink, size, offset = 0) {
+  const start = Math.floor((width - (label.length * 6 - 1) * size) / 2) + offset;
+  for (const [i, letter] of [...label].entries()) {
+    const code = letter.charCodeAt(0) + (letter === ' ' ? 0 : 128);
+    for (let row = 0; row < 7; row++) {
+      for (let col = 0; col < 5; col++) {
+        if (!(font[code * 8 + row] & (64 >> col))) continue;
+        const x = start + (i * 6 + col) * size;
+        for (let dy = 0; dy < size; dy++) {
+          const index = (y + row * size + dy) * width + x;
+          pixels.fill(ink, index, index + size);
+        }
+      }
+    }
+  }
+}
 
 function drawScene() {
   const pixels = Buffer.alloc(width * height);
@@ -35,20 +54,6 @@ function drawScene() {
       }
     }
   }
-  function text(label, y, color, size, offset = 0) {
-    const start = Math.floor((width - (label.length * 6 - 1) * size) / 2) + offset;
-    for (const [i, letter] of [...label].entries()) {
-      const code = letter.charCodeAt(0) + (letter === ' ' ? 0 : 128);
-      for (let row = 0; row < 7; row++) {
-        for (let col = 0; col < 5; col++) {
-          if (font[code * 8 + row] & (64 >> col)) {
-            rect(start + (i * 6 + col) * size, y + row * size, size, size, color);
-          }
-        }
-      }
-    }
-  }
-
   // Dusk and the far treeline.
   for (let y = 77; y < 140; y++) {
     for (let x = 0; x < width; x++) {
@@ -119,13 +124,13 @@ function drawScene() {
   line(63, 97, 67, 100, gray);
   line(59, 111, 67, 111, gray);
 
-  text('WHISKER', 18, purple, 3, 2);
-  text('WHISKER', 15, white, 3);
-  text('BEACON', 48, orange, 3, 2);
-  text('BEACON', 45, yellow, 3);
+  drawText(pixels, 'WHISKER', 18, purple, 3, 2);
+  drawText(pixels, 'WHISKER', 15, white, 3);
+  drawText(pixels, 'BEACON', 48, orange, 3, 2);
+  drawText(pixels, 'BEACON', 45, yellow, 3);
   rect(0, 176, 160, 24, black);
-  rect(15, 179, 130, 1, blue);
-  text('FIRE OR SPACE TO START', 184, yellow, 1);
+  drawText(pixels, 'C OR UP TO CHOOSE CAT', 184, silver, 1);
+  drawText(pixels, 'FIRE OR SPACE TO START', 192, yellow, 1);
   return pixels;
 }
 
@@ -151,7 +156,9 @@ function encodeScene(pixels) {
     for (const ink of samples) count[ink]++;
     const inks = count.slice(1).map((_, index) => index + 1)
       .filter(ink => count[ink] > 0).sort((a, b) => count[b] - count[a]).slice(0, 3);
-    const palette = y === promptRow ? [black, black, black, yellow] : [black, ...inks];
+    let palette = [black, ...inks];
+    if (y === nameRow) palette = [black, black, black, cyan];
+    if (y === promptRow) palette = [black, black, black, yellow];
     screen[cell] = (palette[1] ?? 0) << 4 | (palette[2] ?? 0);
     color[cell] = palette[3] ?? 0;
     for (const [r, row] of rows.entries()) {
@@ -174,14 +181,28 @@ function hires(rows) {
   return bytes;
 }
 
-function titleArt(pip) {
+function titleName(label) {
+  const pixels = Buffer.alloc(width * 8);
+  drawText(pixels, label, 0, 3, 1);
+  const name = Buffer.alloc(nameCells * 8);
+  for (let cell = 0; cell < nameCells; cell++) {
+    const x = (width - nameCells * 4) / 2 + cell * 4;
+    for (let y = 0; y < 8; y++) {
+      name[cell * 8 + y] = pixels.subarray(y * width + x, y * width + x + 4)
+        .reduce((byte, pixel) => byte << 2 | pixel, 0);
+    }
+  }
+  return name;
+}
+
+function titleArt(cats) {
   const sprites = Buffer.concat([
-    ...pip.map(frame => Buffer.concat([frame, Buffer.alloc(64 - frame.length)])),
+    ...cats.flatMap(cat => cat.frames.map(frame => Buffer.concat([frame, Buffer.alloc(64 - frame.length)]))),
     hires(['...##...', '..####..', '.######.', '.######.', '..####..', '...##...']),
     hires(['..#..', '.###.', '..#..']),
     hires(['.....', '..#..', '.....'])
   ]);
-  return { ...encodeScene(drawScene()), sprites };
+  return { ...encodeScene(drawScene()), sprites, names: Buffer.concat(cats.map(cat => titleName(cat.name))) };
 }
 
 module.exports = { titleArt };

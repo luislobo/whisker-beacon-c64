@@ -1,9 +1,13 @@
 TITLE_SCREEN = $8c00
-TITLE_SPRITES = $8800
+TITLE_NAMES = $8000
+TITLE_NAME_BYTES = 20*8
+TITLE_NAME_BITMAP = TITLE_BITMAP+(22*40+10)*8
+TITLE_SPRITES = $8640
 TITLE_COLORS = $9400
 TITLE_BITMAP = $a000
-TITLE_PIP = (TITLE_SPRITES & $3fff)/64
-TITLE_PROMPT = $d800 + 23*40
+TITLE_CAT = (TITLE_SPRITES & $3fff)/64
+TITLE_LAMP = TITLE_CAT+CAT_LOOKS*2
+TITLE_PROMPT = $d800 + 24*40
 
 show_title:
     lda #$0b
@@ -48,14 +52,13 @@ title_init_sprites:
     sta $d01c
     sta $d01d
     sta $d017
-    lda #9
+    lda #11
     sta $d025
-    lda #7
+    lda #1
     sta $d026
-    lda #8
-    sta $d027
-    lda #TITLE_PIP+2
+    lda #TITLE_LAMP
     sta TITLE_SCREEN+$3f9
+    jsr show_title_cat
     lda #$3b
     sta $d011
     jsr init_title_music
@@ -83,6 +86,15 @@ title_controls_ready:
     lda input_bits
     and #JUMP
     bne title_start
+    lda input_bits
+    and #CHANGE_CAT
+    tax
+    eor wardrobe_keys
+    and input_bits
+    stx wardrobe_keys
+    beq title_leave_raster
+    jsr select_next_cat
+    jsr show_title_cat
 title_leave_raster:
     lda $d012
     cmp #250
@@ -160,17 +172,49 @@ title_prompt_pulse:
     sta $d02a
     lda #13
     sta $d02b
-    ldx #TITLE_PIP
-    lda title_ticks
-    and #$7c
-    cmp #$54
-    bne title_show_pip
-    inx
-title_show_pip:
-    stx TITLE_SCREEN+$3f8
+    jsr title_cat_frame
     lda #$1f
     sta $d015
     rts
+
+show_title_cat:
+    ldx cat_look
+    lda cat_colors,x
+    sta $d027
+    lda title_name_lo,x
+    sta map_source
+    lda title_name_hi,x
+    sta map_source+1
+    ldy #0
+copy_title_name:
+    lda (map_source),y
+    sta TITLE_NAME_BITMAP,y
+    iny
+    cpy #TITLE_NAME_BYTES
+    bne copy_title_name
+title_cat_frame:
+    lda cat_look
+    asl
+    clc
+    adc #TITLE_CAT
+    tax
+    lda title_ticks
+    and #$7c
+    cmp #$54
+    bne title_show_cat_frame
+    inx
+title_show_cat_frame:
+    stx TITLE_SCREEN+$3f8
+    rts
+
+title_name_lo:
+    .for look := 0, look < CAT_LOOKS, look += 1
+        .byte <(TITLE_NAMES+look*TITLE_NAME_BYTES)
+    .endfor
+title_name_hi:
+    .for look := 0, look < CAT_LOOKS, look += 1
+        .byte >(TITLE_NAMES+look*TITLE_NAME_BYTES)
+    .endfor
 
 title_drift:
     .byte 0,0,1,2,3,4,6,7,9,11,12,14,15,16,17,17
@@ -181,6 +225,6 @@ title_lamp_ink:
 title_prompt_ink:
     .byte 15,15,7,7,1,7,7,15
 title_fly_frame:
-    .byte TITLE_PIP+3,TITLE_PIP+4,TITLE_PIP+4,TITLE_PIP+3
-    .byte TITLE_PIP+3,TITLE_PIP+4,TITLE_PIP+4,TITLE_PIP+3
-    .byte TITLE_PIP+3,TITLE_PIP+4,TITLE_PIP+4,TITLE_PIP+3
+    .byte TITLE_LAMP+1,TITLE_LAMP+2,TITLE_LAMP+2,TITLE_LAMP+1
+    .byte TITLE_LAMP+1,TITLE_LAMP+2,TITLE_LAMP+2,TITLE_LAMP+1
+    .byte TITLE_LAMP+1,TITLE_LAMP+2,TITLE_LAMP+2,TITLE_LAMP+1

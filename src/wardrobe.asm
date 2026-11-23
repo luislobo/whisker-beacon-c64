@@ -12,6 +12,13 @@ choose_look:
     beq wardrobe_done
     and #CHANGE_CAT
     beq choose_charm
+    jsr select_next_cat
+    jsr load_cat_look
+    jmp show_wardrobe
+wardrobe_done:
+    rts
+
+select_next_cat:
     ldx cat_look
 next_cat_look:
     inx
@@ -26,9 +33,6 @@ check_tuxedo:
     beq next_cat_look
 swap_cat_look:
     stx cat_look
-    jsr load_cat_look
-    jmp show_wardrobe
-wardrobe_done:
     rts
 
 choose_charm:

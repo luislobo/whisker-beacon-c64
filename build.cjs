@@ -19,7 +19,7 @@ fs.writeFileSync(path.join(build, 'actors.bin'), actorSprites());
 const looks = catLooks();
 fs.writeFileSync(path.join(build, 'cat-looks.bin'), looks.bytes);
 fs.writeFileSync(path.join(build, 'cat-looks.inc'), looks.tables);
-for (const [name, bytes] of Object.entries(titleArt(looks.titlePip))) {
+for (const [name, bytes] of Object.entries(titleArt(looks.titleCats))) {
   fs.writeFileSync(path.join(build, 'title-' + name + '.bin'), bytes);
 }
 fs.writeFileSync(path.join(build, 'charms.bin'), charmArt());
