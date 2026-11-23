@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
 const { runVice, readSymbols } = require('./vice.cjs');
+const { gardenRoute } = require('./garden-route.cjs');
 
 const root = path.resolve(__dirname, '..');
 const symbols = readSymbols(path.join(root, 'build/symbols.labels'));
@@ -23,8 +24,6 @@ const RECOVERIES = 0x2b;
 const VIDEO_TICKS = 0x0a;
 const GAME_TICKS = 0x0b;
 const SID_TICKS = 0x33;
-const FULL_JUMP_TICKS = 16;
-const jumpAt = new Set([17,52,122,149,185,210,238,298,324,358,403,433]);
 
 async function boot(monitor) {
   await loadGame(monitor);
@@ -61,10 +60,8 @@ async function test(mode) {
     // Restart the PRG to give the patrols the same starting phase.
     await boot(monitor);
     const gardenScroll = new Set();
-    let fireUntil = 0;
-    for (let i = 0; i < 466; i++) {
-      if (jumpAt.has(i)) fireUntil = i + FULL_JUMP_TICKS;
-      await monitor.write(INPUT, [RIGHT | (i < fireUntil ? FIRE : 0)]);
+    for (const [i, input] of gardenRoute.entries()) {
+      await monitor.write(INPUT, [input]);
       if (i >= 60 && i < 72) {
         const hudMode = (await monitor.bytes(0xd016, 1))[0] & 0x1f;
         assert.equal(hudMode, 0x08, 'the HUD stays in fixed 40-column mode');
