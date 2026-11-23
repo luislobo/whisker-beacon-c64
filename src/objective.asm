@@ -6,38 +6,36 @@ BLUE_FLY_TILE = 8
 BLUE_BADGE_COLUMN = 37
 
 start_game:
-    ldx #0
-copy_garden:
-    .for page := 0, page < 12, page += 1
-        lda garden_source+256*page,x
-        sta LEVEL_MAP+256*page,x
-    .endfor
-    inx
-    bne copy_garden
-copy_last_row:
-    lda garden_source+$c00,x
-    sta LEVEL_MAP+$c00,x
-    inx
-    bpl copy_last_row
+    jsr load_level
     lda #0
     sta fireflies
     sta beacon_lit
     sta restart_armed
     sta blue_found
+    sta SCREEN_A+3
+    sta SCREEN_B+3
+    sta SCREEN_A+36
+    sta SCREEN_B+36
     sta SCREEN_A+BLUE_BADGE_COLUMN
     sta SCREEN_B+BLUE_BADGE_COLUMN
     jsr reset_run
+    jsr load_level_best
     jsr init_checkpoints
     jsr reset_player
     jsr init_patrols
     lda #$ff
     sta drawn_column
-    ldx #header_end-header-1
+    ldx level_index
+    lda header_low,x
+    sta hud_source
+    lda header_high,x
+    sta hud_source+1
+    ldy #header_end-header-1
 write_header:
-    lda header,x
-    sta SCREEN_A+4,x
-    sta SCREEN_B+4,x
-    dex
+    lda (hud_source),y
+    sta SCREEN_A+4,y
+    sta SCREEN_B+4,y
+    dey
     bpl write_header
     rts
 
@@ -56,6 +54,7 @@ wait_for_replay:
     beq arm_replay
     lda restart_armed
     beq objective_done
+    jsr select_level
     jsr start_game
     jmp track_cat
 arm_replay:
@@ -91,12 +90,17 @@ check_objective:
     sta LEVEL_MAP+BEACON_TILE
     lda #$ff
     sta drawn_column
-    ldx #win_end-win_message-1
+    ldx level_index
+    lda win_low,x
+    sta hud_source
+    lda win_high,x
+    sta hud_source+1
+    ldy #win_end-win_message-1
 write_win:
-    lda win_message,x
-    sta SCREEN_A+4,x
-    sta SCREEN_B+4,x
-    dex
+    lda (hud_source),y
+    sta SCREEN_A+3,y
+    sta SCREEN_B+3,y
+    dey
     bpl write_win
     jmp show_results
 
@@ -142,7 +146,22 @@ header:
 header_count:
     .text "00/06"
 header_end:
+greenhouse_header:
+    .text "OLD GREENHOUSE    FIREFLIES 00/06"
+greenhouse_header_end:
 win_message:
-    .text "BEACON LIT     FIRE TO REPLAY    "
+    .text "BEACON LIT   FIRE AGAIN   RIGHT+FIRE"
 win_end:
-.cerror win_end-win_message != header_end-header, "HUD messages must have the same width"
+greenhouse_win:
+    .text "BEACON LIT   FIRE AGAIN    LEFT+FIRE"
+greenhouse_win_end:
+header_low:
+    .byte <header,<greenhouse_header
+header_high:
+    .byte >header,>greenhouse_header
+win_low:
+    .byte <win_message,<greenhouse_win
+win_high:
+    .byte >win_message,>greenhouse_win
+.cerror greenhouse_header_end-greenhouse_header != header_end-header, "HUD headings differ in width"
+.cerror greenhouse_win_end-greenhouse_win != win_end-win_message, "Finish messages differ in width"

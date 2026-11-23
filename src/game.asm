@@ -39,7 +39,7 @@ entry:
     sta $d022
     lda #9
     sta $d023
-    ldx #$40
+    ldx #$49
     lda #0
 clear_state:
     sta $00,x
@@ -55,7 +55,6 @@ clear_screen:
     .endfor
     inx
     bne clear_screen
-    jsr init_colors
     jsr init_cat_sprite
     jsr start_game
     jsr init_view
@@ -102,6 +101,7 @@ leave_raster:
 .include "patrols.asm"
 .include "checkpoints.asm"
 .include "objective.asm"
+.include "levels.asm"
 .include "music.asm"
 .include "results.asm"
 
@@ -117,3 +117,10 @@ garden_source:
     .binary "../build/garden.bin"
 garden_colors:
     .binary "../build/garden-colors.bin"
+
+
+* = $6000
+greenhouse_source:
+    .binary "../build/greenhouse.bin"
+greenhouse_colors:
+    .binary "../build/greenhouse-colors.bin"

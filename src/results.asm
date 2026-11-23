@@ -94,8 +94,8 @@ write_result:
     ldx #clean_end-clean_message-1
 write_clean:
     lda clean_message,x
-    sta SCREEN_A+4,x
-    sta SCREEN_B+4,x
+    sta SCREEN_A+3,x
+    sta SCREEN_B+3,x
     dex
     bpl write_clean
 result_done:
@@ -122,6 +122,37 @@ copy_best:
     bpl copy_best
     lda #1
     sta have_best
+    jmp store_level_best
+
+level_record_offset:
+    lda level_index
+    asl
+    asl
+    tay
+    rts
+
+load_level_best:
+    jsr level_record_offset
+    ldx #0
+load_record_byte:
+    lda level_records,y
+    sta have_best,x
+    iny
+    inx
+    cpx #4
+    bne load_record_byte
+    rts
+
+store_level_best:
+    jsr level_record_offset
+    ldx #0
+save_record_byte:
+    lda have_best,x
+    sta level_records,y
+    iny
+    inx
+    cpx #4
+    bne save_record_byte
     rts
 
 format_binary:
@@ -172,6 +203,8 @@ best_seconds:
     .byte 0
 best_minutes:
     .byte 0
+level_records:
+    .fill 8,0
 result_row:
     .text "00:00.00 "
 result_flies:

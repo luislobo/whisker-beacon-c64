@@ -11,7 +11,9 @@ init_colors:
     sta color_dst+1
     ldx #0
 color_row:
-    lda garden_colors,x
+    txa
+    tay
+    lda (palette_source),y
     ldy #39
 color_cell:
     sta (color_dst),y

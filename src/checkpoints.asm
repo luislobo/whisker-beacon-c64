@@ -14,6 +14,11 @@ activate_checkpoint:
     ldx checkpoint
     cpx #2
     beq checkpoint_done
+    lda level_index
+    beq check_position
+    inx
+    inx
+check_position:
     lda player_x
     cmp checkpoint_low,x
     lda player_x+1
@@ -28,6 +33,6 @@ checkpoint_done:
     rts
 
 checkpoint_low:
-    .byte <432,<768
+    .byte <432,<768,<464,<768
 checkpoint_high:
-    .byte >432,>768
+    .byte >432,>768,>464,>768

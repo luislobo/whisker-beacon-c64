@@ -3,6 +3,7 @@ const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const { playerSprites } = require('./tools/sprites.cjs');
 const { glyphs, garden, gardenColors } = require('./tools/garden.cjs');
+const { greenhouse } = require('./tools/greenhouse.cjs');
 const { score } = require('./tools/music.cjs');
 
 const root = __dirname;
@@ -16,6 +17,9 @@ fs.writeFileSync(path.join(build, 'tiles.bin'), glyphs());
 const map = garden();
 fs.writeFileSync(path.join(build, 'garden.bin'), map);
 fs.writeFileSync(path.join(build, 'garden-colors.bin'), gardenColors(map));
+const secondMap = greenhouse();
+fs.writeFileSync(path.join(build, 'greenhouse.bin'), secondMap);
+fs.writeFileSync(path.join(build, 'greenhouse-colors.bin'), gardenColors(secondMap));
 fs.writeFileSync(path.join(build, 'score.inc'), score());
 execFileSync(process.env.TASS64 || '64tass', [
   '--cbm-prg', '-a', '-o', program,
