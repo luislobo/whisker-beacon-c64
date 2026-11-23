@@ -40,7 +40,17 @@ function test(mode) {
       assert.deepEqual([...colors.map(color => color & 15)], flash ? [7, 9, 1] : [7, 9]);
       const pointers = await monitor.bytes(0x07fd, 3);
       assert.deepEqual(pointers, await monitor.bytes(0x2bfd, 3), 'both screen buffers use the same layers');
+      if (flash) {
+        const star = await spriteHeight(pointers[2], 3);
+        assert.deepEqual([...star.subarray(0, 9)], [0, 0, 8, 0, 0, 28, 0, 0, 8]);
+      }
       return pointers[0];
+    }
+    async function spriteHeight(pointer, rows) {
+      const art = await monitor.bytes(pointer * 64, 64);
+      assert.ok(art.subarray((rows - 1) * 3, rows * 3).some(Boolean), 'the last intended row is drawn');
+      assert.ok(art.subarray(rows * 3).every(byte => byte === 0), 'the area below the sprite art is transparent');
+      return art;
     }
 
     await monitor.write(ram.won, [1]);
@@ -78,6 +88,8 @@ function test(mode) {
     await step(left | down);
     const tucked = await bell(false, -7);
     assert.ok(!strides.has(tucked), 'the slide uses separate folded bell art');
+    await spriteHeight(tucked, 3);
+    await spriteHeight(tucked + 1, 4);
     for (const offset of [-4, -2, 0]) {
       await step();
       assert.equal(await bell(false, offset), tucked, 'the folded bell settles close to the cat');
@@ -88,6 +100,12 @@ function test(mode) {
     const unfolded = await bell();
     assert.notEqual(unfolded, tucked, 'the bell opens up after the slide');
     assert.ok(!strides.has(unfolded), 'the bell stays mirrored while facing left');
+    for (let tick = 0; tick < 8; tick++) await step();
+    await step(right | down);
+    const tuckedRight = await bell(false, -7);
+    assert.notEqual(tuckedRight, tucked, 'rightward slides have their own mirrored art');
+    await spriteHeight(tuckedRight, 3);
+    await spriteHeight(tuckedRight + 1, 4);
 
     console.log(mode + ': shaded brass, pickup glint, swing, mirroring, and slide verified');
   });

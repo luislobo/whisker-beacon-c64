@@ -6,9 +6,9 @@ BRASS_POINTER = CHARM_POINTER+2
 BRASS_BACK = 0
 BRASS_UPRIGHT = 2
 BRASS_FORWARD = 4
-BRASS_TUCK = 6
-BRASS_GLINT_SPRITES = $2700
-BRASS_GLINT = BRASS_GLINT_SPRITES/64
+BRASS_TUCK_SPRITES = $2600
+BRASS_TUCK_POINTER = BRASS_TUCK_SPRITES/64
+BRASS_GLINT = BRASS_TUCK_POINTER+4
 
 present_cat_charm:
     lda cat_charm
@@ -46,12 +46,21 @@ charm_done:
 
 present_brass:
     ; Each swing has a right-facing pair followed by a left-facing pair.
+    ldx low_profile
+    bne use_tucked_brass
     jsr brass_swing
     txa
     ora facing_left
     asl
     clc
     adc #BRASS_POINTER
+    bne place_brass_frames
+use_tucked_brass:
+    lda facing_left
+    asl
+    clc
+    adc #BRASS_TUCK_POINTER
+place_brass_frames:
     sta SCREEN_A+$3fd
     sta SCREEN_B+$3fd
     clc
@@ -99,9 +108,6 @@ place_brass_y:
     jmp enable_charm_sprites
 
 brass_swing:
-    ldx #BRASS_TUCK
-    lda low_profile
-    bne brass_swing_done
     ldx #BRASS_UPRIGHT
     lda beacon_lit
     bne brass_swing_done
