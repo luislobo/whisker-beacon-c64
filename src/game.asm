@@ -1,5 +1,6 @@
 .cpu "6502"
 .include "state.asm"
+.include "../build/map.inc"
 
 * = $0801
     .word basic_end
@@ -39,7 +40,7 @@ entry:
     sta $d022
     lda #9
     sta $d023
-    ldx #$6c
+    ldx #$6e
     lda #0
 clear_state:
     sta $00,x
@@ -128,8 +129,10 @@ garden_colors:
     .binary "../build/garden-colors.bin"
 
 
-* = $6000
 greenhouse_source:
     .binary "../build/greenhouse.bin"
 greenhouse_colors:
     .binary "../build/greenhouse-colors.bin"
+
+.cerror * > LEVEL_MAP, "Packed levels overlap working map"
+.cerror LEVEL_MAP + MAP_STRIDE*25 > $d000, "Working map overlaps I/O"

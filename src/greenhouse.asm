@@ -5,10 +5,10 @@ LANTERN_TILE = 85
 LIT_LANTERN_TILE = 86
 LANTERN_GLOW_TILE = 87
 BELL_COLUMN = 38
-BOARD_FIRST = 20*WORLD_WIDTH+40
+BOARD_FIRST = 20*MAP_STRIDE+40
 BOARD_LENGTH = 6
 GATE_COLUMN = 30
-LANTERN_OFFSET = 21*WORLD_WIDTH+67
+LANTERN_OFFSET = 21*MAP_STRIDE+67
 
 init_greenhouse_props:
     lda #0
@@ -38,7 +38,7 @@ board_cell:
     dex
     bpl board_cell
     lda #$ff
-    sta drawn_column
+    sta drawn_page
 boards_idle:
     rts
 
@@ -47,15 +47,15 @@ collect_bell:
     sta sfx_event
     lda #0
     sta (cell_ptr),y
-    sta LEVEL_MAP+21*WORLD_WIDTH+GATE_COLUMN
-    sta LEVEL_MAP+22*WORLD_WIDTH+GATE_COLUMN
+    sta LEVEL_MAP+21*MAP_STRIDE+GATE_COLUMN
+    sta LEVEL_MAP+22*MAP_STRIDE+GATE_COLUMN
     lda #1
     sta bell_found
     lda #$c2
     sta SCREEN_A+BELL_COLUMN
     sta SCREEN_B+BELL_COLUMN
     lda #$ff
-    sta drawn_column
+    sta drawn_page
     ldx #HINT_BELL
     jmp show_objective_hint
 
@@ -71,14 +71,14 @@ light_greenhouse_lantern:
     sta LEVEL_MAP+LANTERN_OFFSET+1
     sta LEVEL_MAP+LANTERN_OFFSET-2
     sta LEVEL_MAP+LANTERN_OFFSET+2
-    sta LEVEL_MAP+LANTERN_OFFSET-WORLD_WIDTH
-    sta LEVEL_MAP+LANTERN_OFFSET-WORLD_WIDTH-1
-    sta LEVEL_MAP+LANTERN_OFFSET-WORLD_WIDTH+1
+    sta LEVEL_MAP+LANTERN_OFFSET-MAP_STRIDE
+    sta LEVEL_MAP+LANTERN_OFFSET-MAP_STRIDE-1
+    sta LEVEL_MAP+LANTERN_OFFSET-MAP_STRIDE+1
     lda #FIREFLY_TILE
-    sta LEVEL_MAP+21*WORLD_WIDTH+71
-    sta LEVEL_MAP+21*WORLD_WIDTH+73
-    sta LEVEL_MAP+21*WORLD_WIDTH+75
+    sta LEVEL_MAP+21*MAP_STRIDE+71
+    sta LEVEL_MAP+21*MAP_STRIDE+73
+    sta LEVEL_MAP+21*MAP_STRIDE+75
     lda #$ff
-    sta drawn_column
+    sta drawn_page
     ldx #HINT_LANTERN
     jmp show_objective_hint

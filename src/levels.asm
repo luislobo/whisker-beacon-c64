@@ -15,27 +15,55 @@ load_level:
     sta map_dst
     lda #>LEVEL_MAP
     sta map_dst+1
+    ; Blank the screen while the active map and its row colors are replaced.
+    lda #$0b
+    sta $d011
     ldy #0
-    ldx #12
-copy_level_page:
-    lda (map_source),y
-    sta (map_dst),y
-    iny
-    bne copy_level_page
-    inc map_source+1
-    inc map_dst+1
+read_packet:
+    jsr read_map_byte
+    beq map_loaded
+    bmi fill_packet
+    tax
+copy_literal:
+    jsr read_map_byte
+    jsr write_map_byte
     dex
-    bne copy_level_page
-copy_level_tail:
-    lda (map_source),y
-    sta (map_dst),y
-    iny
-    bpl copy_level_tail
-
+    bne copy_literal
+    beq read_packet
+fill_packet:
+    and #$7f
+    tax
+    jsr read_map_byte
+fill_run:
+    jsr write_map_byte
+    dex
+    bne fill_run
+    beq read_packet
+map_loaded:
     ldx level_index
     lda level_ink,x
     sta $d023
-    jmp init_colors
+    jsr init_colors
+    lda #$1b
+    sta $d011
+    rts
+
+read_map_byte:
+    lda (map_source),y
+    inc map_source
+    bne map_byte
+    inc map_source+1
+map_byte:
+    ora #0
+    rts
+
+write_map_byte:
+    sta (map_dst),y
+    inc map_dst
+    bne map_write_done
+    inc map_dst+1
+map_write_done:
+    rts
 
 source_low:
     .byte <garden_source,<greenhouse_source

@@ -10,7 +10,7 @@ const INPUT = 7;
 const PLAYER_X = 0x0c;
 const SCREEN_A = 0x0400;
 const SCREEN_B = 0x2800;
-const MAP = 0x5000;
+const MAP = 0x8000;
 const TILE_ROW = 7;
 
 async function measurePass(monitor, mode, direction) {
@@ -31,7 +31,7 @@ async function measurePass(monitor, mode, direction) {
 
     const screen = bank === 0x1c ? SCREEN_A : SCREEN_B;
     assert.deepEqual(await monitor.bytes(screen + TILE_ROW * 40, 40),
-      await monitor.bytes(MAP + TILE_ROW * 128 + (camera >> 3), 40),
+      await monitor.bytes(MAP + TILE_ROW * 768 + (camera >> 3), 40),
       'the selected bank starts at the matching tile column');
     if (previousBank !== undefined && previousBank !== bank) switches++;
     previousBank = bank;

@@ -1,5 +1,6 @@
 SCREEN_A = $0400
 SCREEN_B = $2800
+LEVEL_MAP = $8000
 WORLD_WIDTH = 128
 CAMERA_LIMIT = (WORLD_WIDTH - 40) * 8
 HUD_ROWS = 2
@@ -33,7 +34,7 @@ next_color_row:
 
 init_view:
     lda #$ff
-    sta drawn_column
+    sta drawn_page
     jsr prepare_view
     jsr present_view
     lda #<scroll_irq
@@ -81,6 +82,11 @@ screen_select:
 render_world:
     ; Convert the 16-bit pixel offset to a tile column.
     lda camera_x+1
+    lsr
+    lsr
+    lsr
+    sta camera_page
+    lda camera_x+1
     asl
     asl
     asl
@@ -92,12 +98,18 @@ render_world:
     lsr
     lsr
     ora camera_column
+    sta camera_column
     cmp drawn_column
+    bne redraw_world
+    lda camera_page
+    cmp drawn_page
     bne redraw_world
     rts
 redraw_world:
+    lda camera_column
     sta drawn_column
-    sta camera_column
+    lda camera_page
+    sta drawn_page
     lda screen_index
     eor #1
     sta screen_index
@@ -105,14 +117,27 @@ redraw_world:
     jmp render_b
 
 draw_columns .macro screen
-    ldx camera_column
+    ; Patch the hidden buffer's row sources once, then copy at most 40 tiles
+    ; from each row. Absolute indexed loads carry across the map's tile pages.
+    lda camera_column
+    .for row := HUD_ROWS, row < 25, row += 1
+        sta next_column+6*(row-HUD_ROWS)+1
+    .endfor
+    lda camera_page
+    clc
+    adc #>(LEVEL_MAP + HUD_ROWS*MAP_STRIDE)
+    .for row := HUD_ROWS, row < 25, row += 1
+        sta next_column+6*(row-HUD_ROWS)+2
+        .if row < 24
+            adc #>MAP_STRIDE
+        .endif
+    .endfor
     ldy #0
 next_column:
     .for row := HUD_ROWS, row < 25, row += 1
-        lda LEVEL_MAP+row*WORLD_WIDTH,x
+        lda LEVEL_MAP+row*MAP_STRIDE,y
         sta \screen+row*40,y
     .endfor
-    inx
     iny
     cpy #40
     beq finished

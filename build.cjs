@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { playerSprites } = require('./tools/sprites.cjs');
 const { glyphs, garden, gardenColors } = require('./tools/garden.cjs');
 const { greenhouse } = require('./tools/greenhouse.cjs');
+const { MAP_STRIDE, packMap } = require('./tools/pack-map.cjs');
 const { score } = require('./tools/music.cjs');
 
 const root = __dirname;
@@ -15,10 +16,11 @@ fs.mkdirSync(build, { recursive: true });
 fs.writeFileSync(path.join(build, 'cats.bin'), playerSprites());
 fs.writeFileSync(path.join(build, 'tiles.bin'), glyphs());
 const map = garden();
-fs.writeFileSync(path.join(build, 'garden.bin'), map);
+fs.writeFileSync(path.join(build, 'garden.bin'), packMap(map));
 fs.writeFileSync(path.join(build, 'garden-colors.bin'), gardenColors(map));
 const secondMap = greenhouse();
-fs.writeFileSync(path.join(build, 'greenhouse.bin'), secondMap);
+fs.writeFileSync(path.join(build, 'greenhouse.bin'), packMap(secondMap));
+fs.writeFileSync(path.join(build, 'map.inc'), `MAP_STRIDE = ${MAP_STRIDE}\n`);
 fs.writeFileSync(path.join(build, 'greenhouse-colors.bin'), gardenColors(secondMap));
 fs.writeFileSync(path.join(build, 'score.inc'), score());
 execFileSync(process.env.TASS64 || '64tass', [

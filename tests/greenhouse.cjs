@@ -12,10 +12,10 @@ const LEFT = 4;
 const DOWN = 2;
 const FIRE = 16;
 const LEVEL = 0x41;
-const LEVEL_MAP = 0x5000;
+const LEVEL_MAP = 0x8000;
 const WON = 0x2e;
 const RECOVERIES = 0x2b;
-const BOARD = LEVEL_MAP + 20 * 128 + 40;
+const BOARD = LEVEL_MAP + 20 * 768 + 40;
 assert.equal(garden().filter(tile => tile === TILE.firefly).length, 12, 'all garden fireflies remain reachable');
 assert.ok(glyphs().subarray(32 * 8, 33 * 8).every(byte => byte === 0), 'spaces stay blank in the HUD');
 
@@ -83,7 +83,7 @@ function route(mode) {
     await step(RIGHT | DOWN, 14);
     assert.ok(await x() >= 145, 'the slide reaches the other side of the shelf');
     assert.equal((await monitor.bytes(0x4a, 1))[0], 1, 'the bell was collected under the shelf');
-    const gate = LEVEL_MAP + 21 * 128 + 30;
+    const gate = LEVEL_MAP + 21 * 768 + 30;
     assert.equal((await monitor.bytes(gate, 1))[0], 0, 'the bell opens the gate');
     for (const screen of [0x0400, 0x2800]) {
       assert.equal((await monitor.bytes(screen + 33, 3)).toString('ascii'), '/06');
@@ -156,11 +156,11 @@ function hazards(mode) {
     assert.ok((await monitor.bytes(0x0e, 1))[0] > 147, 'Pip drops toward the lower route');
 
     await place(525, 171);
-    assert.notEqual((await monitor.bytes(LEVEL_MAP + 21 * 128 + 71, 1))[0], 9);
+    assert.notEqual((await monitor.bytes(LEVEL_MAP + 21 * 768 + 71, 1))[0], 9);
     await step(RIGHT, 2);
     assert.equal((await monitor.bytes(0x4b, 1))[0], 1);
     for (const column of [71, 73, 75]) {
-      assert.equal((await monitor.bytes(LEVEL_MAP + 21 * 128 + column, 1))[0], 9);
+      assert.equal((await monitor.bytes(LEVEL_MAP + 21 * 768 + column, 1))[0], 9);
     }
 
     await place(608, 170);

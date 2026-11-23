@@ -70,3 +70,5 @@ draw_player_x  = $68
 draw_player_y  = $6a
 blend_index    = $6b
 objective_ink  = $6c
+camera_page    = $6d
+drawn_page     = $6e

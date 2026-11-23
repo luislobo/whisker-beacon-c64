@@ -1,7 +1,6 @@
 GOAL = 6
-LEVEL_MAP = $5000
 BEACON_X = 984
-BEACON_TILE = 20*WORLD_WIDTH+125
+BEACON_TILE = 20*MAP_STRIDE+125
 FIREFLY_TILE = 9
 BLUE_FLY_TILE = 8
 LIT_BEACON_TILE = 12
@@ -34,7 +33,7 @@ start_game:
     jsr reset_player
     jsr init_patrols
     lda #$ff
-    sta drawn_column
+    sta drawn_page
     ldx level_index
     lda header_low,x
     sta hud_source
@@ -101,7 +100,7 @@ check_objective:
     lda #LIT_BEACON_TILE
     sta LEVEL_MAP+BEACON_TILE
     lda #$ff
-    sta drawn_column
+    sta drawn_page
     ldx level_index
     lda win_low,x
     sta hud_source
@@ -129,7 +128,7 @@ catch_firefly:
     lda #0
     sta (cell_ptr),y
     lda #$ff
-    sta drawn_column
+    sta drawn_page
     inc fireflies
     ldx #48
     lda fireflies
@@ -153,7 +152,7 @@ catch_blue_firefly:
     lda #0
     sta (cell_ptr),y
     lda #$ff
-    sta drawn_column
+    sta drawn_page
     lda #1
     sta blue_found
     lda #42

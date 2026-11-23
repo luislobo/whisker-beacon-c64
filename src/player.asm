@@ -253,7 +253,7 @@ non_solid:
 
 read_tile:
     lda probe_x+1
-    cmp #4
+    cmp #>(WORLD_WIDTH*8)
     bcs world_wall
     asl
     asl
@@ -274,9 +274,14 @@ read_tile:
     lsr
     lsr
     tax
-    lda row_low,x
+    lda #0
     sta cell_ptr
-    lda row_high,x
+    lda probe_x+1
+    lsr
+    lsr
+    lsr
+    clc
+    adc row_high,x
     sta cell_ptr+1
     lda (cell_ptr),y
     rts
@@ -287,11 +292,7 @@ under_world:
     lda #0
     rts
 
-row_low:
-    .for row := 0, row < 25, row += 1
-        .byte <(LEVEL_MAP + row * WORLD_WIDTH)
-    .endfor
 row_high:
     .for row := 0, row < 25, row += 1
-        .byte >(LEVEL_MAP + row * WORLD_WIDTH)
+        .byte >(LEVEL_MAP + row * MAP_STRIDE)
     .endfor
