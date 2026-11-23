@@ -1,4 +1,4 @@
-const { WIDTH, HEIGHT, TILE } = require('./garden.cjs');
+const { WIDTH, HEIGHT, TILE, placeBeacon } = require('./garden.cjs');
 
 function greenhouse() {
   const map = Buffer.alloc(WIDTH * HEIGHT);
@@ -46,15 +46,18 @@ function greenhouse() {
   }
   for (const [x,y] of [[8,21],[13,21],[23,21],[33,21],[44,21],[50,21],
     [61,21],[87,21],[115,21]]) put(x,y,'firefly');
+  put(17, 22, 'sky');
   put(18, 22, 'bell');
+  put(19, 22, 'sky');
   put(30, 21, 'gate');
   put(30, 22, 'gate');
   for (let x = 40; x < 46; x++) put(x, 20, 'cracked');
+  for (let x = 66; x <= 68; x++) put(x, 21, 'sky');
+  put(67, 20, 'lanternCrown');
   put(67, 21, 'lantern');
+  put(67, 22, 'post');
   put(97, 17, 'blueFly');
-  put(126, 20, 'lamp');
-  put(126, 21, 'post');
-  put(126, 22, 'post');
+  placeBeacon(map);
   return map;
 }
 

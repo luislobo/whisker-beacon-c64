@@ -8,7 +8,9 @@ const TILE = {
   glass: 80, glassFrame: 81, roofLeft: 82, roofRight: 83, bell: 84, lantern: 85,
   brightLantern: 86, glow: 87, glassBeam: 88, glassJoin: 89, roofCap: 90,
   paneGlint: 91, chain: 92, basket: 93, vineLeft: 94, vineRight: 95,
-  fern: 96, flowerPot: 97, rootsPot: 98, sill: 99
+  fern: 96, flowerPot: 97, rootsPot: 98, sill: 99,
+  beaconCrown: 100, beaconLeft: 101, beaconRight: 102, beaconBase: 103,
+  lanternCrown: 104
 };
 
 const tiles = {
@@ -16,14 +18,14 @@ const tiles = {
   cloud:       ['....','....','...1','....','.1.1','..1.','.1.1','1.1.'],
   leaf:        ['.11.','.11.','1111','1111','1111','1111','1111','1111'],
   trunk:       ['.22.','.22.','.222','.22.','.22.','222.','.22.','.22.'],
-  flower:      ['....','....','.3..','333.','.3..','.3.3','.33.','.3..'],
+  flower:      ['....','....','.2..','212.','.1..','.1.1','.11.','.1..'],
   roots:       ['....','....','....','...1','1.11','1111','2112','2222'],
   moon:        ['.33.','33..','3...','3...','3...','33..','.333','..3.'],
-  blueFly:     ['....','.33.','1331','.33.','1331','.33.','....','....'],
-  firefly:     ['....','.1..','131.','.3..','.33.','..1.','....','....'],
+  blueFly:     ['.33.','.33.','3333','3..3','3..3','3333','.33.','.33.'],
+  firefly:     ['....','3..3','.33.','3333','.33.','.33.','....','....'],
   post:        ['.22.','.22.','.22.','.22.','.22.','.22.','2222','2222'],
-  lamp:        ['.22.','2222','2..2','2.12','2.12','2222','.22.','.22.'],
-  litLamp:     ['.22.','2222','2332','2332','2332','2222','.22.','.22.'],
+  lamp:        ['3333','3..3','3..3','3..3','3..3','3333','.22.','.22.'],
+  litLamp:     ['3333','3.33','3333','3333','3333','3333','.33.','.33.'],
   pineLeft:    ['....','....','...1','...1','..11','..11','.111','.111'],
   pineRight:   ['....','....','1...','1...','11..','11..','111.','111.'],
   mist:        ['.1.1','1.1.','....','....','1.1.','.1.1','....','....'],
@@ -39,9 +41,9 @@ const tiles = {
   glassFrame:  ['.1..','.1..','.1..','.1..','.1..','.1..','.1..','.1..'],
   roofLeft:    ['..1.','..1.','.1..','.1..','1...','1...','....','....'],
   roofRight:   ['.1..','.1..','..1.','..1.','...1','...1','....','....'],
-  bell:        ['.33.','.33.','3333','3223','3333','2332','.33.','....'],
-  lantern:     ['.22.','2222','2..2','2..2','2122','2222','.22.','.22.'],
-  brightLantern:['.33.','2332','3333','3333','3333','2332','.22.','.22.'],
+  bell:        ['.33.','.33.','.33.','.33.','3333','3333','.11.','.33.'],
+  lantern:     ['3333','3..3','3..3','3.13','3..3','3333','.22.','.22.'],
+  brightLantern:['3333','3.33','3333','3333','3333','3333','.33.','.33.'],
   glow:        ['....','..1.','....','.3..','...1','....','..1.','....'],
   glassBeam:   ['....','....','....','1111','....','....','....','....'],
   glassJoin:   ['.1..','.1..','.1..','1111','.21.','.1..','.1..','.1..'],
@@ -49,12 +51,17 @@ const tiles = {
   paneGlint:   ['....','...1','..1.','.1..','1...','...1','..1.','....'],
   chain:       ['..1.','..2.','..1.','..1.','..2.','..1.','..1.','..2.'],
   basket:      ['.3..','131.','3133','2332','2222','.22.','....','....'],
-  vineLeft:    ['..1.','..1.','.31.','...1','..1.','.31.','..1.','....'],
-  vineRight:   ['.1..','.13.','..1.','.1..','.13.','.1..','....','....'],
-  fern:        ['....','...3','1.31','.3.1','..31','3113','.313','..1.'],
-  flowerPot:   ['....','..3.','131.','.13.','..1.','2322','.22.','.22.'],
+  vineLeft:    ['..1.','..1.','.21.','...1','..1.','.21.','..1.','....'],
+  vineRight:   ['.1..','.12.','..1.','.1..','.12.','.1..','....','....'],
+  fern:        ['....','...2','1.21','.2.1','..21','2112','.212','..1.'],
+  flowerPot:   ['....','..2.','121.','.12.','..1.','2122','.22.','.22.'],
   rootsPot:    ['....','..1.','..1.','2222','2112','.22.','.22.','.22.'],
-  sill:        ['....','....','1111','2121','1111','....','....','....']
+  sill:        ['....','....','1111','2121','1111','....','....','....'],
+  beaconCrown: ['.33.','.33.','....','.33.','.33.','3333','3333','3333'],
+  beaconLeft:  ['....','3...','.3..','..3.','..3.','.3..','3...','....'],
+  beaconRight: ['....','...3','..3.','.3..','.3..','..3.','...3','....'],
+  beaconBase:  ['.22.','.22.','.22.','2222','3333','3333','2222','2222'],
+  lanternCrown:['....','.33.','3333','3..3','3..3','3333','.33.','.33.']
 };
 
 const font = {
@@ -87,6 +94,19 @@ function glyphs() {
     for (const [y, row] of rows.entries()) output[8 * code + y] = row << 2;
   }
   return output;
+}
+
+function placeBeacon(map) {
+  const column = 125;
+  for (let row = 18; row <= 22; row++) {
+    map.fill(TILE.sky, row * WIDTH + 123, row * WIDTH + 128);
+  }
+  map[19 * WIDTH + column] = TILE.beaconCrown;
+  map[20 * WIDTH + column - 1] = TILE.beaconLeft;
+  map[20 * WIDTH + column] = TILE.lamp;
+  map[20 * WIDTH + column + 1] = TILE.beaconRight;
+  map[21 * WIDTH + column] = TILE.post;
+  map[22 * WIDTH + column] = TILE.beaconBase;
 }
 
 function garden() {
@@ -135,9 +155,7 @@ function garden() {
     for (let x = first; x < last; x++) put(x,11,'stone');
   }
   put(22,9,'blueFly');
-  put(126,20,'lamp');
-  put(126,21,'post');
-  put(126,22,'post');
+  placeBeacon(map);
   return map;
 }
 
@@ -147,9 +165,10 @@ function gardenColors(map) {
     if (row === 1) return 3;
     const tiles = map.subarray(row * WIDTH, (row + 1) * WIDTH);
     if (tiles.includes(TILE.blueFly)) return 11; // Cyan for the rare firefly.
-    // Multicolor yellow for stone caps and the moon, green everywhere else.
-    return tiles.includes(TILE.stone) || tiles.includes(TILE.moon) ? 15 : 13;
+    const gold = [TILE.stone, TILE.moon, TILE.firefly, TILE.bell, TILE.lantern,
+      TILE.lanternCrown, TILE.beaconCrown, TILE.lamp, TILE.beaconBase];
+    return gold.some(tile => tiles.includes(tile)) ? 15 : 13;
   }));
 }
 
-module.exports = { glyphs, garden, gardenColors, WIDTH, HEIGHT, TILE };
+module.exports = { glyphs, garden, gardenColors, placeBeacon, WIDTH, HEIGHT, TILE };
