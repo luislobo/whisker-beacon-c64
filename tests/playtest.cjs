@@ -41,6 +41,14 @@ async function test(mode) {
     await boot(monitor);
     const hz = mode === 'pal' ? 50 : 60;
     assert.equal((await monitor.bytes(8, 1))[0], hz);
+    const fireflyGlyph = 0x3000 + 9 * 8;
+    const initialGlyph = await monitor.bytes(fireflyGlyph, 8);
+    await monitor.until(symbols.swap_ink_row);
+    await monitor.until(symbols.objective_ink_changed);
+    assert.notDeepEqual(await monitor.bytes(fireflyGlyph, 8), initialGlyph, 'fireflies change pose');
+    await monitor.until(symbols.swap_ink_row);
+    await monitor.until(symbols.objective_ink_changed);
+    assert.deepEqual(await monitor.bytes(fireflyGlyph, 8), initialGlyph, 'firefly poses loop');
 
     // Measure the physical raster intervals while letting the SID and game run.
     await monitor.until(symbols.frame_present);

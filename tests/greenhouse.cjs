@@ -3,7 +3,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const { runVice, readSymbols } = require('./vice.cjs');
 const { gardenRoute } = require('./garden-route.cjs');
-const { glyphs } = require('../tools/garden.cjs');
+const { garden, glyphs, TILE } = require('../tools/garden.cjs');
 
 const build = path.resolve(__dirname, '../build');
 const symbols = readSymbols(path.join(build, 'symbols.labels'));
@@ -16,6 +16,7 @@ const LEVEL_MAP = 0x5000;
 const WON = 0x2e;
 const RECOVERIES = 0x2b;
 const BOARD = LEVEL_MAP + 20 * 128 + 40;
+assert.equal(garden().filter(tile => tile === TILE.firefly).length, 12, 'all garden fireflies remain reachable');
 assert.ok(glyphs().subarray(32 * 8, 33 * 8).every(byte => byte === 0), 'spaces stay blank in the HUD');
 
 async function exercise(mode, name, action) {
@@ -84,6 +85,12 @@ function route(mode) {
     assert.equal((await monitor.bytes(0x4a, 1))[0], 1, 'the bell was collected under the shelf');
     const gate = LEVEL_MAP + 21 * 128 + 30;
     assert.equal((await monitor.bytes(gate, 1))[0], 0, 'the bell opens the gate');
+    for (const screen of [0x0400, 0x2800]) {
+      assert.equal((await monitor.bytes(screen + 33, 3)).toString('ascii'), '/06');
+      assert.equal((await monitor.bytes(screen + 38, 1))[0], 0xc2);
+    }
+    const bellHint = await monitor.bytes(0x0400 + 42, 'BELL FOUND'.length);
+    assert.deepEqual(bellHint, Buffer.from('BELL FOUND').map(byte => byte === 32 ? byte : byte + 128));
     await step(RIGHT | DOWN, 9);
     assert.equal((await monitor.bytes(0x3c, 1))[0], 0, 'holding Down does not chain slides');
     await march(191);
@@ -96,6 +103,8 @@ function route(mode) {
     await step(RIGHT | FIRE, 16);
     await march(595);
     assert.equal((await monitor.bytes(0x4b, 1))[0], 1, 'the floor route lights the lantern');
+    const lanternHint = await monitor.bytes(0x2800 + 42, 'LANTERN LIT'.length);
+    assert.deepEqual(lanternHint, Buffer.from('LANTERN LIT').map(byte => byte === 32 ? byte : byte + 128));
     assert.notEqual((await monitor.bytes(0x61, 1))[0], 0, 'the owl announces the swoop');
     await step(RIGHT | DOWN, 14);
     await march(632);

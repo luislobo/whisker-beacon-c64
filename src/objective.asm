@@ -6,6 +6,10 @@ FIREFLY_TILE = 9
 BLUE_FLY_TILE = 8
 LIT_BEACON_TILE = 12
 BLUE_BADGE_COLUMN = 37
+HINT_WIDTH = 36
+HINT_GOAL = 0
+HINT_BELL = 1
+HINT_LANTERN = 2
 
 start_game:
     jsr load_level
@@ -20,6 +24,8 @@ start_game:
     sta SCREEN_B+36
     sta SCREEN_A+BLUE_BADGE_COLUMN
     sta SCREEN_B+BLUE_BADGE_COLUMN
+    sta SCREEN_A+BELL_COLUMN
+    sta SCREEN_B+BELL_COLUMN
     jsr init_greenhouse_props
     jsr reset_run
     jsr load_level_best
@@ -40,7 +46,8 @@ write_header:
     sta SCREEN_B+4,y
     dey
     bpl write_header
-    rts
+    ldx #HINT_GOAL
+    jmp show_objective_hint
 
 step_game:
     lda beacon_lit
@@ -153,13 +160,41 @@ catch_blue_firefly:
     sta SCREEN_B+BLUE_BADGE_COLUMN
     rts
 
+show_objective_hint:
+    lda objective_hint_low,x
+    sta hud_source
+    lda objective_hint_high,x
+    sta hud_source+1
+    ldy #HINT_WIDTH-1
+write_objective_hint:
+    lda (hud_source),y
+    sta SCREEN_A+42,y
+    sta SCREEN_B+42,y
+    dey
+    bpl write_objective_hint
+    rts
+
+objective_hint_low:
+    .byte <goal_hint,<bell_hint,<lantern_hint
+objective_hint_high:
+    .byte >goal_hint,>bell_hint,>lantern_hint
+goal_hint:
+    .text "COLLECT 6   THEN LIGHT THE BEACON"
+    .fill HINT_WIDTH-(*-goal_hint),32
+bell_hint:
+    .text "BELL FOUND   SHORTCUT OPEN"
+    .fill HINT_WIDTH-(*-bell_hint),32
+lantern_hint:
+    .text "LANTERN LIT   BONUS FIREFLIES"
+    .fill HINT_WIDTH-(*-lantern_hint),32
+
 header:
-    .text "WHISKER BEACON    FIREFLIES "
+    .text "WHISKER BEACON   FIREFLIES "
 header_count:
     .text "00/06"
 header_end:
 greenhouse_header:
-    .text "OLD GREENHOUSE    FIREFLIES 00/06"
+    .text "OLD GREENHOUSE   FIREFLIES 00/06"
 greenhouse_header_end:
 win_message:
     .text "BEACON LIT   FIRE RETRY RIGHT+FIRE"

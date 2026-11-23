@@ -4,7 +4,7 @@ BELL_TILE = 84
 LANTERN_TILE = 85
 LIT_LANTERN_TILE = 86
 LANTERN_GLOW_TILE = 87
-BELL_COLUMN = 36
+BELL_COLUMN = 38
 BOARD_FIRST = 20*WORLD_WIDTH+40
 BOARD_LENGTH = 6
 GATE_COLUMN = 30
@@ -56,7 +56,8 @@ collect_bell:
     sta SCREEN_B+BELL_COLUMN
     lda #$ff
     sta drawn_column
-    rts
+    ldx #HINT_BELL
+    jmp show_objective_hint
 
 light_greenhouse_lantern:
     lda #SFX_LANTERN
@@ -79,4 +80,5 @@ light_greenhouse_lantern:
     sta LEVEL_MAP+21*WORLD_WIDTH+75
     lda #$ff
     sta drawn_column
-    rts
+    ldx #HINT_LANTERN
+    jmp show_objective_hint
