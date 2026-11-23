@@ -15,6 +15,9 @@ clear_actor_delays:
 patrol_init_loop:
     lda patrol_start,x
     sta patrol_x,x
+    sta actor_min,x
+    lda patrol_end,x
+    sta actor_max,x
     lda #0
     sta patrol_dir,x
     lda patrol_page,x
@@ -39,6 +42,7 @@ garden_patrols_ready:
     rts
 
 step_patrols:
+    jsr update_encounter
     lda level_index
     beq step_garden_patrols
     jmp step_greenhouse_actors
@@ -57,14 +61,14 @@ walking_patrol:
     bne patrol_left
     inc patrol_x,x
     lda patrol_x,x
-    cmp patrol_end,x
+    cmp actor_max,x
     bcc check_patrol_contact
     inc patrol_dir,x
     bne check_patrol_contact
 patrol_left:
     dec patrol_x,x
     lda patrol_x,x
-    cmp patrol_start,x
+    cmp actor_min,x
     bcs check_patrol_contact
     dec patrol_dir,x
 check_patrol_contact:
@@ -73,6 +77,11 @@ check_patrol_contact:
 patrol_done:
     dex
     bpl next_patrol
+    lda encounter_section
+    beq garden_actors_done
+    ldx #3
+    jmp step_moth
+garden_actors_done:
     rts
 touched_cat:
     lda slide_strike

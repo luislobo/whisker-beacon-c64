@@ -40,7 +40,7 @@ entry:
     sta $d022
     lda #9
     sta $d023
-    ldx #$6e
+    ldx #$79
     lda #0
 clear_state:
     sta $00,x
@@ -105,6 +105,7 @@ leave_raster:
 .include "jump.asm"
 .include "slide.asm"
 .include "patrols.asm"
+.include "encounters.asm"
 .include "greenhouse-actors.asm"
 .include "checkpoints.asm"
 .include "objective.asm"
@@ -114,6 +115,8 @@ leave_raster:
 .include "music.asm"
 .include "sfx.asm"
 .include "results.asm"
+
+.cerror * > SCREEN_B, "Game code overlaps the second screen buffer"
 
 * = $3000
     .binary "../build/tiles.bin"

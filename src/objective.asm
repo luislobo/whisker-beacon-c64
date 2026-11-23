@@ -1,6 +1,6 @@
-GOAL = 6
-BEACON_X = 984
-BEACON_TILE = 20*MAP_STRIDE+125
+GOAL = 24
+BEACON_X = (WORLD_WIDTH-3)*8-16
+BEACON_TILE = 20*MAP_STRIDE+WORLD_WIDTH-3
 FIREFLY_TILE = 9
 BLUE_FLY_TILE = 8
 LIT_BEACON_TILE = 12
@@ -14,6 +14,7 @@ HINT_RARE = 3
 start_game:
     jsr load_level
     lda #0
+    sta encounter_section
     sta fireflies
     sta beacon_lit
     sta restart_armed
@@ -132,10 +133,12 @@ catch_firefly:
     inc fireflies
     ldx #48
     lda fireflies
+score_tens:
     cmp #10
     bcc write_score
     inx
     sbc #10
+    bcs score_tens
 write_score:
     stx SCREEN_A+4+header_count-header
     stx SCREEN_B+4+header_count-header
@@ -180,7 +183,7 @@ objective_hint_low:
 objective_hint_high:
     .byte >goal_hint,>bell_hint,>lantern_hint,>rare_hint
 goal_hint:
-    .text "COLLECT 6   THEN LIGHT THE BEACON"
+    .text "COLLECT 24   THEN LIGHT THE BEACON"
     .fill HINT_WIDTH-(*-goal_hint),32
 bell_hint:
     .text "BELL FOUND   SHORTCUT OPEN"
@@ -195,10 +198,10 @@ rare_hint:
 header:
     .text "WHISKER BEACON   FIREFLIES "
 header_count:
-    .text "00/06"
+    .text "00/24"
 header_end:
 greenhouse_header:
-    .text "OLD GREENHOUSE   FIREFLIES 00/06"
+    .text "OLD GREENHOUSE   FIREFLIES 00/24"
 greenhouse_header_end:
 win_message:
     .text "BEACON LIT   FIRE RETRY RIGHT+FIRE"

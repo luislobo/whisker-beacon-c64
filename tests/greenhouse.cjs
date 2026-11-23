@@ -2,19 +2,18 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
 const { runVice, readSymbols } = require('./vice.cjs');
-const { gardenRoute } = require('./garden-route.cjs');
 const { garden, glyphs, TILE } = require('../tools/garden.cjs');
 
 const build = path.resolve(__dirname, '../build');
 const symbols = readSymbols(path.join(build, 'symbols.labels'));
 const RIGHT = 8;
-const LEFT = 4;
 const DOWN = 2;
 const FIRE = 16;
 const LEVEL = 0x41;
 const LEVEL_MAP = 0x8000;
 const WON = 0x2e;
 const RECOVERIES = 0x2b;
+const SCREEN_A_MOTH = 0x07f9;
 const BOARD = LEVEL_MAP + 20 * 768 + 40;
 assert.equal(garden().filter(tile => tile === TILE.firefly).length, 12, 'all garden fireflies remain reachable');
 assert.ok(glyphs().subarray(32 * 8, 33 * 8).every(byte => byte === 0), 'spaces stay blank in the HUD');
@@ -26,21 +25,10 @@ async function exercise(mode, name, action) {
     await monitor.command('g 810');
     await monitor.command('delete');
 
-    const nativeCapture = process.env.CAPTURE === '1' && mode === 'pal' && name === 'greenhouse-route';
-    let recording = false;
-    let frames = 0;
-    async function capture() {
-      const file = path.join(directory, 'frame-' + String(frames++).padStart(3, '0') + '.png');
-      await monitor.command(`screenshot "${file}" 2`);
-    }
     let ticks = 0;
     async function step(input, count = 1) {
       for (let i = 0; i < count; i++) {
         await monitor.write(7, [input]);
-        if (recording) {
-          await monitor.until(symbols.frame_present);
-          await capture();
-        }
         await monitor.until(symbols.controls_ready);
         ticks++;
       }
@@ -61,17 +49,15 @@ async function exercise(mode, name, action) {
       await step(0);
       await step(RIGHT | FIRE);
       assert.equal((await monitor.bytes(LEVEL, 1))[0], 1, 'right and fire opens the greenhouse');
-      recording = nativeCapture;
     }
-    const stopRecording = () => { recording = false; };
-    return action({ monitor, directory, step, march, x, enterGreenhouse, capture, stopRecording, ticks: () => ticks });
+    return action({ monitor, directory, step, march, x, enterGreenhouse, ticks: () => ticks });
   });
 }
 
 function route(mode) {
-  return exercise(mode, 'greenhouse-route', async ({ monitor, directory, step, march, x, enterGreenhouse, capture, stopRecording, ticks }) => {
-    for (const input of gardenRoute) await step(input);
-    assert.equal((await monitor.bytes(WON, 1))[0], 1, 'the garden beacon was lit normally');
+  return exercise(mode, 'greenhouse-route', async ({ monitor, directory, step, march, x, enterGreenhouse, ticks }) => {
+    // The campaign test covers clearing the garden and choosing this level.
+    await monitor.write(WON, [1]);
     await enterGreenhouse();
     assert.deepEqual(await monitor.bytes(symbols.best_cents, 3), Buffer.alloc(3));
     const startTicks = ticks();
@@ -86,7 +72,7 @@ function route(mode) {
     const gate = LEVEL_MAP + 21 * 768 + 30;
     assert.equal((await monitor.bytes(gate, 1))[0], 0, 'the bell opens the gate');
     for (const screen of [0x0400, 0x2800]) {
-      assert.equal((await monitor.bytes(screen + 33, 3)).toString('ascii'), '/06');
+      assert.equal((await monitor.bytes(screen + 33, 3)).toString('ascii'), '/24');
       assert.equal((await monitor.bytes(screen + 38, 1))[0], 0xc2);
     }
     const bellHint = await monitor.bytes(0x0400 + 42, 'BELL FOUND'.length);
@@ -112,7 +98,7 @@ function route(mode) {
     await march(855);
     await step(RIGHT | FIRE, 16);
     await march(984);
-    assert.equal((await monitor.bytes(WON, 1))[0], 1, 'Pip lights the greenhouse beacon');
+    assert.equal((await monitor.bytes(WON, 1))[0], 0, 'the greenhouse continues beyond the original opening');
     assert.equal((await monitor.bytes(RECOVERIES, 1))[0], 0, 'the greenhouse route earns a clean clear');
     const elapsed = ticks() - startTicks;
     const guest = Number((await monitor.command('stopwatch')).match(/Stopwatch:\s*(\d+)/)?.[1]);
@@ -122,18 +108,8 @@ function route(mode) {
       'the moving greenhouse route holds the normalized game clock');
     assert.equal(((await monitor.bytes(0x33, 1))[0] - startSid) & 255, elapsed & 255,
       'the SID updates throughout the run');
-    stopRecording();
-    if (mode === 'pal' && process.env.CAPTURE === '1') await capture();
-    await monitor.command(`screenshot "${path.join(directory, 'beacon.png')}" 2`);
-    const best = await monitor.bytes(symbols.best_cents, 3);
-    assert.notDeepEqual(best, Buffer.alloc(3), 'the greenhouse records a best time');
-    await step(0);
-    await step(LEFT | FIRE);
-    assert.equal((await monitor.bytes(LEVEL, 1))[0], 0, 'left and fire returns to the garden');
-    assert.deepEqual(await monitor.bytes(symbols.best_cents, 3), Buffer.from([0x32, 0x09, 0]));
     const summary = { mode, seconds: elapsed / 50, guestCycles: guest, gameSteps: elapsed,
-      bothBeacons: true, greenhouseCleanClear: true, bellGate: true, miteCleared: true,
-      lanternLit: true, separateRecords: true, sidTicks: elapsed };
+      greenhouseOpeningClean: true, bellGate: true, miteCleared: true, lanternLit: true, sidTicks: elapsed };
     fs.writeFileSync(path.join(directory, 'result.json'), JSON.stringify(summary, null, 2) + '\n');
     console.log(summary);
   });
@@ -178,7 +154,22 @@ function hazards(mode) {
     assert.equal((await monitor.bytes(0x27, 1))[0], before ^ 1, 'a slide reverses the acorn');
     assert.notEqual((await monitor.bytes(0x62, 1))[0], 0, 'the reversed acorn cannot hit Pip immediately');
 
-    console.log(`${mode}: crumble, lantern trail, owl telegraph and contact, and acorn reversal verified`);
+    const rainCache = LEVEL_MAP + 21 * 768 + 256;
+    await place(2134, 170);
+    await step(0, 12);
+    assert.equal((await monitor.bytes(rainCache + 12, 1))[0], 86, 'the second lantern lights across a map page');
+    for (const column of [16, 18, 20]) {
+      assert.equal((await monitor.bytes(rainCache + column, 1))[0], 9, 'the new lantern reveals its own cache');
+    }
+    assert.equal((await monitor.bytes(SCREEN_A_MOTH, 1))[0], 0xeb, 'a moth replaces the mite in the rain gallery');
+    const moth = (await monitor.bytes(0x50, 1))[0] + 256 * (await monitor.bytes(0x54, 1))[0];
+    const mothY = (await monitor.bytes(0x58, 1))[0];
+    await place(moth, mothY + 2);
+    await step(0);
+    assert.equal((await monitor.bytes(RECOVERIES, 1))[0], 2, 'the moth hits Pip in the air');
+    assert.equal((await monitor.bytes(0x0c, 2)).readUInt16LE(), 2056, 'the latest waymark is the recovery point');
+
+    console.log(`${mode}: crumble, lanterns, owl, acorn and rain-gallery moth verified`);
   });
 }
 

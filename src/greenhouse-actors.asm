@@ -19,6 +19,14 @@ greenhouse_actor:
     sta $d028,x
     dex
     bpl greenhouse_actor
+    ldx #1
+set_initial_range:
+    lda greenhouse_min,x
+    sta actor_min,x
+    lda greenhouse_max,x
+    sta actor_max,x
+    dex
+    bpl set_initial_range
     lda #3
     sta actor_live
     lda #$1f
@@ -30,10 +38,17 @@ step_greenhouse_actors:
     and #1
     beq update_acorn
     ldx #0
+    lda encounter_section
+    beq ground_mite
+    and #1
+    bne ground_mite
+    jsr step_moth
+    jmp update_acorn
+ground_mite:
     lda game_ticks
     and #1
     bne mite_contact
-    jsr greenhouse_patrol
+    jsr bounded_patrol
 mite_contact:
     jsr ground_actor_contact
     bcc update_acorn
@@ -48,7 +63,7 @@ scatter_mite:
     sta sfx_event
 update_acorn:
     ldx #1
-    jsr greenhouse_patrol
+    jsr bounded_patrol
     lda acorn_grace
     beq acorn_contact
     dec acorn_grace
@@ -72,12 +87,16 @@ update_owl:
     ldx owl_phase
     bne step_owl
     lda player_x+1
-    cmp #>OWL_X
+    cmp actor_page+2
     bne greenhouse_actor_done
     lda player_x
-    cmp #<(OWL_X-60)
+    clc
+    adc #60
+    bcs greenhouse_actor_done
+    sec
+    sbc patrol_x+2
     bcc greenhouse_actor_done
-    cmp #<(OWL_X+52)
+    cmp #112
     bcs greenhouse_actor_done
     lda #SFX_OWL
     sta sfx_event
@@ -126,11 +145,11 @@ greenhouse_actor_done:
     rts
 
 ; Both floor patrol spans lie within one page each.
-greenhouse_patrol:
+bounded_patrol:
     lda patrol_dir,x
     bne greenhouse_patrol_left
     lda patrol_x,x
-    cmp greenhouse_max,x
+    cmp actor_max,x
     bcs turn_greenhouse_left
     inc patrol_x,x
     rts
@@ -138,7 +157,7 @@ turn_greenhouse_left:
     inc patrol_dir,x
 greenhouse_patrol_left:
     lda patrol_x,x
-    cmp greenhouse_min,x
+    cmp actor_min,x
     bcc turn_greenhouse_right
     beq turn_greenhouse_right
     dec patrol_x,x

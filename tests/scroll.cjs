@@ -11,16 +11,18 @@ const PLAYER_X = 0x0c;
 const SCREEN_A = 0x0400;
 const SCREEN_B = 0x2800;
 const MAP = 0x8000;
-const TILE_ROW = 7;
+const TILE_ROWS = [7, 21, 23];
 
-async function measurePass(monitor, mode, direction) {
+async function measurePass(monitor, mode, direction, seam) {
   const banks = new Set();
   const positions = [];
   let previousBank;
   let switches = 0;
   for (let frame = 0; frame < 16; frame++) {
     const camera = (await monitor.bytes(CAMERA, 2)).readUInt16LE();
-    assert.ok(camera > 0 && camera < 704, 'measure where the camera follows Pip');
+    assert.ok(camera > 0 && camera < 5824, 'measure where the camera follows Pip');
+    const row = TILE_ROWS[frame % TILE_ROWS.length];
+    const expected = await monitor.bytes(MAP + row * 768 + (camera >> 3), 40);
     await monitor.until(symbols.scroll_applied);
 
     const [horizontal, , selection] = await monitor.bytes(0xd016, 3);
@@ -30,8 +32,7 @@ async function measurePass(monitor, mode, direction) {
     assert.equal((await monitor.bytes(0xd000, 1))[0], 175, 'Pip stays aligned with the camera');
 
     const screen = bank === 0x1c ? SCREEN_A : SCREEN_B;
-    assert.deepEqual(await monitor.bytes(screen + TILE_ROW * 40, 40),
-      await monitor.bytes(MAP + TILE_ROW * 768 + (camera >> 3), 40),
+    assert.deepEqual(await monitor.bytes(screen + row * 40, 40), expected,
       'the selected bank starts at the matching tile column');
     if (previousBank !== undefined && previousBank !== bank) switches++;
     previousBank = bank;
@@ -42,6 +43,8 @@ async function measurePass(monitor, mode, direction) {
 
   assert.equal(banks.size, 2, 'both screen buffers were used');
   assert.ok(switches >= 3, 'the sample crossed several tile boundaries');
+  if (seam) assert.ok(Math.min(...positions) < seam && Math.max(...positions) >= seam,
+    'the camera crossed from one map page to the next');
   const steps = positions.slice(1).map((position, index) => direction * (position - positions[index]));
   assert.ok(steps.every(distance => mode === 'pal' ? distance === 2 : distance === 1 || distance === 2),
     'steady movement advances a small distance every refresh');
@@ -71,7 +74,28 @@ function test(mode) {
     for (let i = 0; i < 3; i++) await monitor.until(symbols.frame_present);
     const left = await measurePass(monitor, mode, -1);
 
-    const result = { mode, right, left };
+    async function atPageSeam() {
+      await monitor.until(symbols.controls_ready);
+      await monitor.write(INPUT, [8]);
+      await monitor.write(PLAYER_X, [2180 & 255, 2180 >> 8, 170, 0, 0, 1]);
+      for (let i = 0; i < 4; i++) await monitor.until(symbols.frame_present);
+      const forward = await measurePass(monitor, mode, 1, 2048);
+      await monitor.write(INPUT, [4]);
+      for (let i = 0; i < 3; i++) await monitor.until(symbols.frame_present);
+      const back = await measurePass(monitor, mode, -1, 2048);
+      return { forward, back };
+    }
+    const gardenSeam = await atPageSeam();
+    await monitor.until(symbols.controls_ready);
+    await monitor.write(0x2e, [1]);
+    await monitor.write(INPUT, [0]);
+    await monitor.until(symbols.controls_ready);
+    await monitor.write(INPUT, [24]);
+    await monitor.until(symbols.controls_ready);
+    assert.equal((await monitor.bytes(0x41, 1))[0], 1, 'the greenhouse is loaded');
+    const greenhouseSeam = await atPageSeam();
+
+    const result = { mode, right, left, gardenSeam, greenhouseSeam };
     fs.writeFileSync(path.join(directory, 'result.json'), JSON.stringify(result, null, 2) + '\n');
     console.log(result);
   });

@@ -14,7 +14,6 @@ function loadGame(monitor) {
 // same boundary so the fixture exercises the assembled gameplay and renderer.
 const INPUT = 7;
 const RIGHT = 8;
-const FIRE = 16;
 const PLAYER_X = 0x0c;
 const CAMERA_X = 2;
 const CHECKPOINT = 0x2c;
@@ -85,29 +84,13 @@ async function test(mode) {
       }
     }
     assert.equal(gardenScroll.size, mode === 'pal' ? 4 : 8, 'each moving scroll phase keeps the HUD fixed');
-    assert.equal((await monitor.bytes(WON, 1))[0], 1, 'the beacon was lit');
-    const cleanTime = Buffer.from([0x32, 0x09, 0x00]);
-    assert.deepEqual(await monitor.bytes(symbols.run_cents, 3), cleanTime);
-    assert.deepEqual(await monitor.bytes(symbols.best_cents, 3), cleanTime);
-    for (const screen of [0x0400, 0x2800]) {
-      const result = (await monitor.bytes(screen + 42, 37)).toString('ascii');
-      assert.ok(result.startsWith('00:09.32 '), 'the HUD shows the run time');
-      assert.ok(result.includes('FALLS 00 '), 'the HUD shows the fall count');
-      assert.ok(result.endsWith('00:09.32'), 'the HUD shows the session best');
-    }
-    assert.ok((await monitor.bytes(SCORE, 1))[0] >= 6, 'enough fireflies were collected');
-    assert.equal((await monitor.bytes(RECOVERIES, 1))[0], 0, 'the recorded route avoids all hazards');
-    assert.equal((await monitor.bytes(CHECKPOINT, 1))[0], 2, 'both checkpoints were reached');
-    assert.equal((await monitor.bytes(CAMERA_X, 2)).readUInt16LE(), 704, 'camera clamped at the right edge');
-    await monitor.command(`screenshot "${path.join(directory, 'beacon.png')}" 2`);
-    await step(monitor, 0);
-    await step(monitor, FIRE);
-    assert.equal((await monitor.bytes(WON, 1))[0], 0, 'fire replays the level');
-    assert.equal((await monitor.bytes(SCORE, 1))[0], 0, 'replay resets the score');
-    assert.deepEqual(await monitor.bytes(symbols.run_cents, 3), Buffer.alloc(3));
-    assert.deepEqual(await monitor.bytes(symbols.best_cents, 3), cleanTime, 'best survives replay');
-    assert.equal((await monitor.bytes(PLAYER_X, 2)).readUInt16LE(), 52, 'replay returns Pip to spawn');
+    assert.equal((await monitor.bytes(WON, 1))[0], 0, 'the opening stays part of the longer garden');
+    assert.ok((await monitor.bytes(SCORE, 1))[0] >= 6, 'the opening still has its firefly trail');
+    assert.equal((await monitor.bytes(RECOVERIES, 1))[0], 0, 'the opening route avoids all hazards');
+    assert.equal((await monitor.bytes(CHECKPOINT, 1))[0], 2, 'both opening checkpoints were reached');
+    assert.ok((await monitor.bytes(CAMERA_X, 2)).readUInt16LE() > 704, 'the camera passes the old right edge');
 
+    await boot(monitor);
     for (let i = 0; i < 95; i++) {
       await step(monitor, RIGHT);
       if ((await monitor.bytes(RECOVERIES, 1))[0]) break;
@@ -116,7 +99,7 @@ async function test(mode) {
     assert.equal((await monitor.bytes(PLAYER_X, 2)).readUInt16LE(), 52, 'a fall returns Pip to the checkpoint');
 
     const results = { mode, videoRefreshes: hz, gameUpdates: 50, sidUpdates: 50, routeSteps: 466,
-      fixedHudScrollPhases: gardenScroll.size, bestTime: '00:09.32', won: true, checkpoints: 2, replay: true, recoveredFromFall: true };
+      fixedHudScrollPhases: gardenScroll.size, openingCheckpoints: 2, recoveredFromFall: true };
     fs.writeFileSync(path.join(directory, 'result.json'), JSON.stringify(results, null, 2) + '\n');
     console.log(results);
   });

@@ -12,12 +12,14 @@ activate_checkpoint:
     lda grounded
     beq checkpoint_done
     ldx checkpoint
-    cpx #2
+    cpx #7
     beq checkpoint_done
     lda level_index
     beq check_position
-    inx
-    inx
+    txa
+    clc
+    adc #7
+    tax
 check_position:
     lda player_x
     cmp checkpoint_low,x
@@ -32,7 +34,10 @@ check_position:
 checkpoint_done:
     rts
 
+waymarks = (1032,2056,3080,4104,5128)
 checkpoint_low:
-    .byte <432,<768,<464,<768
+    .byte <432,<768,<waymarks
+    .byte <464,<768,<waymarks
 checkpoint_high:
-    .byte >432,>768,>464,>768
+    .byte >432,>768,>waymarks
+    .byte >464,>768,>waymarks

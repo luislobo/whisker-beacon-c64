@@ -1,6 +1,6 @@
 # Whisker Beacon
 
-Pip the cat crosses the twilight garden and the Old Greenhouse. Gather six
+Pip the cat crosses the twilight garden and the Old Greenhouse. Gather 24
 fireflies in each level to relight its beacon. The game uses the original
 three-voice SID tune *Lantern Paws*.
 
@@ -22,20 +22,26 @@ From BASIC on a C64, enter `LOAD"*",8,1` and then `RUN`.
 | Enter the greenhouse after clearing the garden | D and Space | Right and Fire |
 | Return to the garden after clearing the greenhouse | A and Space | Left and Fire |
 
-Collect at least six gold fireflies, then reach the beacon between the gold
+Collect at least 24 gold fireflies, then reach the beacon between the gold
 arrows at the far right. Falls and enemy hits return Pip to the latest
-checkpoint. You keep the fireflies you collected.
+checkpoint. You keep the fireflies you collected. A gold arrow marks each
+new section and its checkpoint.
+
+The Garden crosses a moonlit stream, an orchard, an aqueduct, a mushroom
+dell, and the beacon terraces. The Old Greenhouse adds propagation racks,
+a rain gallery, a shade house, a seed vault, and an observatory.
 
 Slide under low shelves, scatter dust mites, and turn rolling acorns around.
 Release Down or S between slides. You can slide again after a short recovery.
-The silver bell opens a shortcut gate. Touch the greenhouse lantern to reveal
-bonus fireflies, and watch for the owl's shadow before it swoops.
+The silver bell opens a shortcut gate. Touch a greenhouse lantern to reveal
+bonus fireflies. Watch for the owl's shadow before it swoops, and stay low
+when a moth dips into your path.
 
 The finish screen shows your time, firefly count, and falls. Finish without
 a fall for a clean clear. Press Fire or Space to try for a faster time.
 Each level keeps its own best time until you reload the game.
 
-Watch for a mushroom that launches Pip onto the rooftop route. The cyan
+Look for mushrooms and stepped ledges that lead to high routes. A cyan
 firefly earns a star beside the firefly counter.
 
 ## Build and test
@@ -49,17 +55,19 @@ x64sc -autostartprgmode 1 -autostart build/whisker-beacon.prg
 ```
 
 Run `node build.cjs --disk` to also create the D64 using VICE's `c1541`.
-Run `node tests/playtest.cjs` to test the garden on PAL and NTSC, or run
-`node tests/greenhouse.cjs` to clear both levels and check the greenhouse
-hazards. Run `node tests/jumps.cjs` to test jump timing and the blue firefly.
-Run `node tests/scroll.cjs` to check left and right scroll across tile boundaries.
-`VICE_BIN` selects the emulator executable. Headless Linux uses `xvfb-run`.
+Run `node tests/campaign.cjs` to clear both levels on PAL and NTSC. The clean
+test routes take 58.10 seconds in the Garden and 58.20 in the Old Greenhouse.
 
-The VICE playtest checks the 50 Hz gameplay and music clocks, both checkpoints,
-the finish time and session best, replay, and recovery from a fall. It supplies input at
-the game's control-sampling boundary. The camera and Pip update at 50 FPS
-on PAL and 60 FPS on NTSC. NTSC draws intermediate positions between the
-50 Hz gameplay steps. The gameplay preview records every PAL refresh.
+Run `node tests/playtest.cjs` to check the Garden opening.
+Run `node tests/greenhouse.cjs` to check the greenhouse hazards and lanterns.
+Run `node tests/jumps.cjs` to test jump timing and the first cyan firefly.
+Run `node tests/scroll.cjs` to check the camera in both directions across a
+map page boundary. Set `VICE_BIN` to select the emulator. Headless Linux
+uses `xvfb-run`.
+
+The camera updates at 50 FPS on PAL and 60 FPS on NTSC. Gameplay and music
+advance at 50 Hz in both modes. The preview shows seven seconds of the
+Old Greenhouse in PAL VICE.
 
 The VICE monitor helper was adapted from Luis Lobo's
 [C64 demo kit](https://github.com/luislobo/c64-demo-kit). The characters, art,

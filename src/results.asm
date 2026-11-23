@@ -70,6 +70,10 @@ show_results:
     ldy #result_flies-result_row
     lda fireflies
     jsr format_binary
+    ldx level_index
+    lda level_fly_totals,x
+    ldy #result_total-result_row
+    jsr format_binary
     ldy #result_falls-result_row
     lda recoveries
     jsr format_binary
@@ -208,7 +212,9 @@ level_records:
 result_row:
     .text "00:00.00 "
 result_flies:
-    .text "00/12 FALLS "
+    .text "00/"
+result_total:
+    .text "00 FALLS "
 result_falls:
     .text "00 BEST "
 result_record:
@@ -218,3 +224,6 @@ clean_message:
     .text "CLEAN CLEAR"
 clean_end:
 .cerror result_end-result_row > 37, "Results row exceeds the HUD"
+
+level_fly_totals:
+    .byte GARDEN_FLIES,GREENHOUSE_FLIES

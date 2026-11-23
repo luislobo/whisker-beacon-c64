@@ -12,7 +12,7 @@ const TILE = {
   beaconCrown: 100, beaconLeft: 101, beaconRight: 102, beaconBase: 103,
   lanternCrown: 104, fireflyAlt: 105, blueFlyAlt: 106,
   litLampAlt: 107, brightLanternAlt: 108, benchLeg: 109,
-  greenhouseLeaves: 110, greenhouseStem: 111, greenhousePot: 112, glassSeal: 113
+  greenhouseLeaves: 110, greenhouseStem: 111, greenhousePot: 112, glassSeal: 113, reed: 114, water: 115, ruinPillar: 116, waymark: 117
 };
 
 const tiles = {
@@ -73,6 +73,10 @@ const tiles = {
   greenhouseLeaves: ['....','.1..','.31.','313.','.131','131.','.31.','.1..'],
   greenhouseStem:   ['.1..','11..','.13.','.31.','.1.1','.113','.11.','.1..'],
   greenhousePot:    ['.1..','.1..','2222','2112','2222','.22.','.22.','....'],
+  reed:        ['..2.','..2.','..1.','.11.','.112','..12','..1.','..1.'],
+  water:       ['..11','11..','....','.111','1...','...1','..11','....'],
+  ruinPillar:  ['.11.','.12.','.12.','1111','.11.','.12.','.12.','.12.'],
+  waymark:     ['....','.3..','333.','3333','333.','.3..','.22.','.22.'],
   glassSeal:        ['1111','1111','....','....','....','....','....','....']
 };
 
@@ -175,13 +179,15 @@ function garden() {
 }
 
 function gardenColors(map) {
+  const stride = map.length / HEIGHT;
   return Buffer.from(Array.from({ length: HEIGHT }, (_, row) => {
     if (row === 0) return 1; // Hires HUD ink.
     if (row === 1) return 3;
-    const tiles = map.subarray(row * WIDTH, (row + 1) * WIDTH);
+    if (row === 23) return 13; // The ground stays green below the gold ledges.
+    const tiles = map.subarray(row * stride, (row + 1) * stride);
     if (tiles.includes(TILE.blueFly)) return 11; // Cyan for the rare firefly.
     const gold = [TILE.stone, TILE.benchTop, TILE.moon, TILE.firefly, TILE.bell, TILE.lantern,
-      TILE.lanternCrown, TILE.beaconCrown, TILE.lamp, TILE.beaconBase];
+      TILE.lanternCrown, TILE.waymark, TILE.beaconCrown, TILE.lamp, TILE.beaconBase];
     return gold.some(tile => tiles.includes(tile)) ? 15 : 13;
   }));
 }

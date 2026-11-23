@@ -47,6 +47,10 @@ const owl = [
   '', '   b    b', '   bb  bb', '  bbwwwwbb', ' bbwobowbb', ' bbbwwwwbbb',
   'bbbbwobwbbbb', ' bbbwwwwbbb', '   bwwwbb', '   bbbbb', '  o    o'
 ];
+const moth = [
+  '', ' b        b', ' bbb    bbb', ' bbwb  bwbb', '  bbbwbbb',
+  '   bwwwwb', '    obbo', '   bb  bb', '   b    b'
+];
 const shadow = ['', '', '', '', '  w w w w', ' w w w w w', '  w w w w'];
 
 const ink = { b: 3, o: 1, w: 2, ' ': 0 };
@@ -65,7 +69,7 @@ function pack(rows, left = false) {
 
 function playerSprites() {
   return Buffer.concat([pack(pip), pack(pip, true), pack(stride), pack(stride, true), pack(rival), pack(slide), pack(slide, true),
-    pack(mite), pack(acorn), pack(owl), pack(shadow)]);
+    pack(mite), pack(acorn), pack(owl), pack(shadow), pack(moth)]);
 }
 
 module.exports = { playerSprites };
