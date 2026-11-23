@@ -89,4 +89,6 @@ cat_copy_right  = $82
 cat_copy_count = $84
 cat_charm      = $85
 brass_flash_ticks = $86
-state_end      = $86
+title_ticks    = $87
+start_fire_held = $88
+state_end      = $88

@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
-const { runVice, readSymbols } = require('./vice.cjs');
+const { runVice, readSymbols, startGame } = require('./vice.cjs');
 const routes = require('./campaign-routes.json');
 
 const build = path.resolve(__dirname, '../build');
@@ -44,9 +44,7 @@ function bcd(bytes) {
 function test(mode) {
   return runVice(mode, capturePreview ? 'campaign-preview' : 'campaign', async (monitor, directory) => {
     await monitor.command(`load "${path.join(build, 'whisker-beacon.prg')}" 0`);
-    await monitor.command('break ' + symbols.controls_ready.toString(16));
-    await monitor.command('g 810');
-    await monitor.command('delete');
+    await startGame(monitor, symbols);
     const inputCall = symbols.controls_ready - 3;
     const originalInput = await monitor.bytes(inputCall, 3);
     assert.equal(originalInput[0], 0x20);

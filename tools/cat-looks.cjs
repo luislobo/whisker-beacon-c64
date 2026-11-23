@@ -391,7 +391,9 @@ function catLooks() {
     'cat_names:',
     ...looks.map(look => '    .text "' + look.name.toUpperCase().padEnd(13) + '"')
   ].join('\n') + '\n';
-  return { bytes: Buffer.concat(frames), tables };
+  const seated = actionArt(looks[0], sit, 'sit');
+  const blinking = seated.split('\n').map((row, y) => y === 3 ? row.replaceAll('c', 'a') : row).join('\n');
+  return { bytes: Buffer.concat(frames), tables, titlePip: [seated, blinking].map(art => packFrame(art, ink)) };
 }
 
 module.exports = { catLooks, charmArt };

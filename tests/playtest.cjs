@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
-const { runVice, readSymbols } = require('./vice.cjs');
+const { runVice, readSymbols, startGame } = require('./vice.cjs');
 const { gardenRoute } = require('./garden-route.cjs');
 
 const root = path.resolve(__dirname, '..');
@@ -26,9 +26,7 @@ const SID_TICKS = 0x33;
 
 async function boot(monitor) {
   await loadGame(monitor);
-  await monitor.command('break ' + symbols.controls_ready.toString(16));
-  await monitor.command('g 810');
-  await monitor.command('delete');
+  await startGame(monitor, symbols);
 }
 async function step(monitor, input) {
   await monitor.write(INPUT, [input]);

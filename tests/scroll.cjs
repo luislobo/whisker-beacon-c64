@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { runVice, readSymbols } = require('./vice.cjs');
+const { runVice, readSymbols, startGame } = require('./vice.cjs');
 
 const build = path.resolve(__dirname, '../build');
 const symbols = readSymbols(path.join(build, 'symbols.labels'));
@@ -56,9 +56,7 @@ async function measurePass(monitor, mode, direction, seam) {
 function test(mode) {
   return runVice(mode, 'scroll', async (monitor, directory) => {
     await monitor.command(`load "${path.join(build, 'whisker-beacon.prg')}" 0`);
-    await monitor.command('break ' + symbols.controls_ready.toString(16));
-    await monitor.command('g 810');
-    await monitor.command('delete');
+    await startGame(monitor, symbols);
 
     // Replace only the input sampler, so every video frame remains observable
     // even when NTSC has a refresh without a game step.

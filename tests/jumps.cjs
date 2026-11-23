@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { runVice, readSymbols } = require('./vice.cjs');
+const { runVice, readSymbols, startGame } = require('./vice.cjs');
 
 const build = path.resolve(__dirname, '../build');
 const symbols = readSymbols(path.join(build, 'symbols.labels'));
@@ -10,9 +10,7 @@ const FIRE = 16;
 async function exercise(mode, name, test) {
   return runVice(mode, name, async (monitor, directory) => {
     await monitor.command(`load "${path.join(build, 'whisker-beacon.prg')}" 0`);
-    await monitor.command('break ' + symbols.controls_ready.toString(16));
-    await monitor.command('g 810');
-    await monitor.command('delete');
+    await startGame(monitor, symbols);
     async function step(bits, count = 1) {
       for (let tick = 0; tick < count; tick++) {
         await monitor.write(7, [bits]);

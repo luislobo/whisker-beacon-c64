@@ -69,4 +69,16 @@ check_space:
 controls_done:
     lda #$ff
     sta $dc00
+    lda start_fire_held
+    beq controls_return
+    lda input_bits
+    and #JUMP
+    beq clear_start_button
+    lda input_bits
+    and #($ff-JUMP)
+    sta input_bits
+controls_return:
+    rts
+clear_start_button:
+    sta start_fire_held
     rts

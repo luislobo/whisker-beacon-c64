@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
-const { runVice, readSymbols } = require('./vice.cjs');
+const { runVice, readSymbols, startGame } = require('./vice.cjs');
 const { garden, glyphs, TILE } = require('../tools/garden.cjs');
 
 const build = path.resolve(__dirname, '../build');
@@ -21,9 +21,7 @@ assert.ok(glyphs().subarray(32 * 8, 33 * 8).every(byte => byte === 0), 'spaces s
 async function exercise(mode, name, action) {
   return runVice(mode, name, async (monitor, directory) => {
     await monitor.command(`load "${path.join(build, 'whisker-beacon.prg')}" 0`);
-    await monitor.command('break ' + symbols.controls_ready.toString(16));
-    await monitor.command('g 810');
-    await monitor.command('delete');
+    await startGame(monitor, symbols);
 
     let ticks = 0;
     async function step(input, count = 1) {

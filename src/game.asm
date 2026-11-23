@@ -56,10 +56,11 @@ clear_screen:
     .endfor
     inx
     bne clear_screen
+    jsr detect_video
+    jsr show_title
     jsr init_cat_sprite
     jsr start_game
     jsr init_view
-    jsr detect_video
     jsr init_music
     cli
 idle:
@@ -156,3 +157,21 @@ cat_look_bits:
 
 .cerror * > LEVEL_MAP, "Packed levels overlap working map"
 .cerror LEVEL_MAP + MAP_STRIDE*25 > $d000, "Working map overlaps I/O"
+
+; Load the intro into the future level map. It is only needed before start_game.
+; Keep VIC data below the character ROM window at $9000.
+* = TITLE_SPRITES
+    .binary "../build/title-sprites.bin"
+.cerror * > TITLE_SCREEN, "Title sprites overlap the screen"
+* = TITLE_SCREEN
+    .binary "../build/title-screen.bin"
+.cerror * > TITLE_COLORS, "Title screen overlaps the palette"
+* = TITLE_COLORS
+    .binary "../build/title-color.bin"
+.cerror * > TITLE_COLORS+$400, "Title palette overlaps title code"
+* = TITLE_COLORS+$400
+    .include "title.asm"
+.cerror * > TITLE_BITMAP, "Title code overlaps the bitmap"
+* = TITLE_BITMAP
+    .binary "../build/title-bitmap.bin"
+.cerror * > $c000, "Title bitmap exceeds its VIC bank"

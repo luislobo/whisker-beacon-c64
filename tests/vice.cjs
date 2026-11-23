@@ -111,4 +111,12 @@ async function runVice(mode, name, run) {
   }
 }
 
-module.exports = { runVice, readSymbols };
+async function startGame(monitor, symbols) {
+  await monitor.command('break ' + symbols.title_controls_ready.toString(16));
+  await monitor.command('g 810');
+  await monitor.command('delete');
+  await monitor.write(7, [16]);
+  await monitor.until(symbols.controls_ready);
+}
+
+module.exports = { runVice, readSymbols, startGame };
