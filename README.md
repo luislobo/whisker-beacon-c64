@@ -6,6 +6,7 @@ three-voice SID tune *Lantern Paws*.
 
 [![Whisker Beacon in VICE](dist/preview.png)](dist/gameplay.gif)
 
+[Watch the greenhouse title and Shaded Brass slide](dist/title-and-slide.gif).
 [Watch all ten cats in motion](dist/cat-sprite-showcase.gif).
 
 ## Play
@@ -13,6 +14,8 @@ three-voice SID tune *Lantern Paws*.
 Open [whisker-beacon.prg](dist/whisker-beacon.prg) in VICE, or attach
 [whisker-beacon.d64](dist/whisker-beacon.d64) to drive 8 on a Commodore 64.
 From BASIC on a C64, enter `LOAD"*",8,1` and then `RUN`.
+Press Fire or Space on the title screen to enter the Garden. The SID intro
+plays once while Pip waits on the greenhouse roof.
 
 | Action | Keyboard | Joystick in port 2 |
 | --- | --- | --- |
@@ -29,8 +32,8 @@ From BASIC on a C64, enter `LOAD"*",8,1` and then `RUN`.
 Use the wardrobe at the start of either level. The cats share the same
 movement and collision rules. Finish either level without a fall to unlock
 Tuxedo. A rare Garden firefly earns the cyan ribbon. A firefly from a
-Greenhouse lantern cache earns the brass bell. Rewards stay unlocked until
-you reload the game.
+Greenhouse lantern cache earns the brass bell. It folds close to the cat
+during slides. Rewards stay unlocked until you reload the game.
 
 When you pause near a rare firefly you have yet to collect, watch Pip's ears
 and tail for a clue.
@@ -75,6 +78,8 @@ Run `node tests/playtest.cjs` to check the Garden opening.
 Run `node tests/greenhouse.cjs` to check the greenhouse hazards and lanterns.
 Run `node tests/jumps.cjs` to test jump timing and the first cyan firefly.
 Run `node tests/wardrobe.cjs` to check the wardrobe and movement poses.
+Run `node tests/title.cjs` for the title, SID cue, and start controls.
+Run `node tests/brass.cjs` for the bell's pickup glint and slide animation.
 Run `node tests/scroll.cjs` to check the camera in both directions across a
 map page boundary. Set `VICE_BIN` to select the emulator. Headless Linux
 uses `xvfb-run`.
