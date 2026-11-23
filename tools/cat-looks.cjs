@@ -36,7 +36,7 @@ b...aaaabaa.
 ...aa..aa...
 ...bb..bb...`;
 
-const calico = `.......c..b.
+const calicoBody = `.......c..b.
 ..b....cc.bb
 .ba...aabbbb
 .a....acacba
@@ -44,9 +44,10 @@ const calico = `.......c..b.
 ..a.aaaaaba.
 ..baccaaac..
 ...aacaaab..
-...aacaaa...
-...cc..aa...
-...cc..aa...`;
+...aacaaa...`;
+
+const calicoStand = calicoBody + "\n...cc..aa...\n...cc..aa...";
+const calicoStride = calicoBody + "\n...cc...aa..\n..cc.....aa.";
 
 const bobtail = `......a..a..
 ......aa.aa.
@@ -213,7 +214,7 @@ const looks = [
   { name: 'Ginger Pip', art: ginger, color: 8 },
   { name: 'Tuxedo', art: tuxedo, color: 12 },
   { name: 'Black Cat', art: black, color: 7, ink: { a: 1, b: 1, c: 3 } },
-  { name: 'Calico', art: calico, color: 8 },
+  { name: 'Calico', art: calicoStand, stride: calicoStride, color: 8 },
   { name: 'Bobtail', art: bobtail, color: 14 },
   { name: 'Fluffy Cat', art: fluffy, color: 15 },
   { name: 'Siamese', art: siamese, color: 15 },
@@ -359,7 +360,7 @@ function catLooks() {
   for (const [index, look] of looks.entries()) {
     labels.push(`cat_look_${index} = cat_look_bits + ${frames.length * height * 3}`);
     for (const [pose, frame] of Object.entries(poses)) {
-      const art = pose === 'stand' ? look.art : actionArt(look, frame, pose);
+      const art = pose === 'stand' ? look.art : look[pose] ?? actionArt(look, frame, pose);
       frames.push(packFrame(art, { ...ink, ...look.ink }));
     }
   }
