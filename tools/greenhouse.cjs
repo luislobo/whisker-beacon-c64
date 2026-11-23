@@ -3,36 +3,35 @@ const { WIDTH, HEIGHT, TILE, placeBeacon } = require('./garden.cjs');
 function greenhouse() {
   const map = Buffer.alloc(WIDTH * HEIGHT);
   const put = (column, row, tile) => { map[row * WIDTH + column] = TILE[tile]; };
+  // A continuous eave and closed window bays give the whole route one silhouette.
   for (let x = 0; x < WIDTH; x++) {
-    const bay = x % 16;
-    const partition = bay === 0 || bay === 8;
-    const roofRow = 7 + Math.floor(Math.abs(bay - 8) / 2);
-    put(x, roofRow, bay === 8 ? 'roofCap' : bay < 8 ? 'roofLeft' : 'roofRight');
-    for (let y = roofRow + 1; y <= 22; y++) {
-      if (y === 15 || y === 19) put(x, y, partition ? 'glassJoin' : 'glassBeam');
-      else if (partition) put(x, y, 'glassFrame');
-      else if ((bay === 3 && y === 13) || (bay === 11 && y === 17)) put(x, y, 'paneGlint');
+    const pane = x % 12;
+    const post = pane === 0;
+    put(x, 6, 'roofGlass');
+    put(x, 7, post ? 'eaveJoint' : 'eave');
+    for (let y = 8; y <= 22; y++) {
+      if (y === 13 || y === 18) put(x, y, post ? 'railJoint' : 'windowRail');
+      else if (post) put(x, y, 'mullion');
+      else if ((y === 9 || y === 14) && pane === 1) put(x, y, 'glassSeal');
+      else if ((pane === 9 && y === 10) || (pane === 4 && y === 15)) put(x, y, 'paneGlint');
+      else if ((pane === 8 && y === 11) || (pane === 3 && y === 16)) put(x, y, 'paneShade');
     }
   }
-  for (const x of [22, 50, 82, 113]) put(x, 4 + (x & 1), 'moon');
-  for (const x of [5, 12, 19, 29, 40, 55, 62, 72, 87, 104, 121]) put(x, 5 + x % 2, 'star');
+  put(21, 4, 'moon');
+  for (const x of [5, 12, 19, 29, 40, 55, 62, 72, 87, 104, 121]) put(x, 4 + x % 2, 'star');
 
   for (const x of [5, 25, 47, 67, 88, 104, 120]) {
-    for (let y = 12; y <= 14; y++) put(x, y, 'chain');
-    put(x, 15, 'basket');
-    put(x - 1, 16, 'vineLeft');
-    put(x + 1, 16, 'vineRight');
+    for (let y = 8; y <= 10; y++) put(x, y, 'chain');
+    put(x - 1, 11, 'greenhouseLeaves');
+    put(x, 11, 'basket');
+    put(x + 1, 11, 'greenhouseLeaves');
+    put(x - 1, 12, 'vineLeft');
+    put(x + 1, 12, 'vineRight');
   }
-  for (const [first, last] of [[3,12],[21,31],[35,46],[57,63],[74,81],[89,98],[113,124]]) {
-    for (let x = first; x < last; x++) {
-      put(x, 22, 'sill');
-      if (x % 4 === 0) {
-        put(x, 21, 'rootsPot');
-        put(x + 1, 20, 'fern');
-      } else if (x % 4 === 2) {
-        put(x, 21, 'flowerPot');
-      }
-    }
+  for (const x of [5, 9, 22, 27, 37, 43, 58, 62, 74, 78, 91, 95, 114, 119]) {
+    put(x, 20, 'greenhouseLeaves');
+    put(x, 21, 'greenhouseStem');
+    put(x, 22, 'greenhousePot');
   }
   for (const [first, last] of [[0,53],[57,81],[85,109],[112,128]]) {
     for (let x = first; x < last; x++) {
@@ -42,7 +41,11 @@ function greenhouse() {
   }
   for (const [first, last, row] of [[16,19,21],[24,28,19],[40,46,20],[57,62,19],
     [70,76,18],[88,94,19],[99,104,18],[116,121,20]]) {
-    for (let x = first; x < last; x++) put(x, row, 'stone');
+    for (let x = first; x < last; x++) put(x, row, 'benchTop');
+    for (let y = row + 1; y <= 22; y++) {
+      put(first, y, 'benchLeg');
+      put(last - 1, y, 'benchLeg');
+    }
   }
   for (const [x,y] of [[8,21],[13,21],[23,21],[33,21],[44,21],[50,21],
     [61,21],[87,21],[115,21]]) put(x,y,'firefly');

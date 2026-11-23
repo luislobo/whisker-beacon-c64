@@ -4,14 +4,15 @@ const TILE = {
   sky: 0, star: 1, cloud: 2, leaf: 3, trunk: 4, flower: 5, roots: 6,
   moon: 7, blueFly: 8, firefly: 9, post: 10, lamp: 11, litLamp: 12,
   pineLeft: 13, pineRight: 14, mist: 15,
-  grass: 16, soil: 17, stone: 18, mushroom: 19, pavers: 20, cracked: 21, shaking: 22, gate: 23,
-  glass: 80, glassFrame: 81, roofLeft: 82, roofRight: 83, bell: 84, lantern: 85,
-  brightLantern: 86, glow: 87, glassBeam: 88, glassJoin: 89, roofCap: 90,
+  grass: 16, soil: 17, stone: 18, mushroom: 19, pavers: 20, cracked: 21, shaking: 22, gate: 23, benchTop: 24,
+  roofGlass: 80, mullion: 81, eave: 82, eaveJoint: 83, bell: 84, lantern: 85,
+  brightLantern: 86, glow: 87, windowRail: 88, railJoint: 89, paneShade: 90,
   paneGlint: 91, chain: 92, basket: 93, vineLeft: 94, vineRight: 95,
   fern: 96, flowerPot: 97, rootsPot: 98, sill: 99,
   beaconCrown: 100, beaconLeft: 101, beaconRight: 102, beaconBase: 103,
   lanternCrown: 104, fireflyAlt: 105, blueFlyAlt: 106,
-  litLampAlt: 107, brightLanternAlt: 108
+  litLampAlt: 107, brightLanternAlt: 108, benchLeg: 109,
+  greenhouseLeaves: 110, greenhouseStem: 111, greenhousePot: 112, glassSeal: 113
 };
 
 const tiles = {
@@ -38,18 +39,19 @@ const tiles = {
   cracked:     ['3333','3333','22.2','2.22','2.22','22.2','2.22','.22.'],
   shaking:     ['3.33','3333','2.22','.22.','22.2','2.2.','.22.','....'],
   gate:        ['2323','2333','2323','2323','2323','2323','2333','2323'],
-  glass:       ['....','...1','..1.','.1..','....','...1','....','....'],
-  glassFrame:  ['.1..','.1..','.1..','.1..','.1..','.1..','.1..','.1..'],
-  roofLeft:    ['..1.','..1.','.1..','.1..','1...','1...','....','....'],
-  roofRight:   ['.1..','.1..','..1.','..1.','...1','...1','....','....'],
+  benchTop:    ['3333','3333','2222','2121','2222','1111','....','....'],
+  roofGlass:   ['....','....','1111','1111','1.11','1111','11.1','1111'],
+  mullion:     ['.12.','.12.','.12.','.12.','.12.','.12.','.12.','.12.'],
+  eave:        ['1122','2222','1111','1111','1212','1111','....','....'],
+  eaveJoint:   ['1122','2222','1111','1221','1212','1121','.12.','.12.'],
   bell:        ['.33.','.33.','.33.','.33.','3333','3333','.11.','.33.'],
   lantern:     ['3333','3..3','3..3','3.13','3..3','3333','.22.','.22.'],
   brightLantern:['3333','3.33','3333','3333','3333','3333','.33.','.33.'],
   glow:        ['....','..1.','....','.3..','...1','....','..1.','....'],
-  glassBeam:   ['....','....','....','1111','....','....','....','....'],
-  glassJoin:   ['.1..','.1..','.1..','1111','.21.','.1..','.1..','.1..'],
-  roofCap:     ['....','.22.','2112','1..1','....','....','....','....'],
-  paneGlint:   ['....','...1','..1.','.1..','1...','...1','..1.','....'],
+  windowRail:  ['....','....','1111','1111','....','....','....','....'],
+  railJoint:   ['.12.','.12.','1221','1111','.12.','.12.','.12.','.12.'],
+  paneShade:   ['...1','..11','....','....','..1.','.11.','....','....'],
+  paneGlint:   ['....','...1','..11','.11.','11..','1...','...1','....'],
   chain:       ['..1.','..2.','..1.','..1.','..2.','..1.','..1.','..2.'],
   basket:      ['.3..','131.','3133','2332','2222','.22.','....','....'],
   vineLeft:    ['..1.','..1.','.21.','...1','..1.','.21.','..1.','....'],
@@ -66,7 +68,12 @@ const tiles = {
   fireflyAlt:  ['....','.33.','.33.','3333','3..3','.33.','....','....'],
   blueFlyAlt:  ['.33.','3333','3..3','3333','3333','3..3','3333','.33.'],
   litLampAlt:  ['3333','33.3','3333','3333','3333','3333','.33.','.33.'],
-  brightLanternAlt: ['3333','33.3','3333','3333','3333','3333','.33.','.33.']
+  brightLanternAlt: ['3333','33.3','3333','3333','3333','3333','.33.','.33.'],
+  benchLeg:    ['.22.','.21.','.21.','.21.','.21.','.21.','.21.','.21.'],
+  greenhouseLeaves: ['....','.1..','.31.','313.','.131','131.','.31.','.1..'],
+  greenhouseStem:   ['.1..','11..','.13.','.31.','.1.1','.113','.11.','.1..'],
+  greenhousePot:    ['.1..','.1..','2222','2112','2222','.22.','.22.','....'],
+  glassSeal:        ['1111','1111','....','....','....','....','....','....']
 };
 
 const font = {
@@ -173,7 +180,7 @@ function gardenColors(map) {
     if (row === 1) return 3;
     const tiles = map.subarray(row * WIDTH, (row + 1) * WIDTH);
     if (tiles.includes(TILE.blueFly)) return 11; // Cyan for the rare firefly.
-    const gold = [TILE.stone, TILE.moon, TILE.firefly, TILE.bell, TILE.lantern,
+    const gold = [TILE.stone, TILE.benchTop, TILE.moon, TILE.firefly, TILE.bell, TILE.lantern,
       TILE.lanternCrown, TILE.beaconCrown, TILE.lamp, TILE.beaconBase];
     return gold.some(tile => tiles.includes(tile)) ? 15 : 13;
   }));
