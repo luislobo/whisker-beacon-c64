@@ -1,20 +1,3 @@
-const pip = [
-  '   o   o',
-  '   oo oo',
-  '   ooooo',
-  '   owowo',
-  '   obobo',
-  '   oowoo',
-  ' b ooooo',
-  ' booooooo',
-  '  ooobooo',
-  '   oowooo',
-  '   oowoo',
-  '   oo oo',
-  '  bb  bb'
-];
-
-const stride = pip.slice(0, 11).concat('  oo oo', ' bb   bb');
 const rival = [
   '  b    b',
   '  bb  bb',
@@ -28,11 +11,6 @@ const rival = [
   '  bbbbb',
   '  bb bb',
   '  bb  bb'
-];
-
-const slide = [
-  '', '', '', '', '', '', '', '      o  o', '   o  oooo',
-  '  boooowowo', ' boooooooo', 'woooooooooo', '  bb   bb'
 ];
 
 const mite = [
@@ -55,21 +33,20 @@ const shadow = ['', '', '', '', '  w w w w', ' w w w w w', '  w w w w'];
 
 const ink = { b: 3, o: 1, w: 2, ' ': 0 };
 
-function pack(rows, left = false) {
+function pack(rows) {
   const sprite = Buffer.alloc(64);
   for (const [y, pixels] of rows.entries()) {
     const line = pixels.padEnd(12, ' ');
-    const columns = left ? [...line].reverse() : [...line];
-    for (const [x, color] of columns.entries()) {
+    for (const [x, color] of [...line].entries()) {
       sprite[y * 3 + (x >> 2)] |= ink[color] << (6 - 2 * (x & 3));
     }
   }
   return sprite;
 }
 
-function playerSprites() {
-  return Buffer.concat([pack(pip), pack(pip, true), pack(stride), pack(stride, true), pack(rival), pack(slide), pack(slide, true),
+function actorSprites() {
+  return Buffer.concat([Buffer.alloc(4 * 64), pack(rival), Buffer.alloc(2 * 64),
     pack(mite), pack(acorn), pack(owl), pack(shadow), pack(moth)]);
 }
 
-module.exports = { playerSprites };
+module.exports = { actorSprites };

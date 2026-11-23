@@ -32,8 +32,11 @@ reset_player:
     sta down_held
     sta low_profile
     sta slide_strike
+    sta facing_before
+    sta cat_pose_ticks
     lda #1
     sta grounded
+    sta ground_before
     jmp remember_player
 
 step_player:

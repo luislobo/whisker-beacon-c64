@@ -1,3 +1,4 @@
+CHANGE_CAT = 1
 SLIDE = 2
 MOVE_LEFT = 4
 MOVE_RIGHT = 8
@@ -10,7 +11,7 @@ read_controls:
     sta $dc03
     lda $dc00
     eor #$ff
-    and #(SLIDE | MOVE_LEFT | MOVE_RIGHT | JUMP)
+    and #(CHANGE_CAT | SLIDE | MOVE_LEFT | MOVE_RIGHT | JUMP)
     sta input_bits
     lda #$ff
     sta $dc02
@@ -33,6 +34,13 @@ scan_left_key:
 check_right_key:
     lda #$fb
     sta $dc00
+    lda $dc01
+    and #16
+    bne check_right_key_bit
+    lda input_bits
+    ora #CHANGE_CAT
+    sta input_bits
+check_right_key_bit:
     lda $dc01
     and #4
     bne check_jump_key

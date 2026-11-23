@@ -19,6 +19,8 @@ start_game:
     sta beacon_lit
     sta restart_armed
     sta blue_found
+    sta cat_pose_ticks
+    sta wardrobe_keys
     sta SCREEN_A+3
     sta SCREEN_B+3
     sta SCREEN_A+36
@@ -47,13 +49,24 @@ write_header:
     sta SCREEN_B+4,y
     dey
     bpl write_header
-    ldx #HINT_GOAL
-    jmp show_objective_hint
+    jmp show_wardrobe
 
 step_game:
     lda beacon_lit
     bne wait_for_replay
+    lda run_started
+    bne running_level
+    lda input_bits
+    and #(MOVE_LEFT | MOVE_RIGHT | JUMP)
+    bne show_run_goal
+    jsr choose_look
+    jmp running_level
+show_run_goal:
+    ldx #HINT_GOAL
+    jsr show_objective_hint
+running_level:
     jsr update_run_time
+    jsr record_cat_transition
     jsr step_player
     jsr step_greenhouse_props
     jsr step_patrols
@@ -98,6 +111,12 @@ check_objective:
     bcc objective_done
     lda #1
     sta beacon_lit
+    lda recoveries
+    bne light_beacon_tile
+    lda cat_unlocks
+    ora #TUXEDO_UNLOCK
+    sta cat_unlocks
+light_beacon_tile:
     lda #LIT_BEACON_TILE
     sta LEVEL_MAP+BEACON_TILE
     lda #$ff
@@ -150,6 +169,10 @@ light_lantern:
     jmp light_greenhouse_lantern
 catch_blue_firefly:
     jsr restore_pickup_background
+    lda #POSE_SPARK
+    sta cat_reaction
+    lda #16
+    sta cat_pose_ticks
     lda #1
     sta blue_found
     lda #42

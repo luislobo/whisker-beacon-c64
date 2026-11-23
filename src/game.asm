@@ -40,7 +40,7 @@ entry:
     sta $d022
     lda #9
     sta $d023
-    ldx #$79
+    ldx #state_end
     lda #0
 clear_state:
     sta $00,x
@@ -85,6 +85,7 @@ frame_present:
 controls_ready:
     jsr remember_player
     jsr step_game
+    jsr animate_cat
     jmp update_view
 wait_next_video:
     sta logic_clock
@@ -97,6 +98,7 @@ leave_raster:
     jmp idle
 
 .include "sprites.asm"
+.include "wardrobe.asm"
 .include "view.asm"
 .include "motion.asm"
 .include "clock.asm"
@@ -123,7 +125,8 @@ leave_raster:
     .binary "../build/tiles.bin"
 
 * = $3800
-    .binary "../build/cats.bin"
+    .binary "../build/actors.bin"
+.cerror * > CAT_CACHE, "Actors overlap the current cat sprite frames"
 
 
 * = $4000
@@ -137,6 +140,9 @@ greenhouse_source:
     .binary "../build/greenhouse.bin"
 greenhouse_colors:
     .binary "../build/greenhouse-colors.bin"
+
+cat_look_bits:
+    .binary "../build/cat-looks.bin"
 
 .cerror * > LEVEL_MAP, "Packed levels overlap working map"
 .cerror LEVEL_MAP + MAP_STRIDE*25 > $d000, "Working map overlaps I/O"
