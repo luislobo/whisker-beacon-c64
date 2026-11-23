@@ -299,6 +299,28 @@ function packFrame(art, colors) {
   return bytes;
 }
 
+function charmArt() {
+  const frames = [
+    ['   .. ..', '   #####', '    ###.', '     ##.', '    #.#.', '   ##.##'],
+    ['    ##..', '    ##..', '   ####.', '   ####.', '  ######', '    ##..']
+  ];
+  const bytes = Buffer.alloc(4 * 64);
+  for (const [charm, rows] of frames.entries()) {
+    for (const [y, row] of rows.entries()) {
+      for (const [i, pixel] of [...row].entries()) {
+        if (pixel !== '#') continue;
+        const x = 16 + i;
+        for (const facing of [0, 1]) {
+          const position = facing ? 23 - x : x;
+          const byte = (charm * 2 + facing) * 64 + (y + 7) * 3 + (position >> 3);
+          bytes[byte] |= 128 >> (position & 7);
+        }
+      }
+    }
+  }
+  return bytes;
+}
+
 function catLooks() {
   const frames = [];
   const labels = [];
@@ -327,4 +349,4 @@ function catLooks() {
   return { bytes: Buffer.concat(frames), tables };
 }
 
-module.exports = { catLooks };
+module.exports = { catLooks, charmArt };

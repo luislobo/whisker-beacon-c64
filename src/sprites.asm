@@ -83,10 +83,20 @@ cat_check_air:
     bne cat_keep_reaction
     lda input_bits
     and #(MOVE_LEFT | MOVE_RIGHT)
-    beq cat_still
+    beq cat_idle
     lda game_ticks
     and #4
     bne cat_striding
+    jmp cat_still
+cat_idle:
+    lda game_ticks
+    and #$18
+    cmp #$18
+    bne cat_still
+    jsr nearby_cat_clue
+    bcc cat_still
+    lda #POSE_CLUE
+    bne cat_pose
 cat_still:
     lda #POSE_STAND
     beq cat_pose

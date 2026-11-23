@@ -12,6 +12,11 @@ const LEVEL = 0x41;
 const WON = 0x2e;
 const RECOVERIES = 0x2b;
 const SID_TICKS = 0x33;
+const CAT_LOOK = 0x7a;
+const CAT_FRAME = 0x7c;
+const CAT_UNLOCKS = 0x81;
+const CAT_CHARM = 0x85;
+const CAT_SITTING = 0xfe;
 const RIGHT = 8;
 const LEFT = 4;
 const FIRE = 16;
@@ -107,11 +112,15 @@ function test(mode) {
     }
 
     const garden = await playRoute(0);
+    assert.equal((await monitor.bytes(CAT_UNLOCKS, 1))[0] & 4, 4, 'a clean clear unlocks the tuxedo');
+    assert.equal((await monitor.bytes(CAT_FRAME, 1))[0], CAT_SITTING,
+      'the cat sits after lighting the beacon');
     await step(0);
     await step(RIGHT | FIRE);
     assert.equal((await monitor.bytes(LEVEL, 1))[0], 1);
     assert.deepEqual(await monitor.bytes(symbols.best_cents, 3), Buffer.alloc(3));
     const greenhouse = await playRoute(1);
+    assert.equal((await monitor.bytes(CAT_UNLOCKS, 1))[0] & 2, 2, 'a cache firefly unlocks the brass charm');
     await step(0);
     await step(LEFT | FIRE);
     assert.equal((await monitor.bytes(LEVEL, 1))[0], 0);
@@ -120,6 +129,15 @@ function test(mode) {
     assert.equal((await monitor.bytes(WON, 1))[0], 0, 'the restarted level has an unlit beacon');
     assert.equal((await monitor.bytes(0x2d, 1))[0], 0, 'the restarted level has no collected fireflies');
     assert.equal((await monitor.bytes(0x0c, 2)).readUInt16LE(), 52, 'the restarted level begins at spawn');
+
+    await step(1);
+    assert.equal((await monitor.bytes(CAT_LOOK, 1))[0], 1, 'the tuxedo is selectable after restarting');
+    await step(0);
+    await step(32);
+    assert.equal((await monitor.bytes(CAT_CHARM, 1))[0], 0, 'the wardrobe cycles from brass to no charm');
+    await step(0);
+    await step(32);
+    assert.equal((await monitor.bytes(CAT_CHARM, 1))[0], 2, 'the earned brass charm can be equipped again');
 
     console.log({ mode, garden, greenhouse });
   });

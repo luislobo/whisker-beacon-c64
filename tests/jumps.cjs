@@ -101,6 +101,8 @@ function roof(mode) {
     }
     assert.ok(pickup.foundBlue, 'Pip collects the rare blue firefly');
     assert.equal(pickup.fireflies, launch.fireflies, 'the rare firefly earns a separate badge');
+    assert.equal((await monitor.bytes(0x81, 1))[0] & 1, 1, 'the rare firefly earns the Garden ribbon');
+    assert.equal((await monitor.bytes(0x85, 1))[0], 1, 'the ribbon equips when earned');
     const rareHint = Buffer.from('RARE FIREFLY FOUND').map(byte => byte === 32 ? byte : byte + 128);
     for (const screen of [0x0400, 0x2800]) {
       assert.equal((await monitor.bytes(screen + 37, 1))[0], 42);

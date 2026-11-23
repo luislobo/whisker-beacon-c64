@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
-const { catLooks } = require('./tools/cat-looks.cjs');
+const { catLooks, charmArt } = require('./tools/cat-looks.cjs');
 const { actorSprites } = require('./tools/sprites.cjs');
 const { glyphs, gardenColors, TILE } = require('./tools/garden.cjs');
 const { longLevel } = require('./tools/long-levels.cjs');
@@ -18,6 +18,7 @@ fs.writeFileSync(path.join(build, 'actors.bin'), actorSprites());
 const looks = catLooks();
 fs.writeFileSync(path.join(build, 'cat-looks.bin'), looks.bytes);
 fs.writeFileSync(path.join(build, 'cat-looks.inc'), looks.tables);
+fs.writeFileSync(path.join(build, 'charms.bin'), charmArt());
 fs.writeFileSync(path.join(build, 'tiles.bin'), glyphs());
 const gardenBackgrounds = new Map();
 const map = longLevel(false, gardenBackgrounds);
@@ -63,6 +64,29 @@ fs.writeFileSync(path.join(build, 'pickup-backgrounds.inc'), [
   pickupTable('greenhouse_pickup_start', greenhousePages),
   pickupTable('pickup_column', pickupTiles.map(([column]) => column)),
   pickupTable('pickup_scenery', pickupTiles.map(([, tile]) => tile))
+].join('\n') + '\n');
+const sites = level => level.reduce((cells, tile, cell) => {
+  if (tile === TILE.blueFly) cells.push(cell);
+  return cells;
+}, []);
+const gardenRares = sites(map);
+const greenhouseRares = sites(secondMap);
+const rareCells = [...gardenRares, ...greenhouseRares];
+const lanternFlies = secondMap.reduce((cells, tile, cell) => {
+  if (tile === TILE.lantern) cells.push(cell + 4, cell + 6, cell + 8);
+  return cells;
+}, []);
+const mapAddress = (cells, prefix) => cells.map(cell => prefix + '(LEVEL_MAP+' + cell + ')');
+fs.writeFileSync(path.join(build, 'cat-routes.inc'), [
+  pickupTable('clue_start', [0, gardenRares.length]),
+  pickupTable('clue_end', [gardenRares.length, rareCells.length]),
+  pickupTable('clue_tile_lo', mapAddress(rareCells, '<')),
+  pickupTable('clue_tile_hi', mapAddress(rareCells, '>')),
+  pickupTable('clue_x_lo', rareCells.map(cell => (cell % MAP_STRIDE * 8) & 255)),
+  pickupTable('clue_x_hi', rareCells.map(cell => (cell % MAP_STRIDE * 8) >> 8)),
+  pickupTable('cache_fly_lo', mapAddress(lanternFlies, '<')),
+  pickupTable('cache_fly_hi', mapAddress(lanternFlies, '>')),
+  'CACHE_FLIES = ' + lanternFlies.length
 ].join('\n') + '\n');
 fs.writeFileSync(path.join(build, 'score.inc'), score());
 execFileSync(process.env.TASS64 || '64tass', [

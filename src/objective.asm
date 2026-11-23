@@ -10,6 +10,7 @@ HINT_GOAL = 0
 HINT_BELL = 1
 HINT_LANTERN = 2
 HINT_RARE = 3
+HINT_BRASS = 4
 
 start_game:
     jsr load_level
@@ -146,6 +147,7 @@ catch_firefly:
     cmp #FIREFLY_TILE
     bne no_firefly
     jsr restore_pickup_background
+    jsr award_brass_charm
     inc fireflies
     ldx #48
     lda fireflies
@@ -169,6 +171,7 @@ light_lantern:
     jmp light_greenhouse_lantern
 catch_blue_firefly:
     jsr restore_pickup_background
+    jsr award_ribbon
     lda #POSE_SPARK
     sta cat_reaction
     lda #16
@@ -196,9 +199,9 @@ write_objective_hint:
     rts
 
 objective_hint_low:
-    .byte <goal_hint,<bell_hint,<lantern_hint,<rare_hint
+    .byte <goal_hint,<bell_hint,<lantern_hint,<rare_hint,<brass_hint
 objective_hint_high:
-    .byte >goal_hint,>bell_hint,>lantern_hint,>rare_hint
+    .byte >goal_hint,>bell_hint,>lantern_hint,>rare_hint,>brass_hint
 goal_hint:
     .text "COLLECT 24   THEN LIGHT THE BEACON"
     .fill HINT_WIDTH-(*-goal_hint),32
@@ -211,6 +214,9 @@ lantern_hint:
 rare_hint:
     .text "RARE FIREFLY FOUND   STAR EARNED"
     .fill HINT_WIDTH-(*-rare_hint),32
+brass_hint:
+    .text "LANTERN LIT   BRASS CHARM EARNED"
+    .fill HINT_WIDTH-(*-brass_hint),32
 
 header:
     .text "WHISKER BEACON   FIREFLIES "

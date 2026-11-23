@@ -14,6 +14,8 @@ From BASIC on a C64, enter `LOAD"*",8,1` and then `RUN`.
 
 | Action | Keyboard | Joystick in port 2 |
 | --- | --- | --- |
+| Change cat before moving | C | Up |
+| Change charm before moving | V | Down |
 | Move | A / D | Left / right |
 | Short hop | Tap Space | Tap Fire |
 | Full leap | Hold Space | Hold Fire |
@@ -21,6 +23,15 @@ From BASIC on a C64, enter `LOAD"*",8,1` and then `RUN`.
 | Replay after lighting the beacon | Space | Fire |
 | Enter the greenhouse after clearing the garden | D and Space | Right and Fire |
 | Return to the garden after clearing the greenhouse | A and Space | Left and Fire |
+
+Use the wardrobe at the start of either level. The cats share the same
+movement and collision rules. Finish either level without a fall to unlock
+Tuxedo. A rare Garden firefly earns the cyan ribbon. A firefly from a
+Greenhouse lantern cache earns the brass bell. Rewards stay unlocked until
+you reload the game.
+
+When you pause near a rare firefly you have yet to collect, watch Pip's ears
+and tail for a clue.
 
 Collect at least 24 gold fireflies, then reach the beacon between the gold
 arrows at the far right. Falls and enemy hits return Pip to the latest
@@ -61,6 +72,7 @@ test routes take 58.10 seconds in the Garden and 58.20 in the Old Greenhouse.
 Run `node tests/playtest.cjs` to check the Garden opening.
 Run `node tests/greenhouse.cjs` to check the greenhouse hazards and lanterns.
 Run `node tests/jumps.cjs` to test jump timing and the first cyan firefly.
+Run `node tests/wardrobe.cjs` to check the wardrobe and movement poses.
 Run `node tests/scroll.cjs` to check the camera in both directions across a
 map page boundary. Set `VICE_BIN` to select the emulator. Headless Linux
 uses `xvfb-run`.

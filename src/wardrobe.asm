@@ -4,12 +4,14 @@ CAT_NAME_LENGTH = 13
 
 choose_look:
     lda input_bits
-    and #CHANGE_CAT
+    and #(CHANGE_CAT | CHANGE_CHARM | SLIDE)
     tax
     eor wardrobe_keys
     and input_bits
     stx wardrobe_keys
     beq wardrobe_done
+    and #CHANGE_CAT
+    beq choose_charm
     ldx cat_look
 next_cat_look:
     inx
@@ -27,6 +29,22 @@ swap_cat_look:
     jsr load_cat_look
     jmp show_wardrobe
 wardrobe_done:
+    rts
+
+choose_charm:
+    ldx cat_charm
+next_charm:
+    inx
+    cpx #3
+    bcc check_charm
+    ldx #0
+    beq equip_charm
+check_charm:
+    lda cat_unlocks
+    and charm_bits,x
+    beq next_charm
+equip_charm:
+    stx cat_charm
     rts
 
 show_wardrobe:
@@ -58,7 +76,7 @@ wardrobe_name_copy:
     rts
 
 wardrobe_help:
-    .text " C OR UP TO CHANGE CAT"
+    .text " C/UP CAT V/DN CHARM"
     .fill HINT_WIDTH-CAT_NAME_LENGTH-(*-wardrobe_help),32
 wardrobe_help_end:
 

@@ -70,6 +70,7 @@ frame_present:
     jsr present_view
     jsr present_cat
     jsr present_patrols
+    jsr present_cat_charm
     jsr animate_objectives
     inc video_ticks
     lda logic_clock
@@ -99,6 +100,7 @@ leave_raster:
 
 .include "sprites.asm"
 .include "wardrobe.asm"
+.include "cat-charms.asm"
 .include "view.asm"
 .include "motion.asm"
 .include "clock.asm"
@@ -120,6 +122,9 @@ leave_raster:
 .include "results.asm"
 
 .cerror * > SCREEN_B, "Game code overlaps the second screen buffer"
+
+* = CHARM_SPRITES
+    .binary "../build/charms.bin"
 
 * = $3000
     .binary "../build/tiles.bin"

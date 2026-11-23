@@ -3,6 +3,7 @@ SLIDE = 2
 MOVE_LEFT = 4
 MOVE_RIGHT = 8
 JUMP = 16
+CHANGE_CHARM = 32
 
 ; Joystick 2 is active low. A, S, D and Space are read from three keyboard rows.
 read_controls:
@@ -48,6 +49,15 @@ check_right_key_bit:
     ora #MOVE_RIGHT
     sta input_bits
 check_jump_key:
+    lda #$f7
+    sta $dc00
+    lda $dc01
+    and #128
+    bne check_space
+    lda input_bits
+    ora #CHANGE_CHARM
+    sta input_bits
+check_space:
     lda #$7f
     sta $dc00
     lda $dc01
