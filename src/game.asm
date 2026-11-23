@@ -39,7 +39,7 @@ entry:
     sta $d022
     lda #9
     sta $d023
-    ldx #$49
+    ldx #$4c
     lda #0
 clear_state:
     sta $00,x
@@ -102,6 +102,7 @@ leave_raster:
 .include "checkpoints.asm"
 .include "objective.asm"
 .include "levels.asm"
+.include "greenhouse.asm"
 .include "music.asm"
 .include "results.asm"
 

@@ -53,3 +53,6 @@ map_source     = $42
 map_dst        = $44
 palette_source = $46
 hud_source     = $48
+bell_found     = $4a
+lantern_lit    = $4b
+board_ticks    = $4c

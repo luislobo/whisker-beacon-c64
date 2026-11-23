@@ -18,6 +18,7 @@ start_game:
     sta SCREEN_B+36
     sta SCREEN_A+BLUE_BADGE_COLUMN
     sta SCREEN_B+BLUE_BADGE_COLUMN
+    jsr init_greenhouse_props
     jsr reset_run
     jsr load_level_best
     jsr init_checkpoints
@@ -44,6 +45,7 @@ step_game:
     bne wait_for_replay
     jsr update_run_time
     jsr step_player
+    jsr step_greenhouse_props
     jsr step_patrols
     jsr activate_checkpoint
     jsr check_objective
@@ -108,6 +110,10 @@ catch_firefly:
     jsr read_tile
     cmp #BLUE_FLY_TILE
     beq catch_blue_firefly
+    cmp #BELL_TILE
+    beq take_greenhouse_bell
+    cmp #LANTERN_TILE
+    beq light_lantern
     cmp #9
     bne no_firefly
     lda #0
@@ -129,6 +135,10 @@ write_score:
     sta SCREEN_B+5+header_count-header
 no_firefly:
     rts
+take_greenhouse_bell:
+    jmp collect_bell
+light_lantern:
+    jmp light_greenhouse_lantern
 catch_blue_firefly:
     lda #0
     sta (cell_ptr),y
@@ -150,10 +160,10 @@ greenhouse_header:
     .text "OLD GREENHOUSE    FIREFLIES 00/06"
 greenhouse_header_end:
 win_message:
-    .text "BEACON LIT   FIRE AGAIN   RIGHT+FIRE"
+    .text "BEACON LIT   FIRE RETRY RIGHT+FIRE"
 win_end:
 greenhouse_win:
-    .text "BEACON LIT   FIRE AGAIN    LEFT+FIRE"
+    .text "BEACON LIT   FIRE RETRY  LEFT+FIRE"
 greenhouse_win_end:
 header_low:
     .byte <header,<greenhouse_header

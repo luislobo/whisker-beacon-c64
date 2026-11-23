@@ -125,6 +125,10 @@ hit_vertical:
     jsr read_tile
     cmp #MUSHROOM_TILE
     beq spring_launch
+    cmp #CRACKED_BOARD_TILE
+    bne ground_player
+    jsr start_crumble
+ground_player:
     lda #1
     sta grounded
     rts

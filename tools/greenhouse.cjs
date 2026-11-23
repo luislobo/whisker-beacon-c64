@@ -28,7 +28,12 @@ function greenhouse() {
     for (let x = first; x < last; x++) put(x, row, 'stone');
   }
   for (const [x,y] of [[8,21],[13,21],[23,21],[33,21],[44,21],[50,21],
-    [61,21],[69,21],[87,21],[100,16],[115,21],[123,21]]) put(x,y,'firefly');
+    [61,21],[87,21],[115,21]]) put(x,y,'firefly');
+  put(18, 22, 'bell');
+  put(30, 21, 'gate');
+  put(30, 22, 'gate');
+  for (let x = 40; x < 46; x++) put(x, 20, 'cracked');
+  put(67, 21, 'lantern');
   put(97, 17, 'blueFly');
   put(126, 20, 'lamp');
   put(126, 21, 'post');
