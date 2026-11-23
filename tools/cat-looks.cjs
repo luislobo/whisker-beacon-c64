@@ -1,63 +1,62 @@
 // One character represents two horizontal multicolor sprite pixels.
 
-const ginger = `.......a..a.
-.......aa.a.
-......aaaaa.
-.b....ababba
-ba...aaaaaa.
-aa..aaaaacc.
-.b.aaaaaaaa.
-.baaabbaaaa.
-..aaaabaaa..
+const ginger = `......a...a.
+..b...aa.aa.
+.aa...aaaaa.
+ab....acaca.
+b.....aabaa.
+b....aaaaaa.
+.b.aaaaaaa..
+..aaabaaab..
 ..aaaaaaa...
+..aabaaaa...
 ...aa..aa...
 ...cc..cc...`;
 
 const tuxedo = `......a...a.
-......ab.ba.
+......aa.aa.
 ......aaaaa.
-.....abcbca.
-.....aaaaaca
-....aaaacca.
-.b.aaaaacca.
-.baaaaaacca.
-..aaaaaacc..
-...aa..ac...
+..b..abcbca.
+.ba..aaabca.
+.a...aaaaca.
+.b..aaaacca.
+..baaaccca..
+..aaaaacca..
+...aa..ca...
 ...cc..cc...`;
 
-const black = `......a...a.
+const black = `.......a..a.
+.......aa.aa
+.aa...aaaaaa
+a..b..acaca.
+b...aaaabaa.
+.b.aaaaaaba.
+..aaaaabaaa.
+..aaaabaaa..
+...aa..aa...
+...bb..bb...`;
+
+const calico = `.......c..b.
+..b....cc.bb
+.ba...ccbbbc
+.a....ccbcba
+.b...aaabcc.
+..a.aaacccc.
+..baccaaac..
+...aacaaab..
+...aacaaa...
+...cc..aa...
+...cc..aa...`;
+
+const bobtail = `......a..a..
 ......aa.aa.
 .....aaaaaa.
-.....aacaca.
-.aa..aaaaaaa
-a..aaaaaaaa.
-b..aaaaabaa.
-bbaaaaabaaa.
-..aababaaba.
-...ab...ab..
-...bb...bb..`;
-
-const calico = `......c..b..
-......cc.bb.
-......cbbbc.
-..b..accbcba
-.ba..aacbccc
-.b...aacbbcc
-.ac.aaaaaccc
-..aacccaaac.
-..aaccaacab.
-...ccc..aa..
-...cc...aa..`;
-
-const bobtail = `.....a...a..
-.....aa.aa..
-....aaaaaaa.
-....acacaba.
-....aaaaaaac
+.....acacba.
+.....aaabca.
 .aa.aaaacca.
 abaaaaaacca.
-.baaaabaaa..
-..aaabaaaa..
+.baaabaaaa..
+..aaaaaaa...
 ..baa..baa..
 ..ccc..ccc..`;
 
@@ -65,110 +64,109 @@ const fluffy = `......a..a..
 .a....aa.aa.
 aaa..aaaaaa.
 aaaa.abcaba.
-aaaa.aaaaaac
-aaabaaaaaaaa
-aaaaaaaaaac.
-.aaaaaaaacc.
-.aaabaacccc.
-..aabacccca.
-...aaa.aaaa.
-...ccc..ccc.`;
+aaaa.aaabca.
+aaabaaaaaca.
+aaaaaaaaacc.
+.aaaaaaaccc.
+.aaabaaccc..
+..aabaccca..
+...aaa.aaa..
+...ccc.ccc..`;
 
-const siamese = `.......b..b.
-.......bb.b.
-.......abbb.
-.......acbc.
-b.....aaabbb
-.b....aaaabb
-.b...aaaaaa.
-.bbaaaaaaaa.
-..aaaaaaaa..
-...aa..aaa..
+const siamese = `......b...b.
+......bb.bb.
+.ba...bbbbb.
+b.....bcbcb.
+.b....bbabb.
+..b..aaaaba.
+..baaaaaaa..
+...aaaaaaa..
+....a...a...
 ....a...a...
 ....b...b...
 ....b...b...`;
 
-const fold = `.....aaa.aa.
-.....baaabb.
-.b..aaaaaa..
-ba..aacaca..
-ab..aaaaaaac
-.a.aaaaaaaa.
-.aaaaaaaaaa.
-..aaaabbbaa.
+const fold = `......aa.aa.
+.b....bbaab.
+ba....aaaaa.
+ab....acaca.
+.b...aaabaa.
+..baaaaaaa..
+..aaaaaaaa..
+...aaabaaa..
 ...aaaaaaa..
 ...aa..aa...
 ...bb..bb...`;
 
-const alley = `.......a.bb.
-......ab..b.
-......aaaaa.
-..a...acaba.
-.b.a.aaaaaab
-.b....aaaab.
-..a.baaaaaa.
-..aaaababba.
-...aaaaaba..
+const alley = `.......a..b.
+..a....aa.b.
+.ba...aaaaa.
+.b....acaba.
+..b...aabca.
+..a..aaabca.
+..abaaaaaa..
+...aaaaabb..
+...aaaaba...
 ...ab...aa..
 ...bb...bb..`;
 
 const lantern = `.c.....a..a.
-cc.....aa.a.
-.cc...aaaaa.
-.c....acaca.
-.b...aaaaaab
-.b..aaaaaaa.
+cc.....aa.aa
+.cc...aaaaaa
+.b....acaca.
+.b....aabca.
+..b..aaaaca.
 ..baaaaaacc.
-..aaaaaacca.
-..aaaaaabaa.
+..aaaaaacc..
+..aaaaaaba..
 ...aa..aa...
 ...bb..bb...`;
 
-const turn = `..a....a..a.
-.aa....aa.a.
+const turn = `..a...a...a.
+.aa...aa.aa.
 .b....aaaaa.
 ..b...acaca.
-...b..aaaaaa
-....baaaaac.
-.....aaaaaa.
+...b..aabaa.
+....baaaaaa.
+.....aaaaa..
 ....aaabaaa.
 ...aaabaa...
 ...aa...aa..
 ...cc...cc..`;
 
-const jump = `b.......a..a
-ab......aa.a
-.ba..aaaaaaa
-..baaaaacaba
-...aaaaaaaaa
-....aaaaaac.
-....aa..aa..
-....bc..bc..`;
+const jump = `b.....a...a.
+ab....aa.aa.
+.ba...aaaaa.
+..baaaacaca.
+...aaaaabaa.
+...aaaaaaa..
+....aa.aa...
+....bc.bc...`;
 
-const landing = `.......a..a.
-.aa....aaaa.
+const landing = `......a...a.
+.aa...aa.aa.
 ab....aaaaa.
 .b....acaca.
-..b..aaaaaaa
-...aaaaaaaa.
-...aaabaaac.
-..aaaaaaaac.
-..cc...cccc.`;
+..b..aaabaa.
+...aaaaaaa..
+...aaabaaa..
+..aaaaaaaa..
+..cc...ccc..`;
 
-const slide = `.........aa.
-........aaaa
-.......acaca
-...bbaaaaaaa
-.bbaaaaaaacc
-baaaaaaaaaa.
-...cc...cc..`;
+const slide = `......a...a.
+......aa.aa.
+......aaaaa.
+...aaaacaca.
+.bbaaaaabaa.
+baaaaaaaa...
+....cc..cc..`;
 
 const clue = `......a..a..
 .c....aa.aa.
 .cc..aaaaaa.
 ..b..aacaba.
-..b.aaaaaaac
-..b.aaaaaa..
+..b.aaaabca.
+..b.aaaaaca.
 ..baaaaaaa..
 ...aaabaa...
 ...aa..aa...
@@ -177,11 +175,11 @@ const clue = `......a..a..
 const spark = `.b......c...
 .ba.c.......
 ab.....a..a.
-ab....aa.aa.
-.b....aaaaa.
-..b..aababa.
-..b..aaaaaaa
-...baaaaaac.
+ab.....aa.aa
+.b....aaaaaa
+..b...aababa
+..b...aabca.
+...baaaaaca.
 ...aaaaaaa..
 ...aa..aaa..
 ...cc...cc..`;
@@ -190,7 +188,7 @@ const sit = `.....a..a...
 .....aa.aa..
 ....aaaaaaa.
 ....acacaba.
-....aaaaaaac
+....aaaabaa.
 .....aaaac..
 .....aaaca..
 ....aaaaca..
@@ -199,15 +197,15 @@ bbaaaaacca..
 .baabbccccb.
 ..bbbbbbbb..`;
 
-const walk = `.......a..a.
-.......aa.a.
-..b...aaaaa.
-.b....abacaa
-.b...aaaaaa.
-.ab.aaaaaac.
-..baaaaaaaa.
-..aaaabaaaa.
-...aaaaaaa..
+const walk = `......a...a.
+..b...aa.aa.
+.b....aaaaa.
+.b....acaca.
+.ab...aabaa.
+..b..aaaaaa.
+..baaaaaaa..
+..aaaabaaa..
+...aaaaaa...
 ...aaa.aa...
 ..cc....cc..`;
 
@@ -224,14 +222,14 @@ const looks = [
   { name: 'Lantern Cat', art: lantern, color: 10 }
 ];
 
-const stretch = `b........a.a
-ab......aa.a
-.ba...aaaaaa
-..baaaaaacba
-...aaaaaaaaa
-....aaa..aca
-.....ac.....
-`;
+const stretch = `b.....a...a.
+ab....aa.aa.
+.ba...aaaaa.
+..baaaacaca.
+...aaaaabaa.
+...aaaaaaa..
+..aaa...aa..
+..cc.....c..`;
 
 const poses = { stand: '', stride: walk, turn, launch: stretch, air: jump, landing, slide, clue, spark, sit };
 const height = 13;
@@ -269,10 +267,17 @@ function actionArt(look, frame, pose) {
       }
       break;
     case 'Scottish Fold':
-      if (!slidePose && firstEar >= 0) rows[firstEar].fill('.', 7);
+      if (!slidePose && firstEar >= 0) {
+        for (let x = 7; x < 12; x++) {
+          if (rows[firstEar][x] === 'a') rows[firstEar][x] = 'b';
+        }
+      }
       break;
     case 'Alley Cat':
-      if (!slidePose && firstEar >= 0) rows[firstEar][10] = '.';
+      if (!slidePose && firstEar >= 0) {
+        const ear = rows[firstEar].lastIndexOf('a');
+        if (ear >= 7) rows[firstEar][ear] = 'b';
+      }
       break;
     case 'Lantern Cat':
       for (const row of rows) {
