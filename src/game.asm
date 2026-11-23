@@ -39,7 +39,7 @@ entry:
     sta $d022
     lda #9
     sta $d023
-    ldx #$64
+    ldx #$6b
     lda #0
 clear_state:
     sta $00,x
@@ -81,10 +81,13 @@ frame_present:
     jsr sid_tick
     jsr read_controls
 controls_ready:
+    jsr remember_player
     jsr step_game
-    jmp leave_raster
+    jmp update_view
 wait_next_video:
     sta logic_clock
+update_view:
+    jsr prepare_view
 leave_raster:
     lda $d012
     cmp #250
@@ -93,6 +96,7 @@ leave_raster:
 
 .include "sprites.asm"
 .include "view.asm"
+.include "motion.asm"
 .include "clock.asm"
 .include "controls.asm"
 .include "player.asm"

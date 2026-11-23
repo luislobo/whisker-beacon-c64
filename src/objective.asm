@@ -49,7 +49,7 @@ step_game:
     jsr step_patrols
     jsr activate_checkpoint
     jsr check_objective
-    jmp track_cat
+    rts
 wait_for_replay:
     lda input_bits
     and #JUMP
@@ -58,7 +58,7 @@ wait_for_replay:
     beq objective_done
     jsr select_level
     jsr start_game
-    jmp track_cat
+    rts
 arm_replay:
     lda #1
     sta restart_armed

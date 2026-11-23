@@ -34,7 +34,7 @@ next_color_row:
 init_view:
     lda #$ff
     sta drawn_column
-    jsr render_world
+    jsr prepare_view
     jsr present_view
     lda #<scroll_irq
     sta $fffe
@@ -127,11 +127,11 @@ render_b:
     #draw_columns SCREEN_B
 
 track_cat:
-    lda player_x
+    lda draw_player_x
     sec
     sbc #144
     tay
-    lda player_x+1
+    lda draw_player_x+1
     sbc #0
     bcc camera_left_edge
     cmp #>CAMERA_LIMIT

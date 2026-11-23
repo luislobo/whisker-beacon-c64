@@ -76,7 +76,7 @@ async function test(mode) {
         await monitor.command(`screenshot "${path.join(directory, 'frame-' + frame + '.png')}" 2`);
       }
     }
-    assert.equal(gardenScroll.size, 4, 'each moving scroll phase keeps the HUD fixed');
+    assert.equal(gardenScroll.size, mode === 'pal' ? 4 : 8, 'each moving scroll phase keeps the HUD fixed');
     assert.equal((await monitor.bytes(WON, 1))[0], 1, 'the beacon was lit');
     const cleanTime = Buffer.from([0x32, 0x09, 0x00]);
     assert.deepEqual(await monitor.bytes(symbols.run_cents, 3), cleanTime);

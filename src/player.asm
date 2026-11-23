@@ -34,7 +34,7 @@ reset_player:
     sta slide_strike
     lda #1
     sta grounded
-    rts
+    jmp remember_player
 
 step_player:
     jsr prepare_slide

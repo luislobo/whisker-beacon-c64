@@ -24,11 +24,11 @@ init_cat_sprite:
     rts
 
 present_cat:
-    lda player_x
+    lda draw_player_x
     sec
     sbc camera_x
     sta sprite_x
-    lda player_x+1
+    lda draw_player_x+1
     sbc camera_x+1
     tax
     lda sprite_x
@@ -38,7 +38,7 @@ present_cat:
     txa
     adc #0
     sta $d010
-    lda player_y
+    lda draw_player_y
     clc
     adc #51
     sta $d001
