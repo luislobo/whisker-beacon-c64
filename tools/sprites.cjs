@@ -29,7 +29,7 @@ const moth = [
   '', ' b        b', ' bbb    bbb', ' bbwb  bwbb', '  bbbwbbb',
   '   bwwwwb', '    obbo', '   bb  bb', '   b    b'
 ];
-const shadow = ['', '', '', '', '  w w w w', ' w w w w w', '  w w w w'];
+const shadow = ['', '', '', '', '  b b b b', ' b b b b b', '  b b b b'];
 
 const ink = { b: 3, o: 1, w: 2, ' ': 0 };
 
