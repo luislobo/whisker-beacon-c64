@@ -16,8 +16,10 @@ init_music:
     lda #0
     sta $d402
     sta $d417
+    sta $d410
     lda #6
     sta $d403
+    sta $d411
     lda refresh_rate
     cmp #60
     bne music_first_note
@@ -31,6 +33,7 @@ music_first_note:
 ; One call per 50 Hz game step. Both video standards use the same tempo.
 sid_tick:
     inc sid_tick_count
+    jsr update_sfx
     dec music_period
     beq music_note
     lda music_period
@@ -42,8 +45,11 @@ release_voices:
     sta $d404
     lda #$10
     sta $d40b
+    lda sfx_ticks
+    bne release_done
     lda #$20
     sta $d412
+release_done:
     rts
 music_note:
     lda #7
@@ -73,6 +79,8 @@ music_bass:
     lda #$11
     sta $d40b
 music_harmony:
+    lda sfx_ticks
+    bne music_advance
     lda harmony,x
     beq music_advance
     clc

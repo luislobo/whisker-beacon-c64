@@ -44,7 +44,7 @@ scatter_mite:
     lda actor_live
     and #$fe
     sta actor_live
-    lda #2
+    lda #SFX_MITE
     sta sfx_event
 update_acorn:
     ldx #1
@@ -63,7 +63,7 @@ acorn_contact:
     sta patrol_dir+1
     lda #14
     sta acorn_grace
-    lda #3
+    lda #SFX_ACORN
     sta sfx_event
 update_owl:
     lda actor_live
@@ -79,7 +79,7 @@ update_owl:
     bcc greenhouse_actor_done
     cmp #<(OWL_X+52)
     bcs greenhouse_actor_done
-    lda #4
+    lda #SFX_OWL
     sta sfx_event
 step_owl:
     inc owl_phase

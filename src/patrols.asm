@@ -79,7 +79,7 @@ touched_cat:
     beq patrol_hit_player
     lda #55
     sta actor_delay,x
-    lda #1
+    lda #SFX_CAT
     sta sfx_event
     jmp patrol_done
 patrol_hit_player:

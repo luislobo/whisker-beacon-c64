@@ -39,6 +39,8 @@ launch_slide:
     sta slide_ticks
     lda #SLIDE_DURATION+SLIDE_RECOVERY
     sta slide_cooldown
+    lda #SFX_SLIDE
+    sta sfx_event
 maintain_slide:
     lda low_profile
     beq slide_ready

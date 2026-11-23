@@ -63,3 +63,4 @@ actor_delay    = $5d
 owl_phase      = $61
 acorn_grace    = $62
 sfx_event      = $63
+sfx_ticks      = $64

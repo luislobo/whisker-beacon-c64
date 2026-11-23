@@ -39,7 +39,7 @@ entry:
     sta $d022
     lda #9
     sta $d023
-    ldx #$63
+    ldx #$64
     lda #0
 clear_state:
     sta $00,x
@@ -105,6 +105,7 @@ leave_raster:
 .include "levels.asm"
 .include "greenhouse.asm"
 .include "music.asm"
+.include "sfx.asm"
 .include "results.asm"
 
 * = $3000

@@ -18,6 +18,8 @@ init_greenhouse_props:
     rts
 
 start_crumble:
+    lda #SFX_BOARDS
+    sta sfx_event
     lda #18
     sta board_ticks
     lda #SHAKING_BOARD_TILE
@@ -41,6 +43,8 @@ boards_idle:
     rts
 
 collect_bell:
+    lda #SFX_BELL
+    sta sfx_event
     lda #0
     sta (cell_ptr),y
     sta LEVEL_MAP+21*WORLD_WIDTH+GATE_COLUMN
@@ -55,6 +59,8 @@ collect_bell:
     rts
 
 light_greenhouse_lantern:
+    lda #SFX_LANTERN
+    sta sfx_event
     lda #1
     sta lantern_lit
     lda #LIT_LANTERN_TILE
