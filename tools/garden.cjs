@@ -128,9 +128,19 @@ function placeBeacon(map) {
   map[22 * WIDTH + column] = TILE.beaconBase;
 }
 
-function garden() {
+function tileWriter(map, backgrounds) {
+  return (column, row, tile) => {
+    const cell = row * WIDTH + column;
+    if (map[cell] && (tile === 'firefly' || tile === 'blueFly' || tile === 'bell')) {
+      backgrounds.set(cell, map[cell]);
+    }
+    map[cell] = TILE[tile];
+  };
+}
+
+function garden(backgrounds = new Map()) {
   const map = Buffer.alloc(WIDTH * HEIGHT);
-  const put = (column, row, tile) => { map[row * WIDTH + column] = TILE[tile]; };
+  const put = tileWriter(map, backgrounds);
   for (let x = 0; x < WIDTH; x++) {
     if (x % 13 === 3 || x % 19 === 1) put(x, 4 + (x * 23 % 9), 'star');
     const ridge = 18 + Math.round(2 * Math.sin(x / 7) + Math.sin(x / 3));
@@ -167,6 +177,7 @@ function garden() {
   for (const x of [11, 24, 36, 54, 66, 80, 101, 118]) {
     if (map[22 * WIDTH + x] === TILE.sky) put(x, 22, 'fern');
   }
+  placeBeacon(map);
   for (const [x,y] of [[8,21],[17,17],[29,21],[44,17],[54,21],[66,16],[77,21],
     [87,18],[97,21],[109,21],[120,18],[124,21]]) put(x,y,'firefly');
   put(16,19,'mushroom');
@@ -174,7 +185,6 @@ function garden() {
     for (let x = first; x < last; x++) put(x,11,'stone');
   }
   put(22,9,'blueFly');
-  placeBeacon(map);
   return map;
 }
 
@@ -192,4 +202,4 @@ function gardenColors(map) {
   }));
 }
 
-module.exports = { glyphs, garden, gardenColors, placeBeacon, WIDTH, HEIGHT, TILE };
+module.exports = { glyphs, garden, gardenColors, placeBeacon, tileWriter, WIDTH, HEIGHT, TILE };

@@ -109,6 +109,7 @@ leave_raster:
 .include "greenhouse-actors.asm"
 .include "checkpoints.asm"
 .include "objective.asm"
+.include "pickup-background.asm"
 .include "objective-ink.asm"
 .include "levels.asm"
 .include "greenhouse.asm"

@@ -89,6 +89,7 @@ function route(mode) {
     await step(RIGHT | FIRE, 16);
     await march(595);
     assert.equal((await monitor.bytes(0x4b, 1))[0], 1, 'the floor route lights the lantern');
+    assert.equal((await monitor.bytes(LEVEL_MAP + 20 * 768 + 67, 1))[0], 104, 'the lantern keeps its crown when lit');
     const lanternHint = await monitor.bytes(0x2800 + 42, 'LANTERN LIT'.length);
     assert.deepEqual(lanternHint, Buffer.from('LANTERN LIT').map(byte => byte === 32 ? byte : byte + 128));
     assert.notEqual((await monitor.bytes(0x61, 1))[0], 0, 'the owl announces the swoop');
@@ -154,6 +155,12 @@ function hazards(mode) {
     assert.equal((await monitor.bytes(0x27, 1))[0], before ^ 1, 'a slide reverses the acorn');
     assert.notEqual((await monitor.bytes(0x62, 1))[0], 0, 'the reversed acorn cannot hit Pip immediately');
 
+    const benchFly = LEVEL_MAP + 21 * 768 + 61;
+    assert.equal((await monitor.bytes(benchFly, 1))[0], 9);
+    await place(478, 170);
+    await step(0);
+    assert.equal((await monitor.bytes(benchFly, 1))[0], 109, 'the firefly reveals the original bench leg');
+
     const rainCache = LEVEL_MAP + 21 * 768 + 256;
     await place(2134, 170);
     await step(0, 12);
@@ -161,6 +168,12 @@ function hazards(mode) {
     for (const column of [16, 18, 20]) {
       assert.equal((await monitor.bytes(rainCache + column, 1))[0], 9, 'the new lantern reveals its own cache');
     }
+    const scoreBeforeCache = (await monitor.bytes(0x2d, 1))[0];
+    await place(2166, 170);
+    await step(0, 2);
+    assert.equal((await monitor.bytes(rainCache + 16, 1))[0], 81, 'a revealed firefly restores its window mullion');
+    assert.equal((await monitor.bytes(0x2d, 1))[0], scoreBeforeCache + 1, 'the cache firefly counts once');
+
     assert.equal((await monitor.bytes(SCREEN_A_MOTH, 1))[0], 0xeb, 'a moth replaces the mite in the rain gallery');
     const moth = (await monitor.bytes(0x50, 1))[0] + 256 * (await monitor.bytes(0x54, 1))[0];
     const mothY = (await monitor.bytes(0x58, 1))[0];

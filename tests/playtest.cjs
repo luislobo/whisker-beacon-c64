@@ -91,6 +91,18 @@ async function test(mode) {
     assert.ok((await monitor.bytes(CAMERA_X, 2)).readUInt16LE() > 704, 'the camera passes the old right edge');
 
     await boot(monitor);
+    const trunkFly = 0x8000 + 21 * 768 + 8;
+    assert.equal((await monitor.bytes(trunkFly, 1))[0], 9, 'a firefly is in front of the trunk');
+    await monitor.write(PLAYER_X, [54, 0, 170, 0, 0, 1]);
+    await step(monitor, 0);
+    assert.equal((await monitor.bytes(SCORE, 1))[0], 1, 'Pip collects the firefly');
+    assert.equal((await monitor.bytes(trunkFly, 1))[0], 4, 'the original trunk tile returns');
+    await monitor.until(symbols.scroll_applied);
+    const [selection] = await monitor.bytes(0xd018, 1);
+    const screen = (selection & 0xfe) === 0x1c ? 0x0400 : 0x2800;
+    assert.equal((await monitor.bytes(screen + 21 * 40 + 8, 1))[0], 4, 'the VIC displays the restored trunk');
+
+    await boot(monitor);
     for (let i = 0; i < 95; i++) {
       await step(monitor, RIGHT);
       if ((await monitor.bytes(RECOVERIES, 1))[0]) break;

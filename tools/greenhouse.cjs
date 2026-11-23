@@ -1,8 +1,8 @@
-const { WIDTH, HEIGHT, TILE, placeBeacon } = require('./garden.cjs');
+const { WIDTH, HEIGHT, placeBeacon, tileWriter } = require('./garden.cjs');
 
-function greenhouse() {
+function greenhouse(backgrounds = new Map()) {
   const map = Buffer.alloc(WIDTH * HEIGHT);
-  const put = (column, row, tile) => { map[row * WIDTH + column] = TILE[tile]; };
+  const put = tileWriter(map, backgrounds);
   // A continuous eave and closed window bays give the whole route one silhouette.
   for (let x = 0; x < WIDTH; x++) {
     const pane = x % 12;
@@ -47,6 +47,7 @@ function greenhouse() {
       put(last - 1, y, 'benchLeg');
     }
   }
+  placeBeacon(map);
   for (const [x,y] of [[8,21],[13,21],[23,21],[33,21],[44,21],[50,21],
     [61,21],[87,21],[115,21]]) put(x,y,'firefly');
   put(17, 22, 'sky');
@@ -60,7 +61,6 @@ function greenhouse() {
   put(67, 21, 'lantern');
   put(67, 22, 'post');
   put(97, 17, 'blueFly');
-  placeBeacon(map);
   return map;
 }
 

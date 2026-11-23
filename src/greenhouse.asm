@@ -44,8 +44,8 @@ boards_idle:
 collect_bell:
     lda #SFX_BELL
     sta sfx_event
+    jsr restore_pickup_background
     lda #0
-    sta (cell_ptr),y
     sta LEVEL_MAP+21*MAP_STRIDE+GATE_COLUMN
     sta LEVEL_MAP+22*MAP_STRIDE+GATE_COLUMN
     lda #1
@@ -53,8 +53,6 @@ collect_bell:
     lda #$c2
     sta SCREEN_A+BELL_COLUMN
     sta SCREEN_B+BELL_COLUMN
-    lda #$ff
-    sta drawn_page
     ldx #HINT_BELL
     jmp show_objective_hint
 
@@ -68,29 +66,26 @@ light_greenhouse_lantern:
     ; read_tile has already selected this lantern's row and 256-tile page.
     ; Lanterns are at least two columns from an edge and eight from a page end.
     sty lantern_center
-    lda #LANTERN_GLOW_TILE
     dey
-    sta (cell_ptr),y
+    jsr glow_in_empty_space
     dey
-    sta (cell_ptr),y
+    jsr glow_in_empty_space
     iny
     iny
     iny
-    sta (cell_ptr),y
+    jsr glow_in_empty_space
     iny
-    sta (cell_ptr),y
+    jsr glow_in_empty_space
     lda cell_ptr+1
     sec
     sbc #>MAP_STRIDE
     sta cell_ptr+1
     ldy lantern_center
-    lda #LANTERN_GLOW_TILE
-    sta (cell_ptr),y
     dey
-    sta (cell_ptr),y
+    jsr glow_in_empty_space
     iny
     iny
-    sta (cell_ptr),y
+    jsr glow_in_empty_space
     lda cell_ptr+1
     clc
     adc #>MAP_STRIDE
@@ -111,3 +106,11 @@ light_greenhouse_lantern:
     sta drawn_page
     ldx #HINT_LANTERN
     jmp show_objective_hint
+
+glow_in_empty_space:
+    lda (cell_ptr),y
+    bne glow_done
+    lda #LANTERN_GLOW_TILE
+    sta (cell_ptr),y
+glow_done:
+    rts

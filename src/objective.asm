@@ -126,10 +126,7 @@ catch_firefly:
     beq light_lantern
     cmp #FIREFLY_TILE
     bne no_firefly
-    lda #0
-    sta (cell_ptr),y
-    lda #$ff
-    sta drawn_page
+    jsr restore_pickup_background
     inc fireflies
     ldx #48
     lda fireflies
@@ -152,10 +149,7 @@ take_greenhouse_bell:
 light_lantern:
     jmp light_greenhouse_lantern
 catch_blue_firefly:
-    lda #0
-    sta (cell_ptr),y
-    lda #$ff
-    sta drawn_page
+    jsr restore_pickup_background
     lda #1
     sta blue_found
     lda #42

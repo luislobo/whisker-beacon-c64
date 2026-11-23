@@ -1,4 +1,4 @@
-const { WIDTH, HEIGHT, TILE, garden, placeBeacon } = require('./garden.cjs');
+const { WIDTH, HEIGHT, TILE, garden, placeBeacon, tileWriter } = require('./garden.cjs');
 const { greenhouse } = require('./greenhouse.cjs');
 const { MAP_STRIDE } = require('./pack-map.cjs');
 
@@ -87,9 +87,9 @@ const greenhouseSections = [
   }
 ];
 
-function makeSection(design, glass, number) {
+function makeSection(design, glass, number, backgrounds) {
   const section = Buffer.alloc(WIDTH * HEIGHT);
-  const put = (x, y, tile) => { section[y * WIDTH + x] = TILE[tile]; };
+  const put = tileWriter(section, backgrounds);
   for (let x = 0; x < WIDTH; x++) {
     if (glass) {
       const bay = design.scene === 'shade' ? 8 : design.scene === 'rain' ? 16 : 12;
@@ -157,6 +157,7 @@ function makeSection(design, glass, number) {
       }
     }
   }
+  if (number === 5) placeBeacon(section);
   for (const [x, y] of design.flies) put(x, y, 'firefly');
   if (design.rare) put(...design.rare, 'blueFly');
   if (design.spring) put(...design.spring, 'mushroom');
@@ -167,26 +168,42 @@ function makeSection(design, glass, number) {
   }
   put(3, 20, 'waymark');
   put(3, 21, 'post');
-  if (number === 5) placeBeacon(section);
   return section;
 }
 
-function longLevel(glass) {
-  const first = glass ? greenhouse() : garden();
+function longLevel(glass, backgrounds = new Map()) {
+  const sectionsBackgrounds = [new Map()];
+  const first = glass ? greenhouse(sectionsBackgrounds[0]) : garden(sectionsBackgrounds[0]);
   for (let row = 19; row <= 22; row++) {
     for (let x = 124; x <= 126; x++) {
       if (first[row * WIDTH + x] !== TILE.firefly) first[row * WIDTH + x] = TILE.sky;
     }
   }
   const sections = [first, ...(glass ? greenhouseSections : gardenSections)
-    .map((design, i) => makeSection(design, glass, i + 1))];
+    .map((design, i) => {
+      const local = new Map();
+      sectionsBackgrounds.push(local);
+      return makeSection(design, glass, i + 1, local);
+    })];
   if (sections.length * WIDTH !== MAP_STRIDE) throw Error('Sections must fill the working map');
   const map = Buffer.alloc(MAP_STRIDE * HEIGHT);
   sections.forEach((section, index) => {
     for (let row = 0; row < HEIGHT; row++) {
       section.copy(map, row * MAP_STRIDE + index * WIDTH, row * WIDTH, (row + 1) * WIDTH);
     }
+    for (const [cell, tile] of sectionsBackgrounds[index]) {
+      const worldCell = Math.floor(cell / WIDTH) * MAP_STRIDE + index * WIDTH + cell % WIDTH;
+      backgrounds.set(worldCell, tile);
+    }
   });
+  // A lantern spawns its three pickups during play. Record what is there now.
+  for (let cell = 0; cell < map.length; cell++) {
+    if (map[cell] !== TILE.lantern) continue;
+    for (const distance of [4, 6, 8]) {
+      const cache = cell + distance;
+      if (map[cache]) backgrounds.set(cache, map[cache]);
+    }
+  }
   return map;
 }
 
