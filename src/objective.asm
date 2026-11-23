@@ -2,7 +2,9 @@ GOAL = 6
 LEVEL_MAP = $5000
 BEACON_X = 984
 BEACON_TILE = 20*WORLD_WIDTH+125
+FIREFLY_TILE = 9
 BLUE_FLY_TILE = 8
+LIT_BEACON_TILE = 12
 BLUE_BADGE_COLUMN = 37
 
 start_game:
@@ -88,7 +90,7 @@ check_objective:
     bcc objective_done
     lda #1
     sta beacon_lit
-    lda #12
+    lda #LIT_BEACON_TILE
     sta LEVEL_MAP+BEACON_TILE
     lda #$ff
     sta drawn_column
@@ -114,7 +116,7 @@ catch_firefly:
     beq take_greenhouse_bell
     cmp #LANTERN_TILE
     beq light_lantern
-    cmp #9
+    cmp #FIREFLY_TILE
     bne no_firefly
     lda #0
     sta (cell_ptr),y

@@ -39,7 +39,7 @@ entry:
     sta $d022
     lda #9
     sta $d023
-    ldx #$6b
+    ldx #$6c
     lda #0
 clear_state:
     sta $00,x
@@ -69,6 +69,7 @@ frame_present:
     jsr present_view
     jsr present_cat
     jsr present_patrols
+    jsr animate_objectives
     inc video_ticks
     lda logic_clock
     clc
@@ -106,6 +107,7 @@ leave_raster:
 .include "greenhouse-actors.asm"
 .include "checkpoints.asm"
 .include "objective.asm"
+.include "objective-ink.asm"
 .include "levels.asm"
 .include "greenhouse.asm"
 .include "music.asm"

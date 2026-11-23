@@ -10,7 +10,8 @@ const TILE = {
   paneGlint: 91, chain: 92, basket: 93, vineLeft: 94, vineRight: 95,
   fern: 96, flowerPot: 97, rootsPot: 98, sill: 99,
   beaconCrown: 100, beaconLeft: 101, beaconRight: 102, beaconBase: 103,
-  lanternCrown: 104
+  lanternCrown: 104, fireflyAlt: 105, blueFlyAlt: 106,
+  litLampAlt: 107, brightLanternAlt: 108
 };
 
 const tiles = {
@@ -61,7 +62,11 @@ const tiles = {
   beaconLeft:  ['....','3...','.3..','..3.','..3.','.3..','3...','....'],
   beaconRight: ['....','...3','..3.','.3..','.3..','..3.','...3','....'],
   beaconBase:  ['.22.','.22.','.22.','2222','3333','3333','2222','2222'],
-  lanternCrown:['....','.33.','3333','3..3','3..3','3333','.33.','.33.']
+  lanternCrown:['....','.33.','3333','3..3','3..3','3333','.33.','.33.'],
+  fireflyAlt:  ['....','.33.','.33.','3333','3..3','.33.','....','....'],
+  blueFlyAlt:  ['.33.','3333','3..3','3333','3333','3..3','3333','.33.'],
+  litLampAlt:  ['3333','33.3','3333','3333','3333','3333','.33.','.33.'],
+  brightLanternAlt: ['3333','33.3','3333','3333','3333','3333','.33.','.33.']
 };
 
 const font = {
@@ -99,7 +104,10 @@ function glyphs() {
 function placeBeacon(map) {
   const column = 125;
   for (let row = 18; row <= 22; row++) {
-    map.fill(TILE.sky, row * WIDTH + 123, row * WIDTH + 128);
+    for (let x = 123; x < WIDTH; x++) {
+      const cell = row * WIDTH + x;
+      if (map[cell] !== TILE.firefly && map[cell] !== TILE.blueFly) map[cell] = TILE.sky;
+    }
   }
   map[19 * WIDTH + column] = TILE.beaconCrown;
   map[20 * WIDTH + column - 1] = TILE.beaconLeft;

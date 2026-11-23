@@ -69,3 +69,4 @@ prior_player_y = $67
 draw_player_x  = $68
 draw_player_y  = $6a
 blend_index    = $6b
+objective_ink  = $6c
