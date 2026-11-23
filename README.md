@@ -4,22 +4,21 @@ Pip the cat crosses the twilight garden and the Old Greenhouse. Gather 24
 fireflies in each level to relight its beacon. The game uses the original
 three-voice SID tune *Lantern Paws*.
 
-[![Whisker Beacon in VICE](dist/preview.png)](dist/gameplay.gif)
+![Animated Whisker Beacon title screen cycling through the cats on the greenhouse roof](dist/title.gif)
 
-[Watch the greenhouse title and Shaded Brass slide](dist/title-and-slide.gif).
-[Watch all ten cats in motion](dist/cat-sprite-showcase.gif).
+[Watch gameplay in VICE](dist/gameplay.gif) · [Watch all ten cats in motion](dist/cat-sprite-showcase.gif)
 
 ## Play
 
 Open [whisker-beacon.prg](dist/whisker-beacon.prg) in VICE, or attach
 [whisker-beacon.d64](dist/whisker-beacon.d64) to drive 8 on a Commodore 64.
 From BASIC on a C64, enter `LOAD"*",8,1` and then `RUN`.
-Press Fire or Space on the title screen to enter the Garden. The SID intro
-plays once while Pip waits on the greenhouse roof.
+Press C or Up on the title screen to preview a cat on the greenhouse roof.
+Press Space or Fire to take that cat into the Garden. The SID intro plays once.
 
 | Action | Keyboard | Joystick in port 2 |
 | --- | --- | --- |
-| Change cat before moving | C | Up |
+| Change cat on the title screen or before moving | C | Up |
 | Change charm before moving | V | Down |
 | Move | A / D | Left / right |
 | Short hop | Tap Space | Tap Fire |
@@ -85,8 +84,8 @@ map page boundary. Set `VICE_BIN` to select the emulator. Headless Linux
 uses `xvfb-run`.
 
 The camera updates at 50 FPS on PAL and 60 FPS on NTSC. Gameplay and music
-advance at 50 Hz in both modes. The preview shows seven seconds of the
-Old Greenhouse in PAL VICE.
+advance at 50 Hz in both modes. The title and gameplay GIFs were captured
+in PAL VICE.
 
 The VICE monitor helper was adapted from Luis Lobo's
 [C64 demo kit](https://github.com/luislobo/c64-demo-kit). The characters, art,
