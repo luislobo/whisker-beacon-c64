@@ -58,6 +58,7 @@ title_init_sprites:
     sta TITLE_SCREEN+$3f9
     lda #$3b
     sta $d011
+    jsr init_title_music
 title_wait:
     lda $d012
     cmp #250
@@ -70,9 +71,13 @@ title_frame:
     cmp refresh_rate
     bcc title_keep_phase
     sbc refresh_rate
+    sta logic_clock
     inc title_ticks
+    jsr title_music_tick
+    jmp title_read_input
 title_keep_phase:
     sta logic_clock
+title_read_input:
     jsr read_controls
 title_controls_ready:
     lda input_bits
@@ -85,6 +90,7 @@ title_leave_raster:
     bne title_wait
 
 title_start:
+    jsr stop_title_music
     lda #0
     sta $d015
     sta logic_clock

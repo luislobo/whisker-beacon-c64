@@ -171,6 +171,7 @@ cat_look_bits:
 .cerror * > TITLE_COLORS+$400, "Title palette overlaps title code"
 * = TITLE_COLORS+$400
     .include "title.asm"
+    .include "title-music.asm"
 .cerror * > TITLE_BITMAP, "Title code overlaps the bitmap"
 * = TITLE_BITMAP
     .binary "../build/title-bitmap.bin"
