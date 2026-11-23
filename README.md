@@ -6,6 +6,8 @@ three-voice SID tune *Lantern Paws*.
 
 [![Whisker Beacon in VICE](dist/preview.png)](dist/gameplay.gif)
 
+[Watch all ten cats in motion](dist/cat-sprite-showcase.gif).
+
 ## Play
 
 Open [whisker-beacon.prg](dist/whisker-beacon.prg) in VICE, or attach
