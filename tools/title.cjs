@@ -2,24 +2,65 @@ const { glyphs } = require('./garden.cjs');
 
 const width = 160;
 const height = 200;
+const hiresWidth = width * 2;
+const columns = hiresWidth / 8;
+const sceneRow = 8;
 const nameRow = 22;
 const nameCells = 20;
-const promptRow = 24;
 const [black, white, , cyan, purple, green, blue, yellow, orange, brown,
   , charcoal, gray, lime, periwinkle, silver] = Array.from({ length: 16 }, (_, ink) => ink);
 const font = glyphs();
 
-function drawText(pixels, label, y, ink, size, offset = 0) {
-  const start = Math.floor((width - (label.length * 6 - 1) * size) / 2) + offset;
+function drawText(pixels, label, y) {
+  const glyphWidth = 7;
+  const advance = 9;
+  const start = Math.floor((hiresWidth - label.length * advance + advance - glyphWidth) / 2);
   for (const [i, letter] of [...label].entries()) {
     const code = letter.charCodeAt(0) + (letter === ' ' ? 0 : 128);
     for (let row = 0; row < 7; row++) {
-      for (let col = 0; col < 5; col++) {
-        if (!(font[code * 8 + row] & (64 >> col))) continue;
-        const x = start + (i * 6 + col) * size;
-        for (let dy = 0; dy < size; dy++) {
-          const index = (y + row * size + dy) * width + x;
-          pixels.fill(ink, index, index + size);
+      for (let x = 0; x < glyphWidth; x++) {
+        const source = Math.floor(5 * x / glyphWidth);
+        if (!(font[code * 8 + row] & (64 >> source))) continue;
+        pixels[(y + row) * hiresWidth + start + i * advance + x] = 1;
+      }
+    }
+  }
+}
+
+// The logo strokes use a 24 by 18 grid and are rasterized at single-dot resolution.
+const logoStrokes = {
+  W: [[[0,0],[4,18],[7,18],[12,8],[17,18],[20,18],[24,0]]],
+  H: [[[0,0],[0,18]], [[0,9],[24,9]], [[24,0],[24,18]]],
+  I: [[[3,0],[21,0]], [[12,0],[12,18]], [[3,18],[21,18]]],
+  S: [[[24,0],[4,0],[0,3],[0,6],[3,9],[21,9],[24,12],[24,15],[20,18],[0,18]]],
+  K: [[[0,0],[0,18]], [[24,0],[7,9],[0,9]], [[7,9],[24,18]]],
+  E: [[[24,0],[0,0],[0,18],[24,18]], [[0,9],[19,9]]],
+  R: [[[0,18],[0,0],[20,0],[24,3],[24,6],[20,9],[0,9]], [[13,9],[24,18]]],
+  B: [[[0,9],[0,0],[19,0],[23,3],[23,6],[19,9],[0,9],[0,18],[20,18],[24,15],[24,12],[20,9]]],
+  A: [[[0,18],[0,6],[5,0],[19,0],[24,6],[24,18]], [[0,11],[24,11]]],
+  C: [[[24,0],[5,0],[0,4],[0,14],[5,18],[24,18]]],
+  O: [[[5,0],[19,0],[24,4],[24,14],[19,18],[5,18],[0,14],[0,4],[5,0]]],
+  N: [[[0,18],[0,0],[24,18],[24,0]]]
+};
+
+function drawLogoWord(pixels, word, top, letterWidth, spacing) {
+  const wordWidth = word.length * (letterWidth + spacing) - spacing;
+  for (const [letterIndex, letter] of [...word].entries()) {
+    const left = Math.floor((hiresWidth - wordWidth) / 2) + letterIndex * (letterWidth + spacing);
+    for (const stroke of logoStrokes[letter]) {
+      for (let i = 1; i < stroke.length; i++) {
+        const [x1, y1] = stroke[i - 1];
+        const [x2, y2] = stroke[i];
+        const dx = (x2 - x1) * letterWidth / 24;
+        const count = Math.ceil(Math.max(Math.abs(dx), Math.abs(y2 - y1)));
+        for (let dot = 0; dot <= count; dot++) {
+          const x = left + Math.round(x1 * letterWidth / 24 + dx * dot / count);
+          const y = top + Math.round(y1 + (y2 - y1) * dot / count);
+          for (let dy = -2; dy <= 2; dy++) {
+            const start = (y + dy) * hiresWidth + x;
+            const radius = Math.abs(dy) === 2 ? 1 : 2;
+            pixels.fill(1, start - radius, start + radius + 1);
+          }
         }
       }
     }
@@ -65,8 +106,8 @@ function drawScene() {
   line(3, 103, 58, 103, purple);
   line(13, 105, 44, 105, purple);
   line(95, 94, 157, 94, periwinkle);
-  for (const [x, y] of [[10,14],[150,13],[137,23],[8,49],[15,73],[30,80],[49,78],[76,76],
-    [83,9],[102,83],[117,70],[148,74],[68,93],[18,96],[43,98],[154,98],[4,110]]) {
+  for (const [x, y] of [[15,73],[30,80],[49,78],[76,76],
+    [102,83],[117,70],[148,74],[68,93],[18,96],[43,98],[154,98],[4,110]]) {
     dot(x, y, periwinkle);
     if (x % 3 === 0) line(x, y - 1, x, y + 1, silver);
   }
@@ -124,13 +165,6 @@ function drawScene() {
   line(63, 97, 67, 100, gray);
   line(59, 111, 67, 111, gray);
 
-  drawText(pixels, 'WHISKER', 18, purple, 3, 2);
-  drawText(pixels, 'WHISKER', 15, white, 3);
-  drawText(pixels, 'BEACON', 48, orange, 3, 2);
-  drawText(pixels, 'BEACON', 45, yellow, 3);
-  rect(0, 176, 160, 24, black);
-  drawText(pixels, 'C OR UP TO CHOOSE CAT', 184, silver, 1);
-  drawText(pixels, 'FIRE OR SPACE TO START', 192, yellow, 1);
   return pixels;
 }
 
@@ -156,9 +190,7 @@ function encodeScene(pixels) {
     for (const ink of samples) count[ink]++;
     const inks = count.slice(1).map((_, index) => index + 1)
       .filter(ink => count[ink] > 0).sort((a, b) => count[b] - count[a]).slice(0, 3);
-    let palette = [black, ...inks];
-    if (y === nameRow) palette = [black, black, black, cyan];
-    if (y === promptRow) palette = [black, black, black, yellow];
+    const palette = [black, ...inks];
     screen[cell] = (palette[1] ?? 0) << 4 | (palette[2] ?? 0);
     color[cell] = palette[3] ?? 0;
     for (const [r, row] of rows.entries()) {
@@ -169,6 +201,42 @@ function encodeScene(pixels) {
     }
   }
   return { bitmap, screen, color };
+}
+
+function packHires(pixels, firstColumn = 0, count = columns) {
+  const rows = pixels.length / (hiresWidth * 8);
+  const bytes = Buffer.alloc(rows * count * 8);
+  for (let cell = 0; cell < rows * count; cell++) {
+    const top = Math.floor(cell / count) * 8;
+    const left = (firstColumn + cell % count) * 8;
+    for (let row = 0; row < 8; row++) {
+      const start = (top + row) * hiresWidth + left;
+      bytes[cell * 8 + row] = pixels.subarray(start, start + 8)
+        .reduce((byte, pixel) => byte << 1 | pixel, 0);
+    }
+  }
+  return bytes;
+}
+
+function drawLettering({ bitmap, screen }) {
+  const logo = Buffer.alloc(hiresWidth * sceneRow * 8);
+  drawLogoWord(logo, 'WHISKER', 11, 26, 10);
+  drawLogoWord(logo, 'BEACON', 40, 30, 12);
+  for (const [x, y] of [[23,14],[295,13],[289,24],[28,51],[300,48],[167,7],[252,35]]) {
+    logo[y * hiresWidth + x] = 1;
+  }
+
+  const footer = Buffer.alloc(hiresWidth * 24);
+  drawText(footer, 'C OR UP TO CHOOSE CAT', 8);
+  drawText(footer, 'FIRE OR SPACE TO START', 16);
+  packHires(logo).copy(bitmap);
+  packHires(footer).copy(bitmap, nameRow * columns * 8);
+  const inks = [silver, white, white, silver, silver, yellow, yellow, orange];
+  for (const [row, ink] of inks.entries()) screen.fill(ink << 4, row * columns, (row + 1) * columns);
+  for (const [row, ink] of [cyan, silver, yellow].entries()) {
+    const start = (nameRow + row) * columns;
+    screen.fill(ink << 4, start, start + columns);
+  }
 }
 
 function hires(rows) {
@@ -182,17 +250,10 @@ function hires(rows) {
 }
 
 function titleName(label) {
-  const pixels = Buffer.alloc(width * 8);
-  drawText(pixels, label, 0, 3, 1);
-  const name = Buffer.alloc(nameCells * 8);
-  for (let cell = 0; cell < nameCells; cell++) {
-    const x = (width - nameCells * 4) / 2 + cell * 4;
-    for (let y = 0; y < 8; y++) {
-      name[cell * 8 + y] = pixels.subarray(y * width + x, y * width + x + 4)
-        .reduce((byte, pixel) => byte << 2 | pixel, 0);
-    }
-  }
-  return name;
+  const pixels = Buffer.alloc(hiresWidth * 8);
+  // Keep the first scanline blank for the multicolor-to-hi-res switch.
+  drawText(pixels, label, 1);
+  return packHires(pixels, (columns - nameCells) / 2, nameCells);
 }
 
 function titleArt(cats) {
@@ -202,7 +263,9 @@ function titleArt(cats) {
     hires(['..#..', '.###.', '..#..']),
     hires(['.....', '..#..', '.....'])
   ]);
-  return { ...encodeScene(drawScene()), sprites, names: Buffer.concat(cats.map(cat => titleName(cat.name))) };
+  const scene = encodeScene(drawScene());
+  drawLettering(scene);
+  return { ...scene, sprites, names: Buffer.concat(cats.map(cat => titleName(cat.name))) };
 }
 
 module.exports = { titleArt };

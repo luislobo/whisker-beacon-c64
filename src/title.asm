@@ -1,13 +1,17 @@
 TITLE_SCREEN = $8c00
 TITLE_NAMES = $8000
+TITLE_NAME_ROW = 22
 TITLE_NAME_BYTES = 20*8
-TITLE_NAME_BITMAP = TITLE_BITMAP+(22*40+10)*8
+TITLE_NAME_BITMAP = TITLE_BITMAP+(TITLE_NAME_ROW*40+10)*8
 TITLE_SPRITES = $8640
 TITLE_COLORS = $9400
 TITLE_BITMAP = $a000
 TITLE_CAT = (TITLE_SPRITES & $3fff)/64
 TITLE_LAMP = TITLE_CAT+CAT_LOOKS*2
-TITLE_PROMPT = $d800 + 24*40
+TITLE_PROMPT = TITLE_SCREEN + 24*40
+TITLE_FIRST_RASTER = 51
+TITLE_SCENE_RASTER = TITLE_FIRST_RASTER + 8*8 - 1
+TITLE_FOOTER_RASTER = TITLE_FIRST_RASTER + TITLE_NAME_ROW*8
 
 show_title:
     lda #$0b
@@ -18,7 +22,7 @@ show_title:
     sta $dd00
     lda #$38
     sta $d018
-    lda #$18
+    lda #$08
     sta $d016
     ldx #0
 title_color_pages:
@@ -59,9 +63,31 @@ title_init_sprites:
     lda #TITLE_LAMP
     sta TITLE_SCREEN+$3f9
     jsr show_title_cat
+    jsr init_title_music
+    lda #250
+title_enable_wait:
+    cmp $d012
+    bne title_enable_wait
     lda #$3b
     sta $d011
-    jsr init_title_music
+    jmp title_frame
+
+    ; Change modes in blank scanlines while the CPU is waiting for the frame.
+title_wait_scene:
+    lda #TITLE_SCENE_RASTER
+title_poll_scene:
+    cmp $d012
+    bne title_poll_scene
+    lda #$18
+    sta $d016
+title_scene_applied:
+    lda #TITLE_FOOTER_RASTER
+title_poll_footer:
+    cmp $d012
+    bne title_poll_footer
+    lda #$08
+    sta $d016
+title_footer_applied:
 title_wait:
     lda $d012
     cmp #250
@@ -99,7 +125,7 @@ title_leave_raster:
     lda $d012
     cmp #250
     beq title_leave_raster
-    bne title_wait
+    jmp title_wait_scene
 
 title_start:
     jsr stop_title_music
@@ -223,7 +249,7 @@ title_drift:
 title_lamp_ink:
     .byte 9,8,8,7,1,7,8,9
 title_prompt_ink:
-    .byte 15,15,7,7,1,7,7,15
+    .byte $f0,$f0,$70,$70,$10,$70,$70,$f0
 title_fly_frame:
     .byte TITLE_LAMP+1,TITLE_LAMP+2,TITLE_LAMP+2,TITLE_LAMP+1
     .byte TITLE_LAMP+1,TITLE_LAMP+2,TITLE_LAMP+2,TITLE_LAMP+1

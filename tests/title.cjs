@@ -12,6 +12,29 @@ const titleCat = 0x8ff8;
 const nameRow = 0xa000 + (22 * 40 + 10) * 8;
 const nameBytes = 20 * 8;
 
+function displayBands(mode) {
+  return runVice(mode, 'title-bands', async monitor => {
+    await monitor.command(`load "${path.join(build, 'whisker-beacon.prg')}" 0`);
+    await monitor.command('break ' + s.title_controls_ready.toString(16));
+    await monitor.command('g 810');
+    await monitor.command('delete');
+
+    const byte = async address => (await monitor.bytes(address, 1))[0];
+    assert.equal(await byte(0xd016) & 0x18, 0x08, 'the frame starts with high-resolution lettering');
+    assert.ok(s.title_scene_applied && s.title_footer_applied, 'the title splits the bitmap into display bands');
+    for (const [label, raster, display] of [
+      ['title_scene_applied', 114, 0x18], ['title_footer_applied', 227, 0x08]
+    ]) {
+      await monitor.until(s[label]);
+      assert.equal(await byte(0xd012), raster, 'the display changes in the blank scanline');
+      assert.equal(await byte(0xd016) & 0x18, display);
+    }
+    const name = await monitor.bytes(nameRow, nameBytes);
+    assert.ok(name.some(bits => (bits ^ (bits >> 1)) & 0x55), 'the name uses individual horizontal pixels');
+    console.log(mode + ': hi-res logo and controls with a multicolor scene between them');
+  });
+}
+
 function test(mode) {
   return runVice(mode, 'title', async monitor => {
     await monitor.command(`load "${path.join(build, 'whisker-beacon.prg')}" 0`);
@@ -92,11 +115,16 @@ function cue(mode) {
     await monitor.command('break ' + s.title_controls_ready.toString(16));
     await monitor.command('g 810');
     const hz = mode === 'pal' ? 50 : 60;
+    const cyclesPerFrame = mode === 'pal' ? 19656 : 17095;
     async function advance(frames) {
       await monitor.command('ignore 1 $' + (frames - 1).toString(16));
       await monitor.command('g');
     }
+    await monitor.command('stopwatch reset');
     await advance(hz * 3);
+    const cycles = Number((await monitor.command('stopwatch')).match(/Stopwatch:\s*(\d+)/)?.[1]);
+    assert.ok(Math.abs(cycles - hz * 3 * cyclesPerFrame) < cyclesPerFrame,
+      'the title services every refresh while the SID cue plays');
     const beat = (await monitor.bytes(0x31, 1))[0];
     assert.equal(beat, 11, 'the closing chord has finished in under three seconds');
     await advance(hz * 3);
@@ -106,7 +134,7 @@ function cue(mode) {
   });
 }
 
-Promise.allSettled(['pal', 'ntsc'].flatMap(mode => [test(mode), cue(mode)])).then(results => {
+Promise.allSettled(['pal', 'ntsc'].flatMap(mode => [test(mode), cue(mode), displayBands(mode)])).then(results => {
   for (const result of results) {
     if (result.status === 'fulfilled') continue;
     console.error(result.reason);
