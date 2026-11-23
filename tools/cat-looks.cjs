@@ -16,9 +16,9 @@ b....aaaaaa.
 const tuxedo = `......a...a.
 ......aa.aa.
 ......aaaaa.
-..b..abcbca.
-.ba..aaabca.
-.a...aaaaca.
+..b..aacaca.
+.ba..aaabaa.
+.a...aaaaaa.
 .b..aaaacca.
 ..baaaccca..
 ..aaaaacca..
@@ -38,10 +38,10 @@ b...aaaabaa.
 
 const calico = `.......c..b.
 ..b....cc.bb
-.ba...ccbbbc
-.a....ccbcba
-.b...aaabcc.
-..a.aaacccc.
+.ba...aabbbb
+.a....acacba
+.b...aaabaa.
+..a.aaaaaba.
 ..baccaaac..
 ...aacaaab..
 ...aacaaa...
@@ -51,10 +51,10 @@ const calico = `.......c..b.
 const bobtail = `......a..a..
 ......aa.aa.
 .....aaaaaa.
-.....acacba.
-.....aaabca.
-.aa.aaaacca.
-abaaaaaacca.
+.....aacaca.
+.....aaabaa.
+.aa.aaaaaaa.
+abaaaaaaaaa.
 .baaabaaaa..
 ..aaaaaaa...
 ..baa..baa..
@@ -101,9 +101,9 @@ ab....acaca.
 const alley = `.......a..b.
 ..a....aa.b.
 .ba...aaaaa.
-.b....acaba.
-..b...aabca.
-..a..aaabca.
+.b....acaca.
+..b...aabaa.
+..a..aaaaba.
 ..abaaaaaa..
 ...aaaaabb..
 ...aaaaba...
@@ -114,10 +114,10 @@ const lantern = `.c.....a..a.
 cc.....aa.aa
 .cc...aaaaaa
 .b....acaca.
-.b....aabca.
-..b..aaaaca.
+.b....aabaa.
+..b..aaaaaa.
 ..baaaaaacc.
-..aaaaaacc..
+..aaaaaaac..
 ..aaaaaaba..
 ...aa..aa...
 ...bb..bb...`;
@@ -234,6 +234,7 @@ ab....aa.aa.
 const poses = { stand: '', stride: walk, turn, launch: stretch, air: jump, landing, slide, clue, spark, sit };
 const height = 13;
 const ink = { '.': 0, a: 3, b: 1, c: 2 };
+const pipFaceLooks = new Set(['Tuxedo', 'Calico', 'Bobtail', 'Alley Cat', 'Lantern Cat']);
 
 // These details carry each silhouette from the portrait into the action poses.
 function actionArt(look, frame, pose) {
@@ -241,16 +242,28 @@ function actionArt(look, frame, pose) {
   const feet = rows.length - 1;
   const slidePose = pose === 'slide';
   const firstEar = rows.findIndex(row => row.slice(7).includes('a'));
+  const eyeRow = pose === 'spark' ? 5 : 3;
+  const eyeLeft = pose === 'sit' ? 5 : pose === 'spark' ? 8 : 7;
   switch (look.name) {
     case 'Tuxedo':
+      for (let y = Math.max(eyeRow + 3, feet - 3); y <= feet; y++) {
+        for (let x = 7; x <= 9; x++) {
+          if (rows[y][x] === 'a') rows[y][x] = 'c';
+        }
+      }
+      break;
     case 'Calico':
+      for (let y = Math.max(eyeRow + 2, feet - 4); y < feet; y++) {
+        if (rows[y][3] === 'a') rows[y][3] = 'c';
+        if (rows[y][4] === 'a' && y % 2) rows[y][4] = 'c';
+      }
+      if (rows[eyeRow - 1][10] === 'a') rows[eyeRow - 1][10] = 'b';
+      break;
     case 'Siamese':
       for (let y = 0; y <= feet; y++) {
         for (let x = 0; x < 12; x++) {
           if (rows[y][x] !== 'a') continue;
-          if (look.name === 'Tuxedo' && x >= 8 && y >= feet - 3) rows[y][x] = 'c';
-          if (look.name === 'Calico' && (x === 7 || x === 3)) rows[y][x] = 'c';
-          if (look.name === 'Siamese' && (y === firstEar || y === feet || x === 11)) rows[y][x] = 'b';
+          if (y === firstEar || y === feet || x === 11) rows[y][x] = 'b';
         }
       }
       break;
@@ -279,7 +292,9 @@ function actionArt(look, frame, pose) {
         if (ear >= 7) rows[firstEar][ear] = 'b';
       }
       break;
-    case 'Lantern Cat':
+    case 'Lantern Cat': {
+      const collar = rows[eyeRow + 3];
+      if (collar?.[eyeLeft + 2] === 'a') collar[eyeLeft + 2] = 'c';
       for (const row of rows) {
         const tip = row.findIndex(pixel => pixel !== '.');
         if (tip >= 0 && tip <= 2) {
@@ -288,6 +303,18 @@ function actionArt(look, frame, pose) {
         }
       }
       break;
+    }
+  }
+  if (pipFaceLooks.has(look.name)) {
+    // Pip's one-cell bridge separates the eyes. The nose sits one row lower.
+    const eyes = rows[eyeRow];
+    const muzzle = rows[eyeRow + 1];
+    for (let x = eyeLeft - 1; x <= eyeLeft + 3; x++) {
+      if (eyes[x] !== '.') eyes[x] = 'a';
+      if (muzzle[x] === 'c') muzzle[x] = 'a';
+    }
+    eyes[eyeLeft] = eyes[eyeLeft + 2] = pose === 'spark' ? 'b' : 'c';
+    muzzle[eyeLeft + 1] = 'b';
   }
   return rows.map(row => row.join('')).join('\n');
 }
