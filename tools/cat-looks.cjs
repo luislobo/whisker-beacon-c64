@@ -187,10 +187,10 @@ ab.....aa.aa
 const sit = `.....a..a...
 .....aa.aa..
 ....aaaaaaa.
-....acacaba.
-....aaaabaa.
-.....aaaac..
-.....aaaca..
+....aacacaa.
+....aaabaaa.
+.....aaaaa..
+.....aaaaa..
 ....aaaaca..
 .baaaaaaca..
 bbaaaaacca..
@@ -243,7 +243,7 @@ function actionArt(look, frame, pose) {
   const slidePose = pose === 'slide';
   const firstEar = rows.findIndex(row => row.slice(7).includes('a'));
   const eyeRow = pose === 'spark' ? 5 : 3;
-  const eyeLeft = pose === 'sit' ? 5 : pose === 'spark' ? 8 : 7;
+  const eyeLeft = pose === 'spark' ? 8 : 7;
   switch (look.name) {
     case 'Tuxedo':
       for (let y = Math.max(eyeRow + 3, feet - 3); y <= feet; y++) {
@@ -294,7 +294,7 @@ function actionArt(look, frame, pose) {
       break;
     case 'Lantern Cat': {
       const collar = rows[eyeRow + 3];
-      if (collar?.[eyeLeft + 2] === 'a') collar[eyeLeft + 2] = 'c';
+      if (pose !== 'sit' && collar?.[eyeLeft + 2] === 'a') collar[eyeLeft + 2] = 'c';
       for (const row of rows) {
         const tip = row.findIndex(pixel => pixel !== '.');
         if (tip >= 0 && tip <= 2) {
@@ -305,7 +305,7 @@ function actionArt(look, frame, pose) {
       break;
     }
   }
-  if (pipFaceLooks.has(look.name)) {
+  if (pose !== 'sit' && pipFaceLooks.has(look.name)) {
     // Pip's one-cell bridge separates the eyes. The nose sits one row lower.
     const eyes = rows[eyeRow];
     const muzzle = rows[eyeRow + 1];
