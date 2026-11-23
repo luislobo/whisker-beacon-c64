@@ -55,6 +55,10 @@ record_cat_transition:
     sta facing_before
     lda grounded
     sta ground_before
+    lda brass_flash_ticks
+    beq record_pose_ticks
+    dec brass_flash_ticks
+record_pose_ticks:
     lda cat_pose_ticks
     beq cat_transition_done
     dec cat_pose_ticks

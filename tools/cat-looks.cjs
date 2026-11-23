@@ -334,22 +334,28 @@ function packFrame(art, colors) {
 }
 
 function charmArt() {
-  const frames = [
-    ['   .. ..', '   #####', '    ###.', '     ##.', '    #.#.', '   ##.##'],
-    ['    ##..', '    ##..', '   ####.', '   ####.', '  ######', '    ##..']
-  ];
-  const bytes = Buffer.alloc(4 * 64);
-  for (const [charm, rows] of frames.entries()) {
-    for (const [y, row] of rows.entries()) {
-      for (const [i, pixel] of [...row].entries()) {
-        if (pixel !== '#') continue;
-        const x = 16 + i;
-        for (const facing of [0, 1]) {
-          const position = facing ? 23 - x : x;
-          const byte = (charm * 2 + facing) * 64 + (y + 7) * 3 + (position >> 3);
-          bytes[byte] |= 128 >> (position & 7);
-        }
-      }
+  const ribbon = ['   .. ..', '   #####', '    ###.', '     ##.', '    #.#.', '   ##.##'];
+  const brass = ['...b...', '..ggb..', '..ggb..', '.ggggb.', '.ggggb.', 'bbgggbb', '...b...'];
+  const glint = ['..w..', '.www.', '..w..'];
+  const frames = [0, 1].map(left => charmFrame(ribbon, '#', 16, 7, left));
+  for (const swing of [-1, 0, 1]) {
+    for (const left of [0, 1]) {
+      frames.push(charmFrame(brass, 'g', 13, 0, left, swing));
+      frames.push(charmFrame(brass, 'b', 13, 0, left, swing));
+    }
+  }
+  for (const left of [0, 1]) frames.push(charmFrame(glint, 'w', 18, 0, left));
+  return Buffer.concat(frames);
+}
+
+function charmFrame(rows, ink, xOrigin, yOrigin, left, swing = 0) {
+  const bytes = Buffer.alloc(64);
+  for (const [y, row] of rows.entries()) {
+    for (const [column, pixel] of [...row].entries()) {
+      if (pixel !== ink) continue;
+      const x = xOrigin + column + (y >= 3 ? swing : 0);
+      const position = left ? 23 - x : x;
+      bytes[(yOrigin + y) * 3 + (position >> 3)] |= 128 >> (position & 7);
     }
   }
   return bytes;

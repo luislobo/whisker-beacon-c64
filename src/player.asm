@@ -34,6 +34,7 @@ reset_player:
     sta slide_strike
     sta facing_before
     sta cat_pose_ticks
+    sta brass_flash_ticks
     lda #1
     sta grounded
     sta ground_before

@@ -88,4 +88,5 @@ cat_unlocks    = $81
 cat_copy_right  = $82
 cat_copy_count = $84
 cat_charm      = $85
-state_end      = $85
+brass_flash_ticks = $86
+state_end      = $86

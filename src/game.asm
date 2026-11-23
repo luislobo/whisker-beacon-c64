@@ -125,6 +125,7 @@ leave_raster:
 
 * = CHARM_SPRITES
     .binary "../build/charms.bin"
+.cerror * > $3000, "Charms overlap the VIC charset"
 
 * = $3000
     .binary "../build/tiles.bin"
