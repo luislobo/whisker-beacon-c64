@@ -52,12 +52,14 @@ Run `node build.cjs --disk` to also create the D64 using VICE's `c1541`.
 Run `node tests/playtest.cjs` to test the garden on PAL and NTSC, or run
 `node tests/greenhouse.cjs` to clear both levels and check the greenhouse
 hazards. Run `node tests/jumps.cjs` to test jump timing and the blue firefly.
+Run `node tests/scroll.cjs` to check left and right scroll across tile boundaries.
 `VICE_BIN` selects the emulator executable. Headless Linux uses `xvfb-run`.
 
 The VICE playtest checks the 50 Hz gameplay and music clocks, both checkpoints,
 the finish time and session best, replay, and recovery from a fall. It supplies input at
-the game's control-sampling boundary. The screen scroll and sprite positions
-update on the native video clock.
+the game's control-sampling boundary. The camera and Pip update at 50 FPS
+on PAL and 60 FPS on NTSC. NTSC draws intermediate positions between the
+50 Hz gameplay steps. The gameplay preview records every PAL refresh.
 
 The VICE monitor helper was adapted from Luis Lobo's
 [C64 demo kit](https://github.com/luislobo/c64-demo-kit). The characters, art,

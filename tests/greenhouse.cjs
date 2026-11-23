@@ -25,6 +25,8 @@ async function exercise(mode, name, action) {
     await monitor.command('g 810');
     await monitor.command('delete');
 
+    const nativeCapture = process.env.CAPTURE === '1' && mode === 'pal' && name === 'greenhouse-route';
+    let recording = false;
     let frames = 0;
     async function capture() {
       const file = path.join(directory, 'frame-' + String(frames++).padStart(3, '0') + '.png');
@@ -34,10 +36,12 @@ async function exercise(mode, name, action) {
     async function step(input, count = 1) {
       for (let i = 0; i < count; i++) {
         await monitor.write(7, [input]);
+        if (recording) {
+          await monitor.until(symbols.frame_present);
+          await capture();
+        }
         await monitor.until(symbols.controls_ready);
         ticks++;
-        if (process.env.CAPTURE === '1' && mode === 'pal' && name === 'greenhouse-route' &&
-            ticks % 6 === 0 && (await monitor.bytes(LEVEL, 1))[0] === 1) await capture();
       }
     }
     async function x() {
@@ -56,13 +60,15 @@ async function exercise(mode, name, action) {
       await step(0);
       await step(RIGHT | FIRE);
       assert.equal((await monitor.bytes(LEVEL, 1))[0], 1, 'right and fire opens the greenhouse');
+      recording = nativeCapture;
     }
-    return action({ monitor, directory, step, march, x, enterGreenhouse, capture, ticks: () => ticks });
+    const stopRecording = () => { recording = false; };
+    return action({ monitor, directory, step, march, x, enterGreenhouse, capture, stopRecording, ticks: () => ticks });
   });
 }
 
 function route(mode) {
-  return exercise(mode, 'greenhouse-route', async ({ monitor, directory, step, march, x, enterGreenhouse, capture, ticks }) => {
+  return exercise(mode, 'greenhouse-route', async ({ monitor, directory, step, march, x, enterGreenhouse, capture, stopRecording, ticks }) => {
     for (const input of gardenRoute) await step(input);
     assert.equal((await monitor.bytes(WON, 1))[0], 1, 'the garden beacon was lit normally');
     await enterGreenhouse();
@@ -107,6 +113,7 @@ function route(mode) {
       'the moving greenhouse route holds the normalized game clock');
     assert.equal(((await monitor.bytes(0x33, 1))[0] - startSid) & 255, elapsed & 255,
       'the SID updates throughout the run');
+    stopRecording();
     if (mode === 'pal' && process.env.CAPTURE === '1') await capture();
     await monitor.command(`screenshot "${path.join(directory, 'beacon.png')}" 2`);
     const best = await monitor.bytes(symbols.best_cents, 3);
