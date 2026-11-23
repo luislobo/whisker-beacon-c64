@@ -5,18 +5,33 @@ function greenhouse() {
   const put = (column, row, tile) => { map[row * WIDTH + column] = TILE[tile]; };
   for (let x = 0; x < WIDTH; x++) {
     const bay = x % 16;
-    put(x, 7 + Math.floor(Math.abs(bay - 8) / 2), bay < 8 ? 'roofLeft' : 'roofRight');
-    if (bay === 0) {
-      for (let y = 11; y <= 22; y++) put(x, y, 'glassFrame');
-    } else {
-      put(x, 15, 'glassBeam');
-      if (bay === 4 || bay === 11) put(x, 13, 'glass');
-      if (bay === 3 || bay === 10) put(x, 17, 'glass');
+    const partition = bay === 0 || bay === 8;
+    const roofRow = 7 + Math.floor(Math.abs(bay - 8) / 2);
+    put(x, roofRow, bay === 8 ? 'roofCap' : bay < 8 ? 'roofLeft' : 'roofRight');
+    for (let y = roofRow + 1; y <= 22; y++) {
+      if (y === 15 || y === 19) put(x, y, partition ? 'glassJoin' : 'glassBeam');
+      else if (partition) put(x, y, 'glassFrame');
+      else if ((bay === 3 && y === 13) || (bay === 11 && y === 17)) put(x, y, 'paneGlint');
     }
-    if (bay >= 6 && bay <= 8) {
-      put(x, 20, 'leaf');
-      put(x, 21, 'leaf');
-      put(x, 22, 'trunk');
+  }
+  for (const x of [22, 50, 82, 113]) put(x, 4 + (x & 1), 'moon');
+  for (const x of [5, 12, 19, 29, 40, 55, 62, 72, 87, 104, 121]) put(x, 5 + x % 2, 'star');
+
+  for (const x of [5, 25, 47, 67, 88, 104, 120]) {
+    for (let y = 12; y <= 14; y++) put(x, y, 'chain');
+    put(x, 15, 'basket');
+    put(x - 1, 16, 'vineLeft');
+    put(x + 1, 16, 'vineRight');
+  }
+  for (const [first, last] of [[3,12],[21,31],[35,46],[57,63],[74,81],[89,98],[113,124]]) {
+    for (let x = first; x < last; x++) {
+      put(x, 22, 'sill');
+      if (x % 4 === 0) {
+        put(x, 21, 'rootsPot');
+        put(x + 1, 20, 'fern');
+      } else if (x % 4 === 2) {
+        put(x, 21, 'flowerPot');
+      }
     }
   }
   for (const [first, last] of [[0,53],[57,81],[85,109],[112,128]]) {
