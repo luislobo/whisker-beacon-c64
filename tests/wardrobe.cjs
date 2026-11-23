@@ -47,7 +47,15 @@ function test(mode) {
     const portraits = new Set();
     for (const [index, name] of names.entries()) {
       assert.equal(text(await monitor.bytes(0x0400 + 42, 13)).trimEnd(), name);
-      portraits.add((await monitor.bytes(cache, 39)).toString('hex'));
+      const portrait = await monitor.bytes(cache, 39);
+      portraits.add(portrait.toString('hex'));
+      if (name === 'CALICO') {
+        const pixel = (x, y) => (portrait[y * 3 + (x >> 2)] >> (6 - 2 * (x & 3))) & 3;
+        const inks = (await monitor.bytes(0xd025, 3)).map(color => color & 15);
+        assert.deepEqual(inks, Buffer.from([11, 1, 8]), 'Calico has gray, white, and orange registers');
+        assert.equal(pixel(6, 4), 2, 'Calico fur selects its own orange sprite register');
+        assert.equal(pixel(7, 2), 3, 'the white ear tip selects shared white');
+      }
       assert.equal(await value('run_started'), 0, 'choosing a cat leaves the timer at zero');
       if (index === 0) {
         await step(down);

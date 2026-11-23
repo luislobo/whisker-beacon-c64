@@ -213,7 +213,7 @@ const walk = `......a...a.
 const looks = [
   { name: 'Ginger Pip', art: ginger, color: 8 },
   { name: 'Tuxedo', art: tuxedo, color: 12 },
-  { name: 'Black Cat', art: black, color: 7, ink: { a: 1, b: 1, c: 3 } },
+  { name: 'Black Cat', art: black, color: 7, ink: { a: 1, b: 1, c: 2 } },
   { name: 'Calico', art: calicoStand, stride: calicoStride, color: 8 },
   { name: 'Bobtail', art: bobtail, color: 14 },
   { name: 'Fluffy Cat', art: fluffy, color: 15 },
@@ -234,7 +234,8 @@ ab....aa.aa.
 
 const poses = { stand: '', stride: walk, turn, launch: stretch, air: jump, landing, slide, clue, spark, sit };
 const height = 13;
-const ink = { '.': 0, a: 3, b: 1, c: 2 };
+// VIC-II multicolor sprites use %10 for their own color and %11 for shared white.
+const ink = { '.': 0, a: 2, b: 1, c: 3 };
 const pipFaceLooks = new Set(['Tuxedo', 'Calico', 'Bobtail', 'Alley Cat', 'Lantern Cat']);
 
 // These details carry each silhouette from the portrait into the action poses.
