@@ -8,8 +8,10 @@ function greenhouse() {
     put(x, 7 + Math.floor(Math.abs(bay - 8) / 2), bay < 8 ? 'roofLeft' : 'roofRight');
     if (bay === 0) {
       for (let y = 11; y <= 22; y++) put(x, y, 'glassFrame');
-    } else if (bay === 4 || bay === 11) {
-      put(x, 13 + (x >> 2) % 4, 'glass');
+    } else {
+      put(x, 15, 'glassBeam');
+      if (bay === 4 || bay === 11) put(x, 13, 'glass');
+      if (bay === 3 || bay === 10) put(x, 17, 'glass');
     }
     if (bay >= 6 && bay <= 8) {
       put(x, 20, 'leaf');
