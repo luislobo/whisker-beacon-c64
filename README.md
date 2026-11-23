@@ -22,9 +22,9 @@ From BASIC on a C64, enter `LOAD"*",8,1` and then `RUN`.
 | Enter the greenhouse after clearing the garden | D and Space | Right and Fire |
 | Return to the garden after clearing the greenhouse | A and Space | Left and Fire |
 
-Collect at least six fireflies and reach the beacon at the far right. Falls
-and enemy hits return Pip to the latest checkpoint. You keep the fireflies
-you collected.
+Collect at least six gold fireflies, then reach the beacon between the gold
+arrows at the far right. Falls and enemy hits return Pip to the latest
+checkpoint. You keep the fireflies you collected.
 
 Slide under low shelves, scatter dust mites, and turn rolling acorns around.
 Release Down or S between slides. You can slide again after a short recovery.
@@ -35,7 +35,7 @@ The finish screen shows your time, firefly count, and falls. Finish without
 a fall for a clean clear. Press Fire or Space to try for a faster time.
 Each level keeps its own best time until you reload the game.
 
-Watch for a mushroom that launches Pip onto the rooftop route. The blue
+Watch for a mushroom that launches Pip onto the rooftop route. The cyan
 firefly earns a star beside the firefly counter.
 
 ## Build and test
