@@ -6,7 +6,7 @@ three-voice SID tune *Lantern Paws*.
 
 ![Animated Whisker Beacon title screen with selectable cats and rain on the greenhouse roof](dist/title.gif)
 
-[Watch gameplay in VICE](dist/gameplay.gif) · [Watch all ten cats in motion](dist/cat-sprite-showcase.gif)
+[Watch the Rain Gallery in VICE](dist/gameplay.gif) · [Watch all ten cats in motion](dist/cat-sprite-showcase.gif)
 
 ## Play
 
@@ -45,7 +45,14 @@ new section and its checkpoint.
 
 The Garden crosses a moonlit stream, an orchard, an aqueduct, a mushroom
 dell, and the beacon terraces. The Old Greenhouse adds propagation racks,
-a rain gallery, a shade house, a seed vault, and an observatory.
+the Rain Gallery, a shade house, a seed vault, and an observatory.
+
+In one stretch of the Rain Gallery, the sunset moves at a quarter of the
+floor's speed and the trees move at half speed. Pip runs inside, past
+lantern-lit platforms and greenhouse window frames. Sliding across the
+gallery floor kicks up a short spray.
+
+![Pip runs and jumps inside the Rain Gallery while the sunset and trees scroll behind the windows](dist/gameplay.gif)
 
 Slide under low shelves, scatter dust mites, and turn rolling acorns around.
 Release Down or S between slides. You can slide again after a short recovery.
@@ -82,12 +89,14 @@ Run `node tests/title.cjs` for the title, SID cue, and start controls.
 Run `node tests/wet-glass.cjs` to check the roof animation on PAL and NTSC.
 Run `node tests/brass.cjs` for the bell's pickup glint and slide animation.
 Run `node tests/scroll.cjs` to check the camera in both directions across a
-map page boundary. Set `VICE_BIN` to select the emulator. Headless Linux
-uses `xvfb-run`.
+map page boundary.
+Run `node tests/parallax.cjs` to check the scroll speeds and palette changes
+at the Rain Gallery windows on PAL and NTSC.
+Set `VICE_BIN` to select the emulator. Headless Linux uses `xvfb-run`.
 
 The camera updates at 50 FPS on PAL and 60 FPS on NTSC. Gameplay and music
 advance at 50 Hz in both modes. The title and gameplay GIFs were captured
-in PAL VICE.
+in PAL VICE. The gameplay GIF samples every other frame.
 
 The VICE monitor helper was adapted from Luis Lobo's
 [C64 demo kit](https://github.com/luislobo/c64-demo-kit). The characters, art,
