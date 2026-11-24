@@ -4,7 +4,7 @@ Pip the cat crosses the twilight garden and the Old Greenhouse. Gather 24
 fireflies in each level to relight its beacon. The game uses the original
 three-voice SID tune *Lantern Paws*.
 
-![Animated Whisker Beacon title screen cycling through the cats on the greenhouse roof](dist/title.gif)
+![Animated Whisker Beacon title screen with selectable cats and rain on the greenhouse roof](dist/title.gif)
 
 [Watch gameplay in VICE](dist/gameplay.gif) · [Watch all ten cats in motion](dist/cat-sprite-showcase.gif)
 
@@ -15,6 +15,7 @@ Open [whisker-beacon.prg](dist/whisker-beacon.prg) in VICE, or attach
 From BASIC on a C64, enter `LOAD"*",8,1` and then `RUN`.
 Press C or Up on the title screen to preview a cat on the greenhouse roof.
 Press Space or Fire to take that cat into the Garden. The SID intro plays once.
+Rain ripples across the sloped roof, with smaller droplets near the ridge.
 
 | Action | Keyboard | Joystick in port 2 |
 | --- | --- | --- |
@@ -78,6 +79,7 @@ Run `node tests/greenhouse.cjs` to check the greenhouse hazards and lanterns.
 Run `node tests/jumps.cjs` to test jump timing and the first cyan firefly.
 Run `node tests/wardrobe.cjs` to check the wardrobe and movement poses.
 Run `node tests/title.cjs` for the title, SID cue, and start controls.
+Run `node tests/wet-glass.cjs` to check the roof animation on PAL and NTSC.
 Run `node tests/brass.cjs` for the bell's pickup glint and slide animation.
 Run `node tests/scroll.cjs` to check the camera in both directions across a
 map page boundary. Set `VICE_BIN` to select the emulator. Headless Linux
@@ -90,3 +92,6 @@ in PAL VICE.
 The VICE monitor helper was adapted from Luis Lobo's
 [C64 demo kit](https://github.com/luislobo/c64-demo-kit). The characters, art,
 levels, and score were made for Whisker Beacon.
+
+Linus Åkesson's bump-mapped rain in *Lunatico* inspired the roof effect.
+[Rain Effect Explained](https://www.linusakesson.net/scene/lunatico/rain.php)
