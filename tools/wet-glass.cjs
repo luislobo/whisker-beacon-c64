@@ -2,24 +2,30 @@
 // https://www.linusakesson.net/scene/lunatico/rain.php
 const phases = 32;
 const columns = 40;
+const roofRidge = 118;
 const roofBottom = 146;
 const impacts = [
-  [55,134,3], [74,130,24], [104,131,11], [120,136,28]
-];
+  [44,140,3], [74,124,31], [104,127,11], [120,137,28]
+].map(([x, y, phase]) => ({
+  x, y, phase,
+  scale: 0.45 + 0.75 * (y - roofRidge) / (roofBottom - roofRidge)
+}));
 const paneColors = new Set([0, 4, 5, 6, 11]);
 const brightness = [0, 100, 34, 78, 47, 53, 37, 90, 58, 27, 69, 38, 52, 83, 66, 81];
 const bytesPerFrame = 128;
 
-function heightAt(x, y, phase, [cx, cy, offset]) {
-  const age = (phase + offset) % phases;
+function heightAt(x, y, phase, impact) {
+  const age = (phase + impact.phase) % phases;
+  const fromImpactX = (x - impact.x) / impact.scale;
+  const fromImpactY = (y - impact.y) / impact.scale;
   if (age < 8) {
-    const dx = (x - cx + (8 - age) * 0.13) / 0.66;
-    const dy = (y - cy + (8 - age) * 0.93) / 1.7;
+    const dx = (fromImpactX + (8 - age) * 0.13) / 0.66;
+    const dy = (fromImpactY + (8 - age) * 0.93) / 1.7;
     return 1.1 * Math.exp(-(dx * dx + dy * dy));
   }
   const time = age - 8;
   const radius = 0.9 + time * 0.31;
-  const distance = Math.hypot(x - cx, (y - cy) * 1.5);
+  const distance = Math.hypot(fromImpactX, fromImpactY * 1.5);
   const trough = (distance - radius) / 0.83;
   return Math.max(0, 1 - time / 19) * Math.exp(-trough * trough);
 }
@@ -28,7 +34,7 @@ function reflectsLight(x, y, phase) {
   const warm = x < 85;
   const direction = warm ? -1 : 1;
   for (const impact of impacts) {
-    if (Math.abs(x - impact[0]) > 8 || Math.abs(y - impact[1]) > 10) continue;
+    if (Math.abs(x - impact.x) > 8 || Math.abs(y - impact.y) > 10) continue;
     const east = heightAt(x + 0.45, y, phase, impact);
     const west = heightAt(x - 0.45, y, phase, impact);
     const north = heightAt(x, y - 0.45, phase, impact);
