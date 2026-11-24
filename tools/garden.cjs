@@ -5,6 +5,7 @@ const TILE = {
   moon: 7, blueFly: 8, firefly: 9, post: 10, lamp: 11, litLamp: 12,
   pineLeft: 13, pineRight: 14, mist: 15,
   grass: 16, soil: 17, stone: 18, mushroom: 19, pavers: 20, cracked: 21, shaking: 22, gate: 23, benchTop: 24,
+  galleryPavers: 25, galleryBench: 26,
   roofGlass: 80, mullion: 81, eave: 82, eaveJoint: 83, bell: 84, lantern: 85,
   brightLantern: 86, glow: 87, windowRail: 88, railJoint: 89, paneShade: 90,
   paneGlint: 91, chain: 92, basket: 93, vineLeft: 94, vineRight: 95,
@@ -12,7 +13,9 @@ const TILE = {
   beaconCrown: 100, beaconLeft: 101, beaconRight: 102, beaconBase: 103,
   lanternCrown: 104, fireflyAlt: 105, blueFlyAlt: 106,
   litLampAlt: 107, brightLanternAlt: 108, benchLeg: 109,
-  greenhouseLeaves: 110, greenhouseStem: 111, greenhousePot: 112, glassSeal: 113, reed: 114, water: 115, ruinPillar: 116, waymark: 117
+  greenhouseLeaves: 110, greenhouseStem: 111, greenhousePot: 112, glassSeal: 113, reed: 114, water: 115, ruinPillar: 116, waymark: 117,
+  galleryMullion: 118, galleryRail: 119, galleryGlint: 120, galleryPane: 121,
+  galleryEave: 122, galleryLeg: 123
 };
 
 const tiles = {
@@ -40,6 +43,8 @@ const tiles = {
   shaking:     ['3.33','3333','2.22','.22.','22.2','2.2.','.22.','....'],
   gate:        ['2323','2333','2323','2323','2323','2323','2333','2323'],
   benchTop:    ['3333','3333','2222','2121','2222','1111','....','....'],
+  galleryPavers:['2222','3333','23.1','21.1','1111','1221','2.21','1121'],
+  galleryBench:['2222','3333','2222','2.21','1111','....','....','....'],
   roofGlass:   ['....','....','1111','1111','1.11','1111','11.1','1111'],
   mullion:     ['.12.','.12.','.12.','.12.','.12.','.12.','.12.','.12.'],
   eave:        ['1122','2222','1111','1111','1212','1111','....','....'],
@@ -77,7 +82,13 @@ const tiles = {
   water:       ['..11','11..','....','.111','1...','...1','..11','....'],
   ruinPillar:  ['.11.','.12.','.12.','1111','.11.','.12.','.12.','.12.'],
   waymark:     ['....','.3..','333.','3333','333.','.3..','.22.','.22.'],
-  glassSeal:        ['1111','1111','....','....','....','....','....','....']
+  glassSeal:     ['1111','1111','....','....','....','....','....','....'],
+  galleryMullion:['.1..','.1..','.1..','.1..','.1..','.1..','.1..','11..'],
+  galleryRail:   ['....','....','1111','....','...1','....','....','....'],
+  galleryGlint:  ['...1','..1.','..1.','.1..','....','....','....','....'],
+  galleryPane:   ['....','....','....','....','....','..1.','.11.','111.'],
+  galleryEave:   ['1111','1221','1111','....','....','....','....','....'],
+  galleryLeg:    ['.21.','.21.','.21.','.21.','.21.','.21.','.21.','121.']
 };
 
 const font = {
@@ -196,7 +207,7 @@ function gardenColors(map) {
     if (row === 23) return 13; // The ground stays green below the gold ledges.
     const tiles = map.subarray(row * stride, (row + 1) * stride);
     if (tiles.includes(TILE.blueFly)) return 11; // Cyan for the rare firefly.
-    const gold = [TILE.stone, TILE.benchTop, TILE.moon, TILE.firefly, TILE.bell, TILE.lantern,
+    const gold = [TILE.stone, TILE.benchTop, TILE.galleryBench, TILE.moon, TILE.firefly, TILE.bell, TILE.lantern,
       TILE.lanternCrown, TILE.waymark, TILE.beaconCrown, TILE.lamp, TILE.beaconBase];
     return gold.some(tile => tiles.includes(tile)) ? 15 : 13;
   }));

@@ -1,6 +1,7 @@
 const { WIDTH, HEIGHT, TILE, garden, placeBeacon, tileWriter } = require('./garden.cjs');
 const { greenhouse } = require('./greenhouse.cjs');
 const { MAP_STRIDE } = require('./pack-map.cjs');
+const RAIN_GALLERY = 2;
 
 const gardenSections = [
   {
@@ -90,17 +91,26 @@ const greenhouseSections = [
 function makeSection(design, glass, number, backgrounds) {
   const section = Buffer.alloc(WIDTH * HEIGHT);
   const put = tileWriter(section, backgrounds);
+  const gallery = glass && number === RAIN_GALLERY;
+  const pavers = gallery ? 'galleryPavers' : 'pavers';
+  const benchTop = gallery ? 'galleryBench' : 'benchTop';
+  const benchLeg = gallery ? 'galleryLeg' : 'benchLeg';
   for (let x = 0; x < WIDTH; x++) {
     if (glass) {
       const bay = design.scene === 'shade' ? 8 : design.scene === 'rain' ? 16 : 12;
       const pane = (x + number * WIDTH) % bay;
       put(x, 6, 'roofGlass');
-      put(x, 7, pane ? 'eave' : 'eaveJoint');
+      put(x, 7, gallery ? 'galleryEave' : pane ? 'eave' : 'eaveJoint');
       for (let y = 8; y <= 22; y++) {
-        if (y === 13 || y === 18) put(x, y, pane ? 'windowRail' : 'railJoint');
-        else if (pane === 0) put(x, y, 'mullion');
+        if (y === 13 || y === 18) put(x, y, gallery ? 'galleryRail' : pane ? 'windowRail' : 'railJoint');
+        else if (pane === 0) put(x, y, gallery ? 'galleryMullion' : 'mullion');
+        else if (gallery && y === 16 && pane >= 7 && pane <= 9) put(x, y, 'galleryPane');
         else if (design.scene === 'rain' && (pane === 2 || pane === 10) && y < 17) {
-          put(x, y, (x + y) % 3 ? 'paneShade' : 'paneGlint');
+          if (gallery) {
+            if ((x + y) % 4 === 0) put(x, y, 'galleryGlint');
+          } else {
+            put(x, y, (x + y) % 3 ? 'paneShade' : 'paneGlint');
+          }
         } else if (design.scene === 'shade' && pane === 2 && y < 16) {
           put(x, y, y % 2 ? 'vineLeft' : 'vineRight');
         }
@@ -134,7 +144,7 @@ function makeSection(design, glass, number, backgrounds) {
     if (design.pits.some(([first, last]) => x >= first && x < last)) {
       put(x, 24, 'water');
     } else {
-      put(x, 23, glass ? 'pavers' : 'grass');
+      put(x, 23, glass ? pavers : 'grass');
       put(x, 24, 'soil');
     }
   }
@@ -144,16 +154,16 @@ function makeSection(design, glass, number, backgrounds) {
     if (design.pits.some(([left, right]) => first < right + 3 && first + count > left - 3)) {
       for (let x = first; x < first + count; x++) {
         if (!design.pits.some(([left, right]) => x >= left && x < right)) {
-          put(x, 23, glass ? 'pavers' : 'stone');
+          put(x, 23, glass ? pavers : 'stone');
         }
       }
       continue;
     }
-    for (let x = first; x < first + count; x++) put(x, row, glass ? 'benchTop' : 'stone');
+    for (let x = first; x < first + count; x++) put(x, row, glass ? benchTop : 'stone');
     if (glass && row <= 20) {
       for (let y = row + 1; y <= 22; y++) {
-        put(first, y, 'benchLeg');
-        put(first + count - 1, y, 'benchLeg');
+        put(first, y, benchLeg);
+        put(first + count - 1, y, benchLeg);
       }
     }
   }
@@ -207,4 +217,6 @@ function longLevel(glass, backgrounds = new Map()) {
   return map;
 }
 
-module.exports = { longLevel };
+const galleryLampColumn = RAIN_GALLERY * WIDTH + greenhouseSections[RAIN_GALLERY - 1].lantern;
+const galleryPlayerPage = RAIN_GALLERY * WIDTH / 32;
+module.exports = { longLevel, galleryLampColumn, galleryPlayerPage };

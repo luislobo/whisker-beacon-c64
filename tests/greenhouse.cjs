@@ -160,6 +160,8 @@ function hazards(mode) {
     assert.equal((await monitor.bytes(benchFly, 1))[0], 109, 'the firefly reveals the original bench leg');
 
     const rainCache = LEVEL_MAP + 21 * 768 + 256;
+    const originalMullion = (await monitor.bytes(rainCache + 16, 1))[0];
+    assert.equal(originalMullion, TILE.galleryMullion, 'the rain gallery uses its own mullion art');
     await place(2134, 170);
     await step(0, 12);
     assert.equal((await monitor.bytes(rainCache + 12, 1))[0], 86, 'the second lantern lights across a map page');
@@ -169,7 +171,8 @@ function hazards(mode) {
     const scoreBeforeCache = (await monitor.bytes(0x2d, 1))[0];
     await place(2166, 170);
     await step(0, 2);
-    assert.equal((await monitor.bytes(rainCache + 16, 1))[0], 81, 'a revealed firefly restores its window mullion');
+    assert.equal((await monitor.bytes(rainCache + 16, 1))[0], originalMullion,
+      'a revealed firefly restores its window mullion');
     assert.equal((await monitor.bytes(0x2d, 1))[0], scoreBeforeCache + 1, 'the cache firefly counts once');
 
     assert.equal((await monitor.bytes(SCREEN_A_MOTH, 1))[0], 0xeb, 'a moth replaces the mite in the rain gallery');
