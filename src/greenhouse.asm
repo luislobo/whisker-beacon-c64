@@ -11,6 +11,10 @@ GATE_COLUMN = 30
 
 init_greenhouse_props:
     lda #0
+    sta gallery_window_active
+    sta gallery_header_a
+    sta gallery_header_b
+    lda #0
     sta bell_found
     sta lantern_lit
     sta board_ticks

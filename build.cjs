@@ -9,6 +9,7 @@ const { MAP_STRIDE, packMap } = require('./tools/pack-map.cjs');
 const { score } = require('./tools/music.cjs');
 const { titleArt } = require('./tools/title.cjs');
 const { glassAnimation } = require('./tools/wet-glass.cjs');
+const { galleryParallax } = require('./tools/gallery-parallax.cjs');
 
 const root = __dirname;
 const build = path.join(root, 'build');
@@ -28,14 +29,25 @@ for (const [name, bytes] of Object.entries(title)) {
   fs.writeFileSync(path.join(build, 'title-' + name + '.bin'), bytes);
 }
 fs.writeFileSync(path.join(build, 'charms.bin'), charmArt());
-fs.writeFileSync(path.join(build, 'tiles.bin'), glyphs());
+const tiles = glyphs();
+fs.writeFileSync(path.join(build, 'gallery-parallax.bin'), galleryParallax(tiles));
+fs.writeFileSync(path.join(build, 'tiles.bin'), tiles);
 const gardenBackgrounds = new Map();
 const map = longLevel(false, gardenBackgrounds);
 fs.writeFileSync(path.join(build, 'garden.bin'), packMap(map));
 fs.writeFileSync(path.join(build, 'garden-colors.bin'), gardenColors(map));
 const greenhouseBackgrounds = new Map();
 const secondMap = longLevel(true, greenhouseBackgrounds);
+for (const level of [map, secondMap]) {
+  if (level.subarray(2 * MAP_STRIDE, 4 * MAP_STRIDE).some(Boolean)) {
+    throw Error('The two rows below the HUD must stay empty');
+  }
+}
 fs.writeFileSync(path.join(build, 'greenhouse.bin'), packMap(secondMap));
+for (let row = 4; row < 8; row++) {
+  const gallery = secondMap.subarray(row * MAP_STRIDE + 256, row * MAP_STRIDE + 384);
+  if (!gallery.every(tile => tile === gallery[0])) throw Error('Gallery roof rows must be uniform');
+}
 const flyCount = level => level.reduce((count, tile) =>
   count + (tile === TILE.firefly ? 1 : tile === TILE.lantern ? 3 : 0), 0);
 fs.writeFileSync(path.join(build, 'map.inc'), [

@@ -4,6 +4,7 @@ LEVEL_MAP = $8000
 WORLD_WIDTH = MAP_STRIDE
 CAMERA_LIMIT = (WORLD_WIDTH - 40) * 8
 HUD_ROWS = 2
+FIRST_MAP_ROW = 4            ; Two blank rows separate the HUD from the world.
 
 init_colors:
     lda #0
@@ -72,6 +73,10 @@ scroll_irq:
     lda #1
     sta $d019
 scroll_applied:
+    lda gallery_window_active
+    beq scroll_done
+    jmp schedule_gallery_sunset
+scroll_done:
     pla
 scroll_irq_return:
     rti
@@ -116,25 +121,82 @@ redraw_world:
     beq render_a
     jmp render_b
 
-draw_columns .macro screen
-    ; Patch the hidden buffer's row sources once, then copy at most 40 tiles
-    ; from each row. Absolute indexed loads carry across the map's tile pages.
+draw_columns .macro screen, header_ready
+    ; Patch the hidden buffer's row sources once, then copy up to 40 tiles
+    ; from each row. Indexed loads carry across the map's tile pages.
     lda camera_column
-    .for row := HUD_ROWS, row < 25, row += 1
-        sta next_column+6*(row-HUD_ROWS)+1
+    .for row := FIRST_MAP_ROW, row < 25, row += 1
+        .if row < GALLERY_WINDOW_ROW
+            sta map_header+6*(row-FIRST_MAP_ROW)+1
+        .else
+            sta normal_window+6*(row-GALLERY_WINDOW_ROW)+1
+        .endif
     .endfor
     lda camera_page
     clc
-    adc #>(LEVEL_MAP + HUD_ROWS*MAP_STRIDE)
-    .for row := HUD_ROWS, row < 25, row += 1
-        sta next_column+6*(row-HUD_ROWS)+2
+    adc #>(LEVEL_MAP + FIRST_MAP_ROW*MAP_STRIDE)
+    .for row := FIRST_MAP_ROW, row < 25, row += 1
+        .if row < GALLERY_WINDOW_ROW
+            sta map_header+6*(row-FIRST_MAP_ROW)+2
+        .else
+            sta normal_window+6*(row-GALLERY_WINDOW_ROW)+2
+        .endif
         .if row < 24
             adc #>MAP_STRIDE
         .endif
     .endfor
+
+    ; The first four map rows are uniform across the gallery. After each
+    ; screen buffer has them, leave them in place and hand the panes to
+    ; the parallax renderer.
+    ldx #<normal_window
+    ldy #>normal_window
+    jsr gallery_camera_inside
+    bcc invalidate_header
+    ldx #<after_window
+    ldy #>after_window
+    lda \header_ready
+    bne set_window_jump
+    inc \header_ready
+    bne draw_map_header
+invalidate_header:
+    lda #0
+    sta \header_ready
+    lda gallery_window_active
+    beq draw_map_header
+    ; The previous frame still drew the sunset. Repaint the plain panes
+    ; at the start of the next frame, when that work no longer overlaps.
+    ldx #<after_window
+    ldy #>after_window
+draw_map_header:
+    lda #<map_header
+    sta header_jump+1
+    lda #>map_header
+    sta header_jump+2
+    bne begin_map_copy
+set_window_jump:
+    stx header_jump+1
+    sty header_jump+2
+begin_map_copy:
+    stx window_jump+1
+    sty window_jump+2
+
     ldy #0
 next_column:
-    .for row := HUD_ROWS, row < 25, row += 1
+header_jump:
+    jmp map_header
+map_header:
+    .for row := FIRST_MAP_ROW, row < GALLERY_WINDOW_ROW, row += 1
+        lda LEVEL_MAP+row*MAP_STRIDE,y
+        sta \screen+row*40,y
+    .endfor
+window_jump:
+    jmp normal_window
+normal_window:
+    .for row := GALLERY_WINDOW_ROW, row < 25, row += 1
+        .if row == GALLERY_WINDOW_ROW+GALLERY_WINDOW_HEIGHT
+after_window:
+        .endif
         lda LEVEL_MAP+row*MAP_STRIDE,y
         sta \screen+row*40,y
     .endfor
@@ -147,9 +209,9 @@ finished:
 .endmacro
 
 render_a:
-    #draw_columns SCREEN_A
+    #draw_columns SCREEN_A, gallery_header_a
 render_b:
-    #draw_columns SCREEN_B
+    #draw_columns SCREEN_B, gallery_header_b
 
 track_cat:
     lda draw_player_x

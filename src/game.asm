@@ -78,6 +78,7 @@ frame_present:
     jsr present_cat_charm
     jsr present_rain_gallery
     jsr animate_objectives
+    jsr present_gallery_parallax
     inc video_ticks
     lda logic_clock
     clc
@@ -160,6 +161,9 @@ greenhouse_colors:
 cat_look_bits:
     .binary "../build/cat-looks.bin"
 
+gallery_parallax_tiles:
+    .binary "../build/gallery-parallax.bin"
+
 .cerror * > LEVEL_MAP, "Packed levels overlap working map"
 .cerror LEVEL_MAP + MAP_STRIDE*25 > $d000, "Working map overlaps I/O"
 
@@ -197,4 +201,5 @@ WET_GLASS_FRAMES = $c000
 .cerror * > LEVEL_MAP+MAP_STRIDE*25, "Title rain overlaps the gameplay effects"
 * = LEVEL_MAP+MAP_STRIDE*25
     .include "rain-gallery.asm"
+    .include "gallery-parallax.asm"
 .cerror * > $d000, "Gameplay effects overlap I/O"
