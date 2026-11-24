@@ -8,6 +8,7 @@ const { longLevel } = require('./tools/long-levels.cjs');
 const { MAP_STRIDE, packMap } = require('./tools/pack-map.cjs');
 const { score } = require('./tools/music.cjs');
 const { titleArt } = require('./tools/title.cjs');
+const { glassAnimation } = require('./tools/wet-glass.cjs');
 
 const root = __dirname;
 const build = path.join(root, 'build');
@@ -19,7 +20,11 @@ fs.writeFileSync(path.join(build, 'actors.bin'), actorSprites());
 const looks = catLooks();
 fs.writeFileSync(path.join(build, 'cat-looks.bin'), looks.bytes);
 fs.writeFileSync(path.join(build, 'cat-looks.inc'), looks.tables);
-for (const [name, bytes] of Object.entries(titleArt(looks.titleCats))) {
+const title = titleArt(looks.titleCats);
+const rain = glassAnimation(title);
+fs.writeFileSync(path.join(build, 'wet-glass.bin'), rain.bytes);
+fs.writeFileSync(path.join(build, 'wet-glass.inc'), rain.assembly);
+for (const [name, bytes] of Object.entries(title)) {
   fs.writeFileSync(path.join(build, 'title-' + name + '.bin'), bytes);
 }
 fs.writeFileSync(path.join(build, 'charms.bin'), charmArt());

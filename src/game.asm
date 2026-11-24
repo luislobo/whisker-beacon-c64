@@ -181,7 +181,13 @@ cat_look_bits:
 * = TITLE_COLORS+$400
     .include "title.asm"
     .include "title-music.asm"
+    .include "../build/wet-glass.inc"
 .cerror * > TITLE_BITMAP, "Title code overlaps the bitmap"
 * = TITLE_BITMAP
     .binary "../build/title-bitmap.bin"
 .cerror * > $c000, "Title bitmap exceeds its VIC bank"
+
+WET_GLASS_FRAMES = $c000
+* = WET_GLASS_FRAMES
+    .binary "../build/wet-glass.bin"
+.cerror * > $d000, "Wet glass frames overlap I/O"

@@ -94,6 +94,7 @@ title_wait:
     bne title_wait
 title_frame:
     jsr animate_title
+    jsr animate_wet_glass
     lda logic_clock
     clc
     adc #50
