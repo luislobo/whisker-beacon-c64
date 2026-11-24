@@ -2,9 +2,9 @@
 // https://www.linusakesson.net/scene/lunatico/rain.php
 const phases = 32;
 const columns = 40;
+const roofBottom = 146;
 const impacts = [
-  [55,134,3], [74,130,24], [104,131,11], [120,136,28],
-  [22,156,18], [58,155,6], [102,155,27], [132,157,1]
+  [55,134,3], [74,130,24], [104,131,11], [120,136,28]
 ];
 const paneColors = new Set([0, 4, 5, 6, 11]);
 const brightness = [0, 100, 34, 78, 47, 53, 37, 90, 58, 27, 69, 38, 52, 83, 66, 81];
@@ -42,7 +42,7 @@ function reflectsLight(x, y, phase) {
 function glassAnimation({ bitmap, screen, color }) {
   const locations = [];
   const warmCells = new Set();
-  for (let cell = 15 * columns; cell < 22 * columns; cell++) {
+  for (let cell = 15 * columns; cell < Math.ceil(roofBottom / 8) * columns; cell++) {
     const x0 = (cell % columns) * 4;
     const y0 = Math.floor(cell / columns) * 8;
     const palette = [0, screen[cell] >> 4, screen[cell] & 15, color[cell]];
@@ -54,7 +54,7 @@ function glassAnimation({ bitmap, screen, color }) {
     let animated = false;
     for (const [row, dry] of original.entries()) {
       const y = y0 + row;
-      if (y >= 175) break;
+      if (y >= roofBottom) break;
       const pixels = [6, 4, 2, 0].map(shift => dry >> shift & 3);
       const frames = Buffer.alloc(phases, dry);
       for (const [column, pair] of pixels.entries()) {
