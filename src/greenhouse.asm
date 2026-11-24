@@ -14,6 +14,8 @@ init_greenhouse_props:
     sta bell_found
     sta lantern_lit
     sta board_ticks
+    lda #GALLERY_LIGHT_OFFSCREEN
+    sta gallery_light_x
     rts
 
 start_crumble:

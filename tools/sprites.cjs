@@ -45,8 +45,29 @@ function pack(rows) {
 }
 
 function actorSprites() {
-  return Buffer.concat([Buffer.alloc(4 * 64), pack(rival), Buffer.alloc(2 * 64),
+  const burst = [
+    '....#', '.........#', '...#..........#', '.......##..........#',
+    '...#........##', '..........#.....###', '...............#####'
+  ];
+  const settling = [
+    '', '.....#', '..........#', '...#..........#',
+    '.......#..........#', '..............#', '..........#.........##'
+  ];
+  const spray = [burst, settling].flatMap(rows => [packSpray(rows, false), packSpray(rows, true)]);
+  return Buffer.concat([...spray, pack(rival), Buffer.alloc(2 * 64),
     pack(mite), pack(acorn), pack(owl), pack(shadow), pack(moth)]);
+}
+
+function packSpray(rows, left) {
+  const sprite = Buffer.alloc(64);
+  for (const [y, row] of rows.entries()) {
+    for (const [x, pixel] of [...row].entries()) {
+      if (pixel !== '#') continue;
+      const column = left ? 23 - x : x;
+      sprite[(y + 6) * 3 + (column >> 3)] |= 128 >> (column & 7);
+    }
+  }
+  return sprite;
 }
 
 module.exports = { actorSprites };

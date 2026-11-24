@@ -76,6 +76,7 @@ frame_present:
     jsr present_cat
     jsr present_patrols
     jsr present_cat_charm
+    jsr present_rain_gallery
     jsr animate_objectives
     inc video_ticks
     lda logic_clock
@@ -191,3 +192,9 @@ WET_GLASS_FRAMES = $c000
 * = WET_GLASS_FRAMES
     .binary "../build/wet-glass.bin"
 .cerror * > $d000, "Wet glass frames overlap I/O"
+
+; The level map reuses the title memory and ends below the runtime effects.
+.cerror * > LEVEL_MAP+MAP_STRIDE*25, "Title rain overlaps the gameplay effects"
+* = LEVEL_MAP+MAP_STRIDE*25
+    .include "rain-gallery.asm"
+.cerror * > $d000, "Gameplay effects overlap I/O"

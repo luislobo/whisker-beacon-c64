@@ -4,7 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { catLooks, charmArt } = require('./tools/cat-looks.cjs');
 const { actorSprites } = require('./tools/sprites.cjs');
 const { glyphs, gardenColors, TILE } = require('./tools/garden.cjs');
-const { longLevel } = require('./tools/long-levels.cjs');
+const { longLevel, galleryLampColumn, galleryPlayerPage } = require('./tools/long-levels.cjs');
 const { MAP_STRIDE, packMap } = require('./tools/pack-map.cjs');
 const { score } = require('./tools/music.cjs');
 const { titleArt } = require('./tools/title.cjs');
@@ -41,7 +41,9 @@ const flyCount = level => level.reduce((count, tile) =>
 fs.writeFileSync(path.join(build, 'map.inc'), [
   `MAP_STRIDE = ${MAP_STRIDE}`,
   `GARDEN_FLIES = ${flyCount(map)}`,
-  `GREENHOUSE_FLIES = ${flyCount(secondMap)}`
+  `GREENHOUSE_FLIES = ${flyCount(secondMap)}`,
+  `RAIN_GALLERY_LAMP = ${galleryLampColumn}`,
+  `RAIN_GALLERY_PAGE = ${galleryPlayerPage}`
 ].join('\n') + '\n');
 fs.writeFileSync(path.join(build, 'greenhouse-colors.bin'), gardenColors(secondMap));
 // Group scenery tiles by page so a pickup scans only its own row segment.

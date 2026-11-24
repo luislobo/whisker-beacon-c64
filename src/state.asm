@@ -91,4 +91,5 @@ cat_charm      = $85
 brass_flash_ticks = $86
 title_ticks    = $87
 start_fire_held = $88
-state_end      = $88
+gallery_light_x = $89
+state_end      = $89
