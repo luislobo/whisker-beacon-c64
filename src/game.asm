@@ -132,7 +132,8 @@ leave_raster:
 
 * = BRASS_TUCK_SPRITES
     .binary "../build/charms.bin", 14*64, 6*64
-.cerror * > SCREEN_B, "Tucked bell and glint sprites overlap the second screen buffer"
+.cerror * > CAT_RUN_LAST, "Tucked bell and glint sprites overlap the last run pose"
+.cerror CAT_RUN_LAST+128 > SCREEN_B, "Last run pose overlaps screen B"
 
 * = CHARM_SPRITES
     .binary "../build/charms.bin", 0, 14*64
@@ -206,4 +207,5 @@ WET_GLASS_FRAMES = $c000
     .include "rain-gallery.asm"
     .include "gallery-parallax.asm"
     .include "recovery.asm"
+    .include "cat-unpack.asm"
 .cerror * > $d000, "Gameplay effects overlap I/O"

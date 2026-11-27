@@ -2,6 +2,10 @@ CAT_SHAPE = $3800 / 64
 CAT_CACHE = $3b00
 CAT_POINTER = CAT_CACHE / 64
 BLANK_CAT_SPRITE = $2f80
+CAT_RUN_CACHE = $0200       ; KERNAL workspace, reclaimed after banking out ROM.
+CAT_RUN_LAST = $2780
+CAT_RUN_HOLD = 3            ; Shared 50 Hz simulation ticks per pose.
+.cerror CAT_RUN_CACHE+(CAT_RUN_EXTRA-1)*128 > SCREEN_A, "Run frames overlap screen A"
 .cerror CAT_CACHE + CAT_POSES * 128 > $4000, "Cat sprite frames exceed the VIC bank"
 
 init_cat_sprite:
@@ -94,13 +98,9 @@ cat_check_air:
     bne cat_turning
     lda cat_pose_ticks
     bne cat_keep_reaction
-    lda input_bits
-    and #(MOVE_LEFT | MOVE_RIGHT)
-    beq cat_idle
-    lda game_ticks
-    and #4
-    bne cat_striding
-    jmp cat_still
+    lda player_x
+    cmp prior_player_x
+    bne cat_running
 cat_idle:
     lda game_ticks
     and #$18
@@ -113,9 +113,19 @@ cat_idle:
 cat_still:
     lda #POSE_STAND
     beq cat_pose
-cat_striding:
-    lda #POSE_STRIDE
-    bne cat_pose
+cat_running:
+    ldx cat_run_tick
+    lda cat_run_frames,x
+    inx
+    cpx #cat_run_frames_end-cat_run_frames
+    bcc next_run_tick
+    ldx #0
+next_run_tick:
+    stx cat_run_tick
+    clc
+    adc facing_left
+    sta cat_frame
+    rts
 cat_turning:
     lda #POSE_TURN
     bne cat_start_reaction
@@ -147,4 +157,14 @@ cat_pose:
     adc facing_left
     adc #CAT_POINTER
     sta cat_frame
+    lda #0
+    sta cat_run_tick
     rts
+
+cat_run_frames:
+    .fill CAT_RUN_HOLD,CAT_POINTER+POSE_STRIDE
+    .for frame := 0, frame < CAT_RUN_EXTRA-1, frame += 1
+        .fill CAT_RUN_HOLD,CAT_RUN_CACHE/64+frame*2
+    .endfor
+    .fill CAT_RUN_HOLD,CAT_RUN_LAST/64
+cat_run_frames_end:

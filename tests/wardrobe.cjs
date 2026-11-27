@@ -9,6 +9,12 @@ const ram = {
   cat_look: 0x7a, cat_frame: 0x7c, cat_charm: 0x85
 };
 const cache = 0x3b00;
+const runPointers = [0xee, 0x08, 0x0a, 0x0c, 0x0e, 0x9e];
+const runHeadY = [1, 2, 3, 2, 1, 0];
+
+function spritePixel(sprite, x, y) {
+  return (sprite[y * 3 + (x >> 2)] >> (6 - 2 * (x & 3))) & 3;
+}
 const poses = { TURN: 4, LAUNCH: 6, LANDING: 10, SLIDE: 12, CLUE: 14 };
 const up = 1;
 const down = 2;
@@ -48,18 +54,30 @@ function test(mode) {
       const portrait = await monitor.bytes(cache, 39);
       portraits.add(portrait.toString('hex'));
       if (name === 'CALICO') {
-        const pixel = (x, y) => (portrait[y * 3 + (x >> 2)] >> (6 - 2 * (x & 3))) & 3;
         const inks = (await monitor.bytes(0xd025, 3)).map(color => color & 15);
         assert.deepEqual(inks, Buffer.from([11, 1, 8]), 'Calico has gray, white, and orange registers');
-        assert.equal(pixel(6, 4), 2, 'Calico fur selects its own orange sprite register');
-        assert.equal(pixel(7, 2), 3, 'the white ear tip selects shared white');
+        assert.equal(spritePixel(portrait, 6, 4), 2, 'Calico fur selects its own orange sprite register');
+        assert.equal(spritePixel(portrait, 7, 2), 3, 'the white ear tip selects shared white');
       }
       if (name === 'SIAMESE') {
-        const stride = await monitor.bytes(cache + 2 * 64, 39);
-        assert.deepEqual(stride.subarray(0, 27), portrait.subarray(0, 27),
-          'the Siamese mask and coat stay the same in both walking poses');
-        assert.notDeepEqual(stride.subarray(27), portrait.subarray(27), 'the Siamese paws still move');
         assert.equal((await monitor.bytes(0xd027, 1))[0] & 15, 15, 'the Siamese body is cream');
+        for (const [frame, pointer] of runPointers.entries()) {
+          const stride = await monitor.bytes(pointer * 64, 39);
+          const mirror = await monitor.bytes((pointer + 1) * 64, 39);
+          for (let y = 0; y < 13; y++) {
+            for (let x = 0; x < 12; x++) {
+              assert.equal(spritePixel(stride, x, y), spritePixel(mirror, 11 - x, y),
+                'the leftward gallop mirrors the rightward silhouette and palette');
+            }
+          }
+          for (let y = 0; y < 6; y++) {
+            for (let x = 5; x < 12; x++) {
+              const marking = spritePixel(portrait, x, y + 1);
+              if (marking) assert.equal(spritePixel(stride, x, y + runHeadY[frame]), marking,
+                'the Siamese keeps its markings through the head bob');
+            }
+          }
+        }
       }
       assert.equal(await value('run_started'), 0, 'choosing a cat leaves the timer at zero');
       if (index === 0) {
@@ -74,6 +92,16 @@ function test(mode) {
     }
     assert.equal(portraits.size, names.length, 'each available cat changes the sprite art');
     assert.equal(await value('cat_look'), 0, 'the roster wraps around to Pip');
+
+    for (const pointer of [...runPointers, runPointers[0]]) {
+      for (let tick = 0; tick < 3; tick++) {
+        await step(right);
+        assert.equal(await value('cat_frame'), pointer, 'ground movement advances the six-pose gallop');
+        assert.equal((await monitor.bytes(0x07f8, 1))[0], pointer, 'the gallop is sent to the VIC');
+      }
+    }
+    await step(0);
+    assert.equal(await value('cat_frame'), cache / 64, 'releasing the direction returns to the standing pose');
 
     await monitor.write(ram.player_x, [120, 0, 170, 0, 0, 1]);
     await monitor.write(ram.game_ticks, [24]);
@@ -94,7 +122,7 @@ function test(mode) {
     const chosen = await value('cat_look');
     await step(up);
     assert.equal(await value('cat_look'), chosen, 'Up leaves the outfit alone during a run');
-    console.log(mode + ': cat selection, locked outfits, clue, turn, jump, landing, and slide verified');
+    console.log(mode + ': cat selection, locked outfits, gallop, mirrored markings, clue, turn, jump, landing, and slide verified');
   });
 }
 

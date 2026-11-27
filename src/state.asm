@@ -98,4 +98,5 @@ gallery_texture_fine = $8d
 gallery_header_a = $8e
 gallery_header_b = $8f
 recovery_ticks = $90
-state_end      = $90
+cat_run_tick   = $91
+state_end      = $91

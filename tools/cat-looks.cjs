@@ -1,3 +1,6 @@
+const { runArt } = require('./cat-run.cjs');
+const { packCat } = require('./pack-cat.cjs');
+
 // One character represents two horizontal multicolor sprite pixels.
 
 const ginger = `......a...a.
@@ -47,7 +50,6 @@ const calicoBody = `.......c..b.
 ...aacaaa...`;
 
 const calicoStand = calicoBody + "\n...cc..aa...\n...cc..aa...";
-const calicoStride = calicoBody + "\n...cc...aa..\n..cc.....aa.";
 
 const bobtail = `......a..a..
 ......aa.aa.
@@ -84,7 +86,6 @@ b.....bcbcb.
 ...aaaaaaa..`;
 
 const siamese = siameseBody + "\n....a...a...\n....a...a...\n....b...b...\n....b...b...";
-const siameseStride = siameseBody + "\n....a...a...\n...aa....a..\n...b.....b..\n..bb.....bb.";
 
 const fold = `......aa.aa.
 .b....bbaab.
@@ -197,26 +198,14 @@ bbaaaaacca..
 .baabbccccb.
 ..bbbbbbbb..`;
 
-const walk = `......a...a.
-..b...aa.aa.
-.b....aaaaa.
-.b....acaca.
-.ab...aabaa.
-..b..aaaaaa.
-..baaaaaaa..
-..aaaabaaa..
-...aaaaaa...
-...aaa.aa...
-..cc....cc..`;
-
 const looks = [
   { name: 'Ginger Pip', art: ginger, color: 8 },
   { name: 'Tuxedo', art: tuxedo, color: 12 },
   { name: 'Black Cat', art: black, color: 7, ink: { a: 1, b: 1, c: 2 } },
-  { name: 'Calico', art: calicoStand, stride: calicoStride, color: 8 },
+  { name: 'Calico', art: calicoStand, color: 8 },
   { name: 'Bobtail', art: bobtail, color: 14 },
   { name: 'Fluffy Cat', art: fluffy, color: 15 },
-  { name: 'Siamese', art: siamese, stride: siameseStride, color: 15 },
+  { name: 'Siamese', art: siamese, color: 15 },
   { name: 'Scottish Fold', art: fold, color: 14 },
   { name: 'Alley Cat', art: alley, color: 5 },
   { name: 'Lantern Cat', art: lantern, color: 10 }
@@ -231,7 +220,7 @@ ab....aa.aa.
 ..aaa...aa..
 ..cc.....c..`;
 
-const poses = { stand: '', stride: walk, turn, launch: stretch, air: jump, landing, slide, clue, spark, sit };
+const poses = { stand: '', stride: '', turn, launch: stretch, air: jump, landing, slide, clue, spark, sit };
 const height = 13;
 // VIC-II multicolor sprites use %10 for their own color and %11 for shared white.
 const ink = { '.': 0, a: 2, b: 1, c: 3 };
@@ -366,14 +355,19 @@ function charmFrame(rows, ink, xOrigin, yOrigin, left, swing = 0) {
 }
 
 function catLooks() {
-  const frames = [];
+  const packets = [];
+  let offset = 0;
+  let runPoses;
   const titleCats = [];
   const labels = [];
   for (const [index, look] of looks.entries()) {
-    labels.push(`cat_look_${index} = cat_look_bits + ${frames.length * height * 3}`);
+    labels.push(`cat_look_${index} = cat_look_bits + ${offset}`);
+    const frames = [];
+    const [reach, ...run] = runArt(look);
+    runPoses = run.length;
     const palette = { ...ink, ...look.ink };
     for (const [pose, frame] of Object.entries(poses)) {
-      const art = pose === 'stand' ? look.art : look[pose] ?? actionArt(look, frame, pose);
+      const art = pose === 'stand' ? look.art : pose === 'stride' ? reach : actionArt(look, frame, pose);
       const packed = packFrame(art, palette);
       frames.push(packed);
       if (pose === 'sit') {
@@ -381,10 +375,15 @@ function catLooks() {
         titleCats.push({ name: look.name.toUpperCase(), frames: [packed, packFrame(blinking, palette)] });
       }
     }
+    frames.push(...run.map(art => packFrame(art, palette)));
+    const packet = packCat(Buffer.concat(frames));
+    packets.push(packet);
+    offset += packet.length;
   }
   const tables = [
     `CAT_LOOKS = ${looks.length}`,
     `CAT_POSES = ${Object.keys(poses).length}`,
+    `CAT_RUN_EXTRA = ${runPoses}`,
     `CAT_POSE_BYTES = ${height * 3}`,
     ...Object.keys(poses).map((pose, index) => `POSE_${pose.toUpperCase()} = ${index * 2}`),
     ...labels,
@@ -397,7 +396,7 @@ function catLooks() {
     'cat_names:',
     ...looks.map(look => '    .text "' + look.name.toUpperCase().padEnd(13) + '"')
   ].join('\n') + '\n';
-  return { bytes: Buffer.concat(frames), tables, titleCats };
+  return { bytes: Buffer.concat(packets), tables, titleCats };
 }
 
 module.exports = { catLooks, charmArt };

@@ -92,11 +92,12 @@ load_cat_look:
     sta map_source
     lda cat_look_hi,x
     sta map_source+1
+    jsr unpack_cat_look
     lda #<CAT_CACHE
     sta map_dst
     lda #>CAT_CACHE
     sta map_dst+1
-    lda #CAT_POSES
+    lda #CAT_POSES+CAT_RUN_EXTRA
     sta cat_copy_count
 copy_cat_pose:
     lda map_dst
@@ -154,7 +155,22 @@ advance_cat_cache:
     inc map_dst+1
 next_cat_pose:
     dec cat_copy_count
+    beq cat_cache_ready
+    ldx cat_copy_count
+    cpx #CAT_RUN_EXTRA
+    beq begin_run_cache
+    cpx #1
     bne copy_cat_pose
+    lda #<CAT_RUN_LAST
+    sta map_dst
+    lda #>CAT_RUN_LAST
+    bne select_cat_cache_page
+begin_run_cache:
+    lda #>CAT_RUN_CACHE
+select_cat_cache_page:
+    sta map_dst+1
+    jmp copy_cat_pose
+cat_cache_ready:
     rts
 
 mirrored_pixels:
