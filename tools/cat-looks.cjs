@@ -44,7 +44,7 @@ const calicoBody = `.......c..b.
 .ba...aabbbb
 .a....acacba
 .b...aaabaa.
-..a.aaaaaba.
+..a.aaaaaaa.
 ..baccaaac..
 ...aacaaab..
 ...aacaaa...`;
@@ -104,7 +104,7 @@ const alley = `.......a..b.
 .ba...aaaaa.
 .b....acaca.
 ..b...aabaa.
-..a..aaaaba.
+..a..aaaaaa.
 ..abaaaaaa..
 ...aaaaabb..
 ...aaaaba...

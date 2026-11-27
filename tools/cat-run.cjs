@@ -94,7 +94,18 @@ const poses = [
   ] }
 ];
 
-function runEars(look, portrait) {
+const slimCrown = ['...a...', '..aa.a.', '.aaaaa.'];
+const runCrowns = {
+  'Black Cat': slimCrown,
+  Calico: ['..c..b.', '..aa.b.', '.aabbb.'],
+  'Alley Cat': ['..a..b.', '..aa.a.', '.aaaaa.'],
+  'Lantern Cat': slimCrown
+};
+
+function runCrown(look, portrait) {
+  const custom = runCrowns[look.name];
+  if (custom) return custom.map(row => '.....' + row);
+
   const tips = [...portrait[0]].flatMap((pixel, x) => x >= 5 && pixel !== '.' ? [x] : []);
   const near = tips[0];
   const far = tips[tips.length - 1];
@@ -107,20 +118,19 @@ function runEars(look, portrait) {
   low[near] = portrait[1][near];
   low[near + 1] = portrait[1][near + 1];
   low[far] = portrait[folded ? 1 : 0][far];
-  return [high, low];
+  return [high, low, portrait[2]];
 }
 
 function runArt(look) {
   const portrait = look.art.split('\n');
-  const ears = runEars(look, portrait);
+  const crown = runCrown(look, portrait);
   return poses.map(({ body, headY }) => {
     const tailRow = body.findIndex(row => row.includes('r'));
     const tailColumn = body[tailRow].indexOf('r');
     return body.map((row, y) => [...row].map((pixel, x) => {
       const headRow = y - headY;
       const marking = portrait[headRow]?.[x];
-      if (x >= 5 && headRow >= 0 && headRow < ears.length) return ears[headRow][x];
-      if (x >= 5 && headRow === ears.length) return marking;
+      if (x >= 5 && headRow >= 0 && headRow < crown.length) return crown[headRow][x];
       if (x >= 5 && headRow < 6 && marking && marking !== '.') return marking;
       if (pixel === 'r') return 'a';
       if (pixel === 't') {
