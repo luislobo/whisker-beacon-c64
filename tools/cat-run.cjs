@@ -94,14 +94,34 @@ const poses = [
   ] }
 ];
 
+function runEars(look, portrait) {
+  const tips = [...portrait[0]].flatMap((pixel, x) => x >= 5 && pixel !== '.' ? [x] : []);
+  const near = tips[0];
+  const far = tips[tips.length - 1];
+  const folded = look.name === 'Scottish Fold';
+  const high = Array(12).fill('.');
+  const low = Array(12).fill('.');
+
+  // The 3/4-view head shows more of the near ear. Folded tips sit low.
+  if (!folded) high[near] = portrait[0][near];
+  low[near] = portrait[1][near];
+  low[near + 1] = portrait[1][near + 1];
+  low[far] = portrait[folded ? 1 : 0][far];
+  return [high, low];
+}
+
 function runArt(look) {
   const portrait = look.art.split('\n');
+  const ears = runEars(look, portrait);
   return poses.map(({ body, headY }) => {
     const tailRow = body.findIndex(row => row.includes('r'));
     const tailColumn = body[tailRow].indexOf('r');
     return body.map((row, y) => [...row].map((pixel, x) => {
-      const marking = portrait[y - headY]?.[x];
-      if (x >= 5 && y - headY < 6 && marking && marking !== '.') return marking;
+      const headRow = y - headY;
+      const marking = portrait[headRow]?.[x];
+      if (x >= 5 && headRow >= 0 && headRow < ears.length) return ears[headRow][x];
+      if (x >= 5 && headRow === ears.length) return marking;
+      if (x >= 5 && headRow < 6 && marking && marking !== '.') return marking;
       if (pixel === 'r') return 'a';
       if (pixel === 't') {
         if (look.name === 'Bobtail' && (x < tailColumn - 1 || y < tailRow - 2)) return '.';

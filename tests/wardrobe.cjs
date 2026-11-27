@@ -70,7 +70,11 @@ function test(mode) {
                 'the leftward gallop mirrors the rightward silhouette and palette');
             }
           }
-          for (let y = 0; y < 6; y++) {
+          const top = runHeadY[frame];
+          assert.equal(spritePixel(stride, 6, top), 1, 'the near ear keeps its dark marking');
+          assert.equal(spritePixel(stride, 10, top), 0, 'the far ear is lower than the near ear');
+          assert.equal(spritePixel(stride, 10, top + 1), 1, 'the far ear keeps its dark marking');
+          for (let y = 2; y < 6; y++) {
             for (let x = 5; x < 12; x++) {
               const marking = spritePixel(portrait, x, y + 1);
               if (marking) assert.equal(spritePixel(stride, x, y + runHeadY[frame]), marking,
