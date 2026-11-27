@@ -1,16 +1,17 @@
 // Key poses of a gallop. The reach leads into forepaw contact, compression,
 // tuck, hind-paw contact, and push-off. Head bob is separate from the pose.
+// r marks the tail root on the rump. t marks the tail beyond it.
 const poses = [
   { headY: 1, body: [
     '............',
-    '.tt.........',
-    'tt.t........',
-    '...tt.......',
-    '....t.......',
-    '....t.aa....',
-    '.....taaa...',
-    '....aaaaaa..',
-    '...aaaaacaa.',
+    '............',
+    '............',
+    'tt..........',
+    'tt..........',
+    '.t....aa....',
+    '.tt...aaa...',
+    '..t.aaaaaa..',
+    '..raaaaacaa.',
     '.aaaab..baaa',
     'aab......bap',
     'pp.........p',
@@ -19,11 +20,11 @@ const poses = [
   { headY: 2, body: [
     '............',
     '............',
+    '............',
     '.tt.........',
-    'tt.tt.......',
-    '.....t......',
-    '....aaaa....',
-    '...aaaaaa...',
+    'ttt.........',
+    '..ttaaaa....',
+    '...raaaaa...',
     '...aaaaaaaa.',
     '..aaab.acaa.',
     '..aab...bapa',
@@ -35,10 +36,10 @@ const poses = [
     '............',
     '............',
     '............',
-    '..ttt.......',
-    '.tt..ta.....',
-    '....aaaa....',
-    '...aaaaaa...',
+    '............',
+    '.tttt.a.....',
+    'tt..raaa....',
+    't..aaaaaa...',
     '...aaaaaaa..',
     '...aabaacaa.',
     '....ab.bbaa.',
@@ -50,12 +51,12 @@ const poses = [
     '............',
     '............',
     '............',
-    '....t.......',
-    '..tt.ta.....',
-    'tt..taaa....',
-    '....aaaaa...',
-    '...aaaaaaa..',
-    '....aabacaa.',
+    '............',
+    '......a.....',
+    '.....aaa....',
+    '.tttaaaaa...',
+    '.t.raaaaaa..',
+    'tt..aabacaa.',
     '....aa.baap.',
     '.....ab.pp..',
     '.....pp.....',
@@ -64,11 +65,11 @@ const poses = [
   { headY: 1, body: [
     '............',
     '............',
-    '..tt........',
-    '.tt.tt......',
-    '.....ta.....',
-    '....aaaa....',
-    '...aaaaaa...',
+    '............',
+    '............',
+    '.tt...a.....',
+    'ttttaaaa....',
+    '...raaaaa...',
     '...aaaaaaa..',
     '...aaabacaa.',
     '...aab..bapa',
@@ -77,15 +78,15 @@ const poses = [
     '..pp........'
   ] },
   { headY: 0, body: [
-    '.tt.........',
-    'tt.tt.......',
-    '.....t......',
-    '.....ta.....',
-    '.....taaa...',
-    '.....taaaa..',
-    '.....aaaaa..',
-    '....abaaacaa',
-    '...aaa...bap',
+    '............',
+    '............',
+    'tt..........',
+    'tt....a.....',
+    '.t....aaa...',
+    '.tt...aaaa..',
+    '..t..aaaaa..',
+    '..ttabaaacaa',
+    '...raa...bap',
     '..aaab...pp.',
     '.aab........',
     'app.........',
@@ -95,21 +96,23 @@ const poses = [
 
 function runArt(look) {
   const portrait = look.art.split('\n');
-  return poses.map(({ body, headY }) => body.map((row, y) => {
-    return [...row].map((pixel, x) => {
+  return poses.map(({ body, headY }) => {
+    const tailRow = body.findIndex(row => row.includes('r'));
+    const tailColumn = body[tailRow].indexOf('r');
+    return body.map((row, y) => [...row].map((pixel, x) => {
       const marking = portrait[y - headY]?.[x];
       if (x >= 5 && y - headY < 6 && marking && marking !== '.') return marking;
+      if (pixel === 'r') return 'a';
       if (pixel === 't') {
-        if (look.name === 'Bobtail' && x < 3) return '.';
-        if (x % 3 === 0) return 'b';
-        return 'a';
+        if (look.name === 'Bobtail' && (x < tailColumn - 1 || y < tailRow - 2)) return '.';
+        return x % 3 === 0 ? 'b' : 'a';
       }
       if (pixel === 'p') return look.name === 'Siamese' ? 'b' : 'c';
       if (pixel === 'a' && x < 8 && (marking === 'b' || marking === 'c')) return marking;
       if (pixel === '.' && look.name === 'Fluffy Cat' && row[x + 1] === 't') return 'a';
       return pixel;
-    }).join('');
-  }).join('\n'));
+    }).join('')).join('\n');
+  });
 }
 
 module.exports = { runArt };
