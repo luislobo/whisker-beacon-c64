@@ -74,18 +74,17 @@ aaaaaaaaacc.
 ...aaa.aaa..
 ...ccc.ccc..`;
 
-const siamese = `......b...b.
+const siameseBody = `......b...b.
 ......bb.bb.
 .ba...bbbbb.
 b.....bcbcb.
 .b....bbabb.
 ..b..aaaaba.
 ..baaaaaaa..
-...aaaaaaa..
-....a...a...
-....a...a...
-....b...b...
-....b...b...`;
+...aaaaaaa..`;
+
+const siamese = siameseBody + "\n....a...a...\n....a...a...\n....b...b...\n....b...b...";
+const siameseStride = siameseBody + "\n....a...a...\n...aa....a..\n...b.....b..\n..bb.....bb.";
 
 const fold = `......aa.aa.
 .b....bbaab.
@@ -217,7 +216,7 @@ const looks = [
   { name: 'Calico', art: calicoStand, stride: calicoStride, color: 8 },
   { name: 'Bobtail', art: bobtail, color: 14 },
   { name: 'Fluffy Cat', art: fluffy, color: 15 },
-  { name: 'Siamese', art: siamese, color: 15 },
+  { name: 'Siamese', art: siamese, stride: siameseStride, color: 15 },
   { name: 'Scottish Fold', art: fold, color: 14 },
   { name: 'Alley Cat', art: alley, color: 5 },
   { name: 'Lantern Cat', art: lantern, color: 10 }

@@ -54,6 +54,13 @@ function test(mode) {
         assert.equal(pixel(6, 4), 2, 'Calico fur selects its own orange sprite register');
         assert.equal(pixel(7, 2), 3, 'the white ear tip selects shared white');
       }
+      if (name === 'SIAMESE') {
+        const stride = await monitor.bytes(cache + 2 * 64, 39);
+        assert.deepEqual(stride.subarray(0, 27), portrait.subarray(0, 27),
+          'the Siamese mask and coat stay the same in both walking poses');
+        assert.notDeepEqual(stride.subarray(27), portrait.subarray(27), 'the Siamese paws still move');
+        assert.equal((await monitor.bytes(0xd027, 1))[0] & 15, 15, 'the Siamese body is cream');
+      }
       assert.equal(await value('run_started'), 0, 'choosing a cat leaves the timer at zero');
       if (index === 0) {
         await step(down);
