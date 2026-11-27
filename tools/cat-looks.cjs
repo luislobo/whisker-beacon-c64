@@ -40,9 +40,9 @@ b...aaaabaa.
 ...bb..bb...`;
 
 const calicoBody = `.......c..b.
-..b....cc.bb
-.ba...aabbbb
-.a....acacba
+..b....aa.ba
+.ba...aaaaba
+.a....acacaa
 .b...aaabaa.
 ..a.aaaaaaa.
 ..baccaaac..

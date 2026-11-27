@@ -97,7 +97,7 @@ const poses = [
 const slimCrown = ['...a...', '..aa.a.', '.aaaaa.'];
 const runCrowns = {
   'Black Cat': slimCrown,
-  Calico: ['..c..b.', '..aa.b.', '.aabbb.'],
+  Calico: ['..c..b.', '..aa.b.', '.aaaab.'],
   'Alley Cat': ['..a..b.', '..aa.a.', '.aaaaa.'],
   'Lantern Cat': slimCrown
 };
