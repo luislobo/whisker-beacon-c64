@@ -10,6 +10,17 @@ three-voice SID tune *Lantern Paws*.
 
 ## Play
 
+On 64-bit Windows, run this from the cloned repository in PowerShell.
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run.ps1
+```
+
+The launcher opens the included game in VICE. It reuses `x64sc.exe` on
+your PATH or downloads VICE under `%LOCALAPPDATA%\WhiskerBeacon` on the
+first run. To select a VICE installation in another folder, set
+`$env:VICE_BIN` to the full path to `x64sc.exe`.
+
 Open [whisker-beacon.prg](dist/whisker-beacon.prg) in VICE, or attach
 [whisker-beacon.d64](dist/whisker-beacon.d64) to drive 8 on a Commodore 64.
 From BASIC on a C64, enter `LOAD"*",8,1` and then `RUN`.
