@@ -24,7 +24,7 @@ patrol_init_loop:
     sta actor_page,x
     lda #PATROL_Y
     sta actor_y,x
-    lda #CAT_SHAPE+4
+    lda #RIVAL_TURN
     sta $07f9,x
     sta $2bf9,x
     lda #15
@@ -69,7 +69,7 @@ patrol_left:
     dec patrol_x,x
     lda patrol_x,x
     cmp actor_min,x
-    bcs check_patrol_contact
+    bne check_patrol_contact
     dec patrol_dir,x
 check_patrol_contact:
     jsr ground_actor_contact
@@ -178,12 +178,16 @@ patrol_outside:
     sta $d010
     lda sprite_enable
     sta $d015
+    lda level_index
+    bne patrols_presented
+    jmp present_rival_walk
+patrols_presented:
     rts
 
 patrol_start:
     .byte <337,<450,<798
 patrol_end:
-    .byte <369,<493,<851
+    .byte <361,<480,<826
 patrol_page:
     .byte >337,>450,>798
 actor_bit:

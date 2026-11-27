@@ -44,6 +44,10 @@ set_encounter_actor:
     ldx #0
     beq set_moth
 add_garden_moth:
+    ; Preserve the extended Garden routes' leftmost pixel with inclusive bounds.
+    dec actor_min
+    dec actor_min+1
+    dec actor_min+2
     lda #15
     sta actor_live
     lda #$1f
@@ -100,6 +104,9 @@ encounter_high:
 encounter_max:
     .byte <(encounter_starts+encounter_spans)
     .for index := 0, index < len(encounter_starts), index += 1
+        .if index < 20 && index % 4 != 3
+            .cerror (<encounter_starts[index]) == 0, "Garden rival turns across a page"
+        .endif
         .cerror (>encounter_starts[index]) != (>(encounter_starts[index]+encounter_spans[index])), "Patrol spans a page"
     .endfor
 moth_heights:

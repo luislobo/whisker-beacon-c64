@@ -128,7 +128,10 @@ leave_raster:
 .include "sfx.asm"
 .include "results.asm"
 
-.cerror * > BRASS_TUCK_SPRITES, "Game code overlaps the tucked bell sprites"
+.cerror * > RIVAL_WALK_LEFT*64, "Game code overlaps the rival cat sprite"
+* = RIVAL_WALK_LEFT*64
+    .binary "../build/rival-walk.bin", 64, 64
+.cerror * > BRASS_TUCK_SPRITES, "Rival cat sprite overlaps the tucked bell sprites"
 
 * = BRASS_TUCK_SPRITES
     .binary "../build/charms.bin", 14*64, 6*64
@@ -140,7 +143,10 @@ leave_raster:
 .cerror * > BLANK_CAT_SPRITE, "Charms overlap the recovery sprite"
 * = BLANK_CAT_SPRITE
     .fill 64,0
-.cerror * > $3000, "Recovery sprite overlaps the VIC charset"
+.cerror * > RIVAL_WALK_RIGHT*64, "Recovery sprite overlaps the rival cat sprite"
+* = RIVAL_WALK_RIGHT*64
+    .binary "../build/rival-walk.bin", 0, 64
+.cerror * > $3000, "Rival cat sprite overlaps the VIC charset"
 
 * = $3000
     .binary "../build/tiles.bin"
@@ -208,4 +214,5 @@ WET_GLASS_FRAMES = $c000
     .include "gallery-parallax.asm"
     .include "recovery.asm"
     .include "cat-unpack.asm"
+    .include "rival-cats.asm"
 .cerror * > $d000, "Gameplay effects overlap I/O"

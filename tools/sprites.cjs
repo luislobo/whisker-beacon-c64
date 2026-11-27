@@ -13,6 +13,18 @@ const rival = [
   '  bb  bb'
 ];
 
+// The profile keeps its face steady as the paws reach and pass.
+const rivalWalkA = [
+  '........b...', '........bb.b', 'bb.....bbbbb', 'bbb....bbbob',
+  '..bb..bbbbbb', '...bbbbbbbb.', '....bwbbww..', '...bbbbwbb..',
+  '...bbbb.bbb.', '..bb.w...bb.', '.bb..w....bb', 'ww..ww...www'
+];
+const rivalWalkB = [
+  '........b...', '........bb.b', '.bb....bbbbb', 'bbbb...bbbob',
+  '...bbb.bbbbb', '....bbbbbbb.', '....bbbwwb..', '....bwbbbb..',
+  '...bbwwbb...', '....bb.bbb..', '....wb...b..', '...ww...ww..'
+];
+
 const mite = [
   '', '', '', '', '   w   w', '  bwwwwb', ' .wwwwwwb', '  wwbowwb',
   '  wwwwwww', '  wwbwwbw', '   wwww', '  b b b'
@@ -31,14 +43,14 @@ const moth = [
 ];
 const shadow = ['', '', '', '', '  b b b b', ' b b b b b', '  b b b b'];
 
-const ink = { b: 3, o: 1, w: 2, ' ': 0 };
+const ink = { b: 3, o: 1, w: 2, ' ': 0, '.': 0 };
 
-function pack(rows) {
+function pack(rows, left = false) {
   const sprite = Buffer.alloc(64);
   for (const [y, pixels] of rows.entries()) {
-    const line = pixels.padEnd(12, ' ');
-    for (const [x, color] of [...line].entries()) {
-      sprite[y * 3 + (x >> 2)] |= ink[color] << (6 - 2 * (x & 3));
+    for (const [x, color] of [...pixels].entries()) {
+      const column = left ? 11 - x : x;
+      sprite[y * 3 + (column >> 2)] |= ink[color] << (6 - 2 * (column & 3));
     }
   }
   return sprite;
@@ -54,7 +66,7 @@ function actorSprites() {
     '.......#..........#', '..............#', '..........#.........##'
   ];
   const spray = [burst, settling].flatMap(rows => [packSpray(rows, false), packSpray(rows, true)]);
-  return Buffer.concat([...spray, pack(rival), Buffer.alloc(2 * 64),
+  return Buffer.concat([...spray, pack(rival), pack(rivalWalkA), pack(rivalWalkA, true),
     pack(mite), pack(acorn), pack(owl), pack(shadow), pack(moth)]);
 }
 
@@ -70,4 +82,8 @@ function packSpray(rows, left) {
   return sprite;
 }
 
-module.exports = { actorSprites };
+function rivalWalkSprites() {
+  return Buffer.concat([pack(rivalWalkB), pack(rivalWalkB, true)]);
+}
+
+module.exports = { actorSprites, rivalWalkSprites };
