@@ -27,6 +27,8 @@ present_cat_charm:
     lda $d000
     sta $d00a
     lda $d001
+    sec
+    sbc #8
     sta $d00b
     ldy #$20
 enable_charm_sprites:

@@ -101,6 +101,14 @@ function roof(mode) {
     assert.equal(pickup.fireflies, launch.fireflies, 'the rare firefly earns a separate badge');
     assert.equal((await monitor.bytes(0x81, 1))[0] & 1, 1, 'the rare firefly earns the Garden ribbon');
     assert.equal((await monitor.bytes(0x85, 1))[0], 1, 'the ribbon equips when earned');
+    const [catX, catY] = await monitor.bytes(0xd000, 2);
+    const [ribbonX, ribbonY] = await monitor.bytes(0xd00a, 2);
+    assert.equal(ribbonX, catX, 'the ribbon uses the cat as its horizontal anchor');
+    assert.ok(ribbonY < catY, 'the ribbon sits above the cat');
+    const [ribbon] = await monitor.bytes(0x07fd, 1);
+    const art = await monitor.bytes(ribbon * 64, 64);
+    assert.ok(art.subarray(0, 18).some(Boolean), 'ribbon pixels appear above the body');
+    assert.ok(art.subarray(18).every(pixel => pixel === 0), 'the ribbon cannot overlap the cat');
     const rareHint = Buffer.from('RARE FIREFLY FOUND').map(byte => byte === 32 ? byte : byte + 128);
     for (const screen of [0x0400, 0x2800]) {
       assert.equal((await monitor.bytes(screen + 37, 1))[0], 42);
