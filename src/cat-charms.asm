@@ -11,6 +11,8 @@ BRASS_TUCK_POINTER = BRASS_TUCK_SPRITES/64
 BRASS_GLINT = BRASS_TUCK_POINTER+4
 
 present_cat_charm:
+    lda recovery_ticks
+    bne charm_done
     lda cat_charm
     beq charm_done
     cmp #2

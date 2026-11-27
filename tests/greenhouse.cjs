@@ -115,7 +115,7 @@ function route(mode) {
 }
 
 function hazards(mode) {
-  return exercise(mode, 'greenhouse-hazards', async ({ monitor, directory, step, enterGreenhouse }) => {
+  return exercise(mode, 'greenhouse-hazards', async ({ monitor, directory, step, x, enterGreenhouse }) => {
     // The route verifies the real route into level two. This fixture places Pip
     // at each encounter so its behavior is independent of the route timing.
     await monitor.write(WON, [1]);
@@ -145,6 +145,7 @@ function hazards(mode) {
     await step(0, 42);
     assert.equal((await monitor.bytes(RECOVERIES, 1))[0], 1, 'standing under the swoop costs a retry');
 
+    await step(0, 24);
     const acorn = (await monitor.bytes(0x51, 1))[0] + 256;
     await place(acorn - 15, 170);
     await monitor.write(0x11, [1]); // Pip starts grounded next to the acorn.
@@ -181,7 +182,12 @@ function hazards(mode) {
     await place(moth, mothY + 2);
     await step(0);
     assert.equal((await monitor.bytes(RECOVERIES, 1))[0], 2, 'the moth hits Pip in the air');
-    assert.equal((await monitor.bytes(0x0c, 2)).readUInt16LE(), 2056, 'the latest waymark is the recovery point');
+    assert.equal(await x(), moth, 'Pip recoils at the point of impact');
+    const impactY = (await monitor.bytes(0xd001, 1))[0];
+    await step(0, 8);
+    assert.ok((await monitor.bytes(0xd001, 1))[0] < impactY, 'the recoil lifts the cat sprite');
+    await step(0, 16);
+    assert.equal(await x(), 2056, 'the latest waymark is the recovery point');
 
     console.log(`${mode}: crumble, lanterns, owl, acorn and rain-gallery moth verified`);
   });

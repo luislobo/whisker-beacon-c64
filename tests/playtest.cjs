@@ -106,6 +106,21 @@ async function test(mode) {
       if ((await monitor.bytes(RECOVERIES, 1))[0]) break;
     }
     assert.equal((await monitor.bytes(RECOVERIES, 1))[0], 1, 'falling triggers recovery');
+    const fallX = (await monitor.bytes(PLAYER_X, 2)).readUInt16LE();
+    assert.notEqual(fallX, 52, 'Pip stays at the fall during the animation');
+    const poses = new Set();
+    const sidAtFall = (await monitor.bytes(SID_TICKS, 1))[0];
+    for (let tick = 0; tick < 23; tick++) {
+      await step(monitor, RIGHT);
+      assert.equal((await monitor.bytes(PLAYER_X, 2)).readUInt16LE(), fallX,
+        'the checkpoint waits for the animation and movement input is ignored');
+      poses.add((await monitor.bytes(0x07f8, 1))[0]);
+    }
+    assert.ok(poses.size >= 2, 'the fall has a visible pose and a cleared sprite');
+    await step(monitor, RIGHT);
+    assert.equal(((await monitor.bytes(SID_TICKS, 1))[0] - sidAtFall) & 255, 24,
+      'the SID keeps playing through the transition');
+    assert.equal((await monitor.bytes(RECOVERIES, 1))[0], 1, 'the fall counts once');
     assert.equal((await monitor.bytes(PLAYER_X, 2)).readUInt16LE(), 52, 'a fall returns Pip to the checkpoint');
 
     const results = { mode, videoRefreshes: hz, gameUpdates: 50, sidUpdates: 50, routeSteps: 466,

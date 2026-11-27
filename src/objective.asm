@@ -53,6 +53,8 @@ write_header:
     jmp show_wardrobe
 
 step_game:
+    lda recovery_ticks
+    bne step_recovery
     lda beacon_lit
     bne wait_for_replay
     lda run_started
@@ -69,11 +71,20 @@ running_level:
     jsr update_run_time
     jsr record_cat_transition
     jsr step_player
+    lda recovery_ticks
+    bne objective_done
     jsr step_greenhouse_props
     jsr step_patrols
+    lda recovery_ticks
+    bne objective_done
     jsr activate_checkpoint
     jsr check_objective
     rts
+step_recovery:
+    jsr update_run_time
+    dec recovery_ticks
+    bne objective_done
+    jmp reset_player
 wait_for_replay:
     lda input_bits
     and #JUMP

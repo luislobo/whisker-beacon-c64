@@ -1,6 +1,7 @@
 CAT_SHAPE = $3800 / 64
 CAT_CACHE = $3b00
 CAT_POINTER = CAT_CACHE / 64
+BLANK_CAT_SPRITE = $2f80
 .cerror CAT_CACHE + CAT_POSES * 128 > $4000, "Cat sprite frames exceed the VIC bank"
 
 init_cat_sprite:
@@ -42,6 +43,10 @@ present_cat:
     adc #0
     sta $d010
     lda draw_player_y
+    ldy recovery_ticks
+    beq place_cat_y
+    jsr recovery_draw_y
+place_cat_y:
     clc
     adc #51
     sta $d001
@@ -66,6 +71,10 @@ cat_transition_done:
     rts
 
 animate_cat:
+    ldy recovery_ticks
+    beq animate_live_cat
+    jmp animate_recovery
+animate_live_cat:
     lda beacon_lit
     bne cat_sitting
     lda low_profile

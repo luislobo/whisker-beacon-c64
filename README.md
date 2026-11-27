@@ -50,9 +50,10 @@ When you pause near a rare firefly you have yet to collect, watch Pip's ears
 and tail for a clue.
 
 Collect at least 24 gold fireflies, then reach the beacon between the gold
-arrows at the far right. Falls and enemy hits return Pip to the latest
-checkpoint. You keep the fireflies you collected. A gold arrow marks each
-new section and its checkpoint.
+arrows at the far right. You have unlimited retries. After a fall or an
+enemy hit, Pip plays a short animation and returns to the latest checkpoint
+with the fireflies you collected. A gold arrow marks each new section and
+its checkpoint.
 
 The Garden crosses a moonlit stream, an orchard, an aqueduct, a mushroom
 dell, and the beacon terraces. The Old Greenhouse adds propagation racks,

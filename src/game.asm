@@ -136,7 +136,10 @@ leave_raster:
 
 * = CHARM_SPRITES
     .binary "../build/charms.bin", 0, 14*64
-.cerror * > $3000, "Charms overlap the VIC charset"
+.cerror * > BLANK_CAT_SPRITE, "Charms overlap the recovery sprite"
+* = BLANK_CAT_SPRITE
+    .fill 64,0
+.cerror * > $3000, "Recovery sprite overlaps the VIC charset"
 
 * = $3000
     .binary "../build/tiles.bin"
@@ -202,4 +205,5 @@ WET_GLASS_FRAMES = $c000
 * = LEVEL_MAP+MAP_STRIDE*25
     .include "rain-gallery.asm"
     .include "gallery-parallax.asm"
+    .include "recovery.asm"
 .cerror * > $d000, "Gameplay effects overlap I/O"

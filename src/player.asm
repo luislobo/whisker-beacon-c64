@@ -6,11 +6,6 @@ CAT_FOOT = 13
 MUSHROOM_TILE = 19
 SPRING_DURATION = 20
 
-recover_player:
-    lda recoveries
-    cmp #99
-    beq reset_player
-    inc recoveries
 reset_player:
     lda checkpoint_x
     sta player_x
@@ -35,6 +30,7 @@ reset_player:
     sta facing_before
     sta cat_pose_ticks
     sta brass_flash_ticks
+    sta recovery_ticks
     lda #1
     sta grounded
     sta ground_before
@@ -98,7 +94,8 @@ probe_head:
     lda #0
     sta grounded
     lda player_y
-    cmp #195
+    ; Both feet have passed the last possible floor tile if this probe was clear.
+    cmp #FALL_Y
     bcs fell
     ldx vertical_step
     dec steps
