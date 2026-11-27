@@ -59,6 +59,8 @@ The Garden crosses a moonlit stream, an orchard, an aqueduct, a mushroom
 dell, and the beacon terraces. The Old Greenhouse adds propagation racks,
 the Rain Gallery, a shade house, a seed vault, and an observatory.
 
+![A pale rival cat walks back and forth and turns around at each end of its Garden patrol](dist/garden-rival-short-patrol.gif)
+
 In one stretch of the Rain Gallery, the sunset moves at a quarter of the
 floor's speed and the trees move at half speed. Pip runs inside, past
 lantern-lit platforms and greenhouse window frames. Sliding across the
